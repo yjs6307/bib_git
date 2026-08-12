@@ -2,7 +2,7 @@
  * =============================================================================
  * 파일명: app.js
  * 설명: 부동산 매물 관리 웹 애플리케이션 프론트엔드 비즈니스 로직 및 
- *       빌라/상가/기타 매물 관리 & 투자 수익 자동 계산 기능
+ *       빌라/상가/기타 매물 관리 & 투자 수익 자동 계산 기능 (단위: 만원 & 면적(㎡))
  * =============================================================================
  */
 
@@ -49,7 +49,7 @@ const MOCK_USERS = [
   }
 ];
 
-// 데모 매물 데이터 ("빌라", "상가", "기타")
+// 데모 매물 데이터 ("빌라", "상가", "기타", 단위: 만원)
 const MOCK_PROPERTIES = [
   {
     id: "1",
@@ -63,10 +63,10 @@ const MOCK_PROPERTIES = [
     price: "매매 3억 8천만원",
     area_size: "공급 65.5㎡ / 전용 48.8㎡",
     zoning_info: "제2종일반주거지역",
-    purchase_price: 300000000,
-    expected_cost: 20000000,
-    expected_selling_price: 380000000,
-    expected_profit: 60000000,
+    purchase_price: 30000,
+    expected_cost: 2000,
+    expected_selling_price: 38000,
+    expected_profit: 6000,
     participant_members: "홍길동(50%), 김에이전트(30%), 박투자(20%)",
     description: `역삼역 도보 5분 거리의 리모델링 완료된 빌라 매물입니다.\n
 - 내부 고급 인테리어 및 시스템 에어컨, 세탁기 풀옵션 제공\n
@@ -89,10 +89,10 @@ const MOCK_PROPERTIES = [
     price: "매매 25억원",
     area_size: "공급 198.5㎡ / 전용 132.2㎡",
     zoning_info: "준공업지역",
-    purchase_price: 2000000000,
-    expected_cost: 150000000,
-    expected_selling_price: 2500000000,
-    expected_profit: 350000000,
+    purchase_price: 200000,
+    expected_cost: 15000,
+    expected_selling_price: 250000,
+    expected_profit: 35000,
     participant_members: "부익부 부동산 펀드 1호 회원단",
     description: `성수동 연무장길 코너에 위치한 고수익 상가 매물입니다.`,
     images: [
@@ -324,7 +324,7 @@ function handleRegisterClick() {
 }
 
 // -----------------------------------------------------------------------------
-// 4.5. 자동 예상 수익 실시간 계산 및 빌라 전용 필드 토글
+// 4.5. 자동 예상 수익 실시간 계산 (단위: 만원) 및 빌라 전용 필드 토글
 // -----------------------------------------------------------------------------
 function setupCalculationEvents() {
   const inputType = document.getElementById("inputType");
@@ -365,7 +365,7 @@ function calculateProfit() {
 
   if (calcProfitText) {
     const formattedProfit = Number(profit).toLocaleString('ko-KR');
-    calcProfitText.textContent = `${formattedProfit} 원`;
+    calcProfitText.textContent = `${formattedProfit} 만원`;
     if (profit > 0) {
       calcProfitText.style.color = "#059669";
     } else if (profit < 0) {
@@ -500,11 +500,11 @@ function openDetailModal(property) {
     modalVillaSpecBox.style.display = "none";
   }
 
-  // 투자 & 수익 산출표 표시
-  modalPurchasePrice.textContent = Number(property.purchase_price || 0).toLocaleString('ko-KR') + " 원";
-  modalExpectedCost.textContent = Number(property.expected_cost || 0).toLocaleString('ko-KR') + " 원";
-  modalExpectedSellingPrice.textContent = Number(property.expected_selling_price || 0).toLocaleString('ko-KR') + " 원";
-  modalExpectedProfit.textContent = Number(property.expected_profit || 0).toLocaleString('ko-KR') + " 원";
+  // 투자 & 수익 산출표 표시 (단위: 만원)
+  modalPurchasePrice.textContent = Number(property.purchase_price || 0).toLocaleString('ko-KR') + " 만원";
+  modalExpectedCost.textContent = Number(property.expected_cost || 0).toLocaleString('ko-KR') + " 만원";
+  modalExpectedSellingPrice.textContent = Number(property.expected_selling_price || 0).toLocaleString('ko-KR') + " 만원";
+  modalExpectedProfit.textContent = Number(property.expected_profit || 0).toLocaleString('ko-KR') + " 만원";
 
   // 참여 회원 명단
   modalParticipants.textContent = property.participant_members || "등록된 참여 회원 명단이 없습니다.";
