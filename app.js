@@ -1,14 +1,14 @@
 /**
  * =============================================================================
  * 파일명: app.js
- * 설명: 부동산 매물 관리 웹 애플리케이션 프론트엔드 비즈니스 로직 (Vanilla JS)
+ * 설명: 부동산 매물 관리 웹 애플리케이션 프론트엔드 비즈니스 로직 및 
+ *       승인제 10단계 회원 등급 / 권한 관리 시스템 (Vanilla JS)
  * =============================================================================
  */
 
 // -----------------------------------------------------------------------------
 // 1. Supabase 클라이언트 초기화 및 데모 데이터 설정
 // -----------------------------------------------------------------------------
-// 사용자님이 제공해주신 Supabase 프로젝트 URL과 Anon Key가 적용되었습니다.
 const SUPABASE_URL = "https://cpixraohpjuozlzjvxoy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwaXhyYW9ocGp1b3psemp2eG95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1MzE3MDEsImV4cCI6MjEwMjEwNzcwMX0.uqjG5F1wXyIxCZ1BrwlfsyWzgByB3LccgxDYFcS_uss";
 
@@ -17,7 +17,67 @@ if (window.supabase) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-// Supabase 연동 전 시연 및 초기 로딩을 위한 검증된 데모 매물 데이터
+// 10단계 회원 등급명 매핑
+const LEVEL_NAMES = {
+  1: "Level 1 (준회원 / 승인대기)",
+  2: "Level 2 (일반 회원)",
+  3: "Level 3 (성실 회원)",
+  4: "Level 4 (우수 회원)",
+  5: "Level 5 (VIP 회원)",
+  6: "Level 6 (VVIP 회원)",
+  7: "Level 7 (공인중개사 / 파트너)",
+  8: "Level 8 (수석 에이전트)",
+  9: "Level 9 (운영 매니저)",
+  10: "Level 10 (최고 관리자)"
+};
+
+// 데모 초기 회원 데이터 (DB 연결 전 시연용)
+const MOCK_USERS = [
+  {
+    id: "user-admin",
+    email: "admin@buikbu.com",
+    password: "admin1234",
+    name: "최고 관리자",
+    phone: "010-8917-8383",
+    role: "admin",
+    level: 10,
+    status: "approved",
+    can_create: true,
+    can_edit: true,
+    can_delete: true,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "user-agent",
+    email: "agent@buikbu.com",
+    password: "1234",
+    name: "김에이전트 공인중개사",
+    phone: "010-2222-3333",
+    role: "member",
+    level: 8,
+    status: "approved",
+    can_create: true,
+    can_edit: true,
+    can_delete: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "user-pending",
+    email: "newmember@buikbu.com",
+    password: "1234",
+    name: "신규가입자 (승인대기중)",
+    phone: "010-9999-8888",
+    role: "member",
+    level: 1,
+    status: "pending",
+    can_create: false,
+    can_edit: false,
+    can_delete: false,
+    created_at: new Date().toISOString()
+  }
+];
+
+// 데모 매물 데이터
 const MOCK_PROPERTIES = [
   {
     id: "1",
@@ -73,22 +133,6 @@ const MOCK_PROPERTIES = [
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
     ],
     created_at: new Date().toISOString()
-  },
-  {
-    id: "4",
-    title: "판교 테크노밸리 인근 오피스텔 통매매 / 기업 사옥 추천",
-    property_type: "오피스텔",
-    location: "경기도 성남시 분당구 삼평동 680",
-    price: "매매 120억원",
-    area_size: "공급 1,320.0㎡ / 전용 950.0㎡",
-    zoning_info: "중심상업지역",
-    description: `판교역 인근 대기업 사옥 또는 연수원용으로 적합한 오피스 건물입니다.\n
-- 신분당선 판교역 도보권, 수도권 제1순환고속도로 진출입 용이\n
-- 최신 빌딩제어 시스템 및 EV 충전소 완비`,
-    images: [
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80"
-    ],
-    created_at: new Date().toISOString()
   }
 ];
 
@@ -97,13 +141,14 @@ const MOCK_PROPERTIES = [
 // -----------------------------------------------------------------------------
 let state = {
   properties: [],
+  users: [],
   selectedCategory: "전체",
   searchQuery: "",
   selectedProperty: null,
-  currentImageIndex: 0
+  currentImageIndex: 0,
+  currentUser: null // 현재 로그인된 사용자 정보
 };
 
-// 매물 수정 모드 상태 변수
 let isEditMode = false;
 let editingPropertyId = null;
 
@@ -114,8 +159,9 @@ const propertyGrid = document.getElementById("propertyGrid");
 const propertyCount = document.getElementById("propertyCount");
 const searchInput = document.getElementById("searchInput");
 const categoryContainer = document.getElementById("categoryContainer");
+const navActions = document.getElementById("navActions");
 
-// 모달 요소 참조
+// 모달 참조
 const detailModal = document.getElementById("detailModal");
 const btnCloseDetailModal = document.getElementById("btnCloseDetailModal");
 const modalGalleryMain = document.getElementById("modalGalleryMain");
@@ -124,7 +170,6 @@ const btnPrevImage = document.getElementById("btnPrevImage");
 const btnNextImage = document.getElementById("btnNextImage");
 const galleryCounter = document.getElementById("galleryCounter");
 
-// 상세 정보 필드 참조
 const modalTypeBadge = document.getElementById("modalTypeBadge");
 const modalPrice = document.getElementById("modalPrice");
 const modalTitle = document.getElementById("modalTitle");
@@ -134,27 +179,69 @@ const modalZoningInfo = document.getElementById("modalZoningInfo");
 const modalCreatedAt = document.getElementById("modalCreatedAt");
 const modalDescription = document.getElementById("modalDescription");
 
-// 관리자 모달 및 폼 참조
+// 신규 회원가입 & 로그인 & 회원관리 모달 참조
+const signupModal = document.getElementById("signupModal");
+const btnOpenSignupModal = document.getElementById("btnOpenSignupModal");
+const btnCloseSignupModal = document.getElementById("btnCloseSignupModal");
+const signupForm = document.getElementById("signupForm");
+
+const loginModal = document.getElementById("loginModal");
+const btnOpenLoginModal = document.getElementById("btnOpenLoginModal");
+const btnCloseLoginModal = document.getElementById("btnCloseLoginModal");
+const loginForm = document.getElementById("loginForm");
+
+const userAdminModal = document.getElementById("userAdminModal");
+const btnCloseUserAdminModal = document.getElementById("btnCloseUserAdminModal");
+const userAdminTableBody = document.getElementById("userAdminTableBody");
+
 const adminModal = document.getElementById("adminModal");
 const btnOpenAdminModal = document.getElementById("btnOpenAdminModal");
 const btnCloseAdminModal = document.getElementById("btnCloseAdminModal");
 const propertyForm = document.getElementById("propertyForm");
 
 // -----------------------------------------------------------------------------
-// 4. 데이터 페칭 및 렌더링 로직
+// 4. 데이터 로딩 & 인증 상태 초기화
 // -----------------------------------------------------------------------------
+async function initApp() {
+  // 1. 저장된 세션 유저 로드
+  const savedUser = sessionStorage.getItem("buikbu_user");
+  if (savedUser) {
+    try {
+      state.currentUser = JSON.parse(savedUser);
+    } catch (e) {
+      state.currentUser = null;
+    }
+  }
+
+  // 2. 매물 및 회원 데이터 로드
+  await fetchUsers();
+  await fetchProperties();
+  updateNavUI();
+}
+
+async function fetchUsers() {
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      state.users = data && data.length > 0 ? data : MOCK_USERS;
+    } catch (err) {
+      console.warn("Supabase 프로필 조회 경고, 데모 유저 데이터를 사용합니다:", err);
+      state.users = MOCK_USERS;
+    }
+  } else {
+    state.users = MOCK_USERS;
+  }
+}
+
 async function fetchProperties() {
   if (supabaseClient) {
     try {
-      const { data, error } = await supabaseClient
-        .from("properties")
-        .select("*")
-        .order("created_at", { ascending: false });
-
+      const { data, error } = await supabaseClient.from("properties").select("*").order("created_at", { ascending: false });
       if (error) throw error;
       state.properties = data && data.length > 0 ? data : MOCK_PROPERTIES;
     } catch (err) {
-      console.warn("Supabase 데이터 조회 오류, 데모 데이터를 사용합니다:", err);
+      console.warn("Supabase 매물 조회 경고, 데모 매물 데이터를 사용합니다:", err);
       state.properties = MOCK_PROPERTIES;
     }
   } else {
@@ -164,10 +251,127 @@ async function fetchProperties() {
 }
 
 /**
- * 상태에 맞는 매물 리스트 그리드 렌더링
+ * 로그인 상태에 맞춰 헤더 네비게이션 액션 버튼 렌더링
  */
+function updateNavUI() {
+  if (!navActions) return;
+
+  const user = state.currentUser;
+
+  if (user) {
+    // 최고 관리자 (Role === 'admin' 또는 Level 10)
+    const isAdmin = user.role === 'admin' || user.level === 10;
+
+    navActions.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:0.8rem; background:#f1f5f9; color:#0f172a; padding:6px 12px; border-radius:9999px; font-weight:700;">
+          👤 ${user.name} (${user.level}단계)
+        </span>
+        ${isAdmin ? `
+          <button id="btnOpenUserAdmin" class="btn-admin" style="background-color:#10b981;">
+            <i data-lucide="shield-check" style="width:16px; height:16px;"></i>
+            <span>회원 승인/등급</span>
+          </button>
+        ` : ''}
+        <button id="btnOpenAdminModal" class="btn-admin-add">
+          <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
+          <span>매물 등록</span>
+        </button>
+        <button id="btnLogout" class="btn-admin" style="background-color:#64748b;">
+          <i data-lucide="log-out" style="width:16px; height:16px;"></i>
+          <span>로그아웃</span>
+        </button>
+      </div>
+    `;
+
+    // 이벤트 다시 바인딩
+    const btnLogout = document.getElementById("btnLogout");
+    if (btnLogout) {
+      btnLogout.addEventListener("click", () => {
+        sessionStorage.removeItem("buikbu_user");
+        state.currentUser = null;
+        alert("로그아웃 되었습니다.");
+        updateNavUI();
+      });
+    }
+
+    const btnOpenUserAdmin = document.getElementById("btnOpenUserAdmin");
+    if (btnOpenUserAdmin) {
+      btnOpenUserAdmin.addEventListener("click", () => {
+        renderUserAdminTable();
+        userAdminModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      });
+    }
+
+    const btnReg = document.getElementById("btnOpenAdminModal");
+    if (btnReg) {
+      btnReg.addEventListener("click", handleRegisterClick);
+    }
+
+  } else {
+    // 미로그인 상태
+    navActions.innerHTML = `
+      <button id="btnOpenLoginModal" class="btn-admin" style="background-color:#475569;">
+        <i data-lucide="log-in" style="width:16px; height:16px;"></i>
+        <span>로그인</span>
+      </button>
+      <button id="btnOpenSignupModal" class="btn-admin" style="background-color:#0f172a;">
+        <i data-lucide="user-plus" style="width:16px; height:16px;"></i>
+        <span>회원가입</span>
+      </button>
+      <button id="btnOpenAdminModal" class="btn-admin-add">
+        <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
+        <span>매물 등록</span>
+      </button>
+    `;
+
+    document.getElementById("btnOpenLoginModal")?.addEventListener("click", () => loginModal.classList.add("active"));
+    document.getElementById("btnOpenSignupModal")?.addEventListener("click", () => signupModal.classList.add("active"));
+    document.getElementById("btnOpenAdminModal")?.addEventListener("click", handleRegisterClick);
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+/**
+ * 매물 등록 버튼 클릭 권한 체크
+ */
+function handleRegisterClick() {
+  const user = state.currentUser;
+
+  if (!user) {
+    alert("🔒 매물 등록은 로그인한 승인 회원만 가능합니다.\n먼저 회원가입 및 로그인해 주세요.");
+    loginModal.classList.add("active");
+    return;
+  }
+
+  if (user.status !== "approved") {
+    alert("⏳ 현재 관리자 가입 승인 대기 중입니다.\n관리자 승인 후 매물 등록이 가능합니다.");
+    return;
+  }
+
+  // 매물 등록 권한(can_create) 또는 최고 관리자 여부 체크
+  if (!user.can_create && user.level < 8 && user.role !== 'admin') {
+    alert(`🔒 매물 등록 권한이 부여되지 않았습니다.\n(현재 등급: ${LEVEL_NAMES[user.level] || user.level + '단계'})\n관리자에게 매물 등록 권한을 신청해 주세요.`);
+    return;
+  }
+
+  // 승인된 권한자 등록 모달 열기
+  isEditMode = false;
+  editingPropertyId = null;
+  const adminModalTitle = document.getElementById("adminModalTitle");
+  if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록";
+  if (propertyForm) propertyForm.reset();
+  
+  adminModal.classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+// -----------------------------------------------------------------------------
+// 5. 매물 그리드 렌더링 및 모달
+// -----------------------------------------------------------------------------
 function render() {
-  // 1. 필터링 로직 적용
   const filtered = state.properties.filter(item => {
     const matchesCategory = state.selectedCategory === "전체" || item.property_type === state.selectedCategory;
     const query = state.searchQuery.toLowerCase();
@@ -178,12 +382,10 @@ function render() {
     return matchesCategory && matchesSearch;
   });
 
-  // 2. 개수 업데이트
   if (propertyCount) {
     propertyCount.innerHTML = `총 <strong>${filtered.length}</strong>개 매물`;
   }
 
-  // 3. 카드 그리드 생성
   if (filtered.length === 0) {
     propertyGrid.innerHTML = `
       <div class="empty-state" style="grid-column: 1 / -1;">
@@ -192,7 +394,7 @@ function render() {
         <p style="color: #94a3b8; font-size: 0.875rem;">검색어를 변경하거나 다른 카테고리를 선택해 보세요.</p>
       </div>
     `;
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
     return;
   }
 
@@ -202,16 +404,11 @@ function render() {
         ? property.images[0]
         : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
 
-      const imgCountBadge = (property.images && property.images.length > 1)
-        ? `<div class="card-badge-count">+${property.images.length}장</div>`
-        : "";
-
       return `
         <div class="property-card" data-id="${property.id}">
           <div class="card-image-wrap">
             <img src="${mainImg}" alt="${property.title}" class="card-image" />
             <div class="card-badge-type">${property.property_type}</div>
-            ${imgCountBadge}
           </div>
           <div class="card-content">
             <div>
@@ -240,12 +437,8 @@ function render() {
     })
     .join("");
 
-  // Lucide 아이콘 동적 렌더링
-  if (window.lucide) {
-    lucide.createIcons();
-  }
+  if (window.lucide) lucide.createIcons();
 
-  // 카드 클릭 이벤트 바인딩
   document.querySelectorAll(".property-card").forEach(card => {
     card.addEventListener("click", () => {
       const id = card.getAttribute("data-id");
@@ -255,14 +448,10 @@ function render() {
   });
 }
 
-// -----------------------------------------------------------------------------
-// 5. 백드롭 블러 상세 모달 (Modal Logic)
-// -----------------------------------------------------------------------------
 function openDetailModal(property) {
   state.selectedProperty = property;
   state.currentImageIndex = 0;
 
-  // 텍스트 정보 채우기
   modalTypeBadge.textContent = property.property_type;
   modalPrice.textContent = property.price;
   modalTitle.textContent = property.title;
@@ -272,31 +461,22 @@ function openDetailModal(property) {
   modalCreatedAt.textContent = new Date(property.created_at).toLocaleDateString("ko-KR");
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
 
-  // 010-8917-8383 번호로 문자 문의하기 모달 팝업 바인딩
-  const btnContactSms = document.getElementById("btnContactSms");
-  const smsModal = document.getElementById("smsModal");
-  const smsContentInput = document.getElementById("smsContentInput");
-  const btnSendSmsApp = document.getElementById("btnSendSmsApp");
   const btnEditProperty = document.getElementById("btnEditProperty");
-
-  // 상세 모달에서 [수정] 버튼 클릭 시
   if (btnEditProperty) {
     btnEditProperty.onclick = () => {
-      // 1. 미인증 시 비밀번호 입력 메세지 박스 모달 바로 팝업
-      if (!isUserAdmin()) {
-        if (authModal) {
-          authModal.classList.add("active");
-          document.body.style.overflow = "hidden";
-        }
+      const user = state.currentUser;
+      if (!user || user.status !== "approved") {
+        alert("🔒 매물 수정 권한이 없습니다. (관리자 승인 필요)");
+        return;
+      }
+      if (!user.can_edit && user.level < 8 && user.role !== 'admin') {
+        alert("🔒 매물 수정 권한이 부여되지 않았습니다.");
         return;
       }
 
-      // 2. 이미 관리자 인증이 완료된 경우 수정 모드 전환
       isEditMode = true;
       editingPropertyId = property.id;
-      
-      const adminModalTitle = document.getElementById("adminModalTitle");
-      if (adminModalTitle) adminModalTitle.textContent = "매물 정보 수정 (관리자)";
+      document.getElementById("adminModalTitle").textContent = "매물 정보 수정";
 
       document.getElementById("inputTitle").value = property.title || "";
       document.getElementById("inputType").value = property.property_type || "상가";
@@ -306,42 +486,31 @@ function openDetailModal(property) {
       document.getElementById("inputZoning").value = property.zoning_info || "";
       document.getElementById("inputDescription").value = property.description || "";
 
-      // 상세보기 모달 닫고 수정 모달 열기
       closeDetailModal();
-      if (adminModal) {
-        adminModal.classList.add("active");
-        document.body.style.overflow = "hidden";
-      }
+      adminModal.classList.add("active");
+      document.body.style.overflow = "hidden";
     };
   }
 
-  if (btnContactSms && smsModal) {
+  const btnContactSms = document.getElementById("btnContactSms");
+  if (btnContactSms) {
     btnContactSms.onclick = (e) => {
       e.preventDefault();
+      const message = `안녕하세요! [${property.title}] 매물에 대해 문의드립니다.\n\n- 매물명: ${property.title}\n- 매매/임대가: ${property.price}\n- 위치: ${property.location}`;
+      document.getElementById("smsContentInput").value = message;
       
-      const message = `안녕하세요! [${property.title}] 매물에 대해 문의드립니다.\n\n- 매물명: ${property.title}\n- 매매/임대가: ${property.price}\n- 위치: ${property.location}\n\n상세 정보 및 방문 상담 가능 여부를 확인하고 싶습니다.`;
-      
-      if (smsContentInput) {
-        smsContentInput.value = message;
-      }
-
-      // 스마트폰 SMS 앱 연결 링크 설정
+      const btnSendSmsApp = document.getElementById("btnSendSmsApp");
       if (btnSendSmsApp) {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const separator = isIOS ? '&' : '?';
-        btnSendSmsApp.href = `sms:010-8917-8383${separator}body=${encodeURIComponent(message)}`;
+        btnSendSmsApp.href = `sms:010-8917-8383${isIOS ? '&' : '?'}body=${encodeURIComponent(message)}`;
       }
-
-      smsModal.classList.add("active");
+      document.getElementById("smsModal").classList.add("active");
     };
   }
 
-  // 갤러리 이미지 업데이트
   updateGallery();
-
-  // 모달 표시
   detailModal.classList.add("active");
-  document.body.style.overflow = "hidden"; // 배경 스크롤 방지
+  document.body.style.overflow = "hidden";
 }
 
 function closeDetailModal() {
@@ -357,11 +526,9 @@ function updateGallery() {
   modalGalleryMain.src = images[state.currentImageIndex];
   galleryCounter.textContent = `${state.currentImageIndex + 1} / ${images.length}`;
 
-  // 좌우 버튼 조절
   btnPrevImage.style.display = images.length > 1 ? "flex" : "none";
   btnNextImage.style.display = images.length > 1 ? "flex" : "none";
 
-  // 썸네일 렌더링
   if (images.length > 1) {
     modalGalleryThumbs.style.display = "flex";
     modalGalleryThumbs.innerHTML = images.map((img, idx) => `
@@ -380,214 +547,138 @@ function updateGallery() {
 }
 
 // -----------------------------------------------------------------------------
-// 6. 이벤트 리스너 등록
+// 6. 최고 관리자 전용: 회원 승인 & 10단계 등급/권한 제어 렌더링
 // -----------------------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  fetchProperties();
+function renderUserAdminTable() {
+  if (!userAdminTableBody) return;
 
-  // 검색창 입력 이벤트
-  if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-      state.searchQuery = e.target.value;
-      render();
+  userAdminTableBody.innerHTML = state.users.map(u => {
+    const isPending = u.status === 'pending';
+    const isApproved = u.status === 'approved';
+    const isRejected = u.status === 'rejected';
+
+    return `
+      <tr style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">
+        <td style="padding: 10px;">
+          <div style="font-weight: 700; color: #0f172a;">${u.name}</div>
+          <div style="font-size: 0.75rem; color: #64748b;">${u.email}</div>
+        </td>
+        <td style="padding: 10px;">${u.phone}</td>
+        <td style="padding: 10px;">
+          ${isApproved ? '<span style="color:#10b981; font-weight:700;">🟢 승인완료</span>' : ''}
+          ${isPending ? '<span style="color:#f59e0b; font-weight:700;">⏳ 승인대기</span>' : ''}
+          ${isRejected ? '<span style="color:#ef4444; font-weight:700;">🔴 승인거절</span>' : ''}
+        </td>
+        <td style="padding: 10px;">
+          <select class="user-level-select" data-id="${u.id}" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem;">
+            ${Object.keys(LEVEL_NAMES).map(lvl => `
+              <option value="${lvl}" ${u.level == lvl ? 'selected' : ''}>${LEVEL_NAMES[lvl]}</option>
+            `).join('')}
+          </select>
+        </td>
+        <td style="padding: 10px;">
+          <label style="margin-right: 8px; cursor:pointer;">
+            <input type="checkbox" class="user-perm-check" data-id="${u.id}" data-perm="can_create" ${u.can_create ? 'checked' : ''} /> 등록
+          </label>
+          <label style="margin-right: 8px; cursor:pointer;">
+            <input type="checkbox" class="user-perm-check" data-id="${u.id}" data-perm="can_edit" ${u.can_edit ? 'checked' : ''} /> 수정
+          </label>
+        </td>
+        <td style="padding: 10px; text-align: right;">
+          ${isPending ? `
+            <button class="btn-approve-user" data-id="${u.id}" style="background:#10b981; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; margin-right:4px;">승인</button>
+            <button class="btn-reject-user" data-id="${u.id}" style="background:#ef4444; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">거절</button>
+          ` : `
+            <button class="btn-toggle-status" data-id="${u.id}" style="background:#64748b; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem;">${isApproved ? '승인취소' : '재승인'}</button>
+          `}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // 이벤트 바인딩
+  // 1. 회원 승인
+  document.querySelectorAll(".btn-approve-user").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      await updateUserProfile(id, { status: "approved", level: 2 });
     });
-  }
-
-  // 상세보기 모달(detailModal) 닫기 이벤트 연결
-  const btnCloseDetailModal = document.getElementById("btnCloseDetailModal");
-  if (btnCloseDetailModal) {
-    btnCloseDetailModal.addEventListener("click", closeDetailModal);
-  }
-  if (detailModal) {
-    detailModal.addEventListener("click", (e) => {
-      if (e.target === detailModal) closeDetailModal();
-    });
-  }
-
-  // ESC 키 누름 감지하여 모든 열린 모달 닫기
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closeDetailModal();
-      if (smsModal) smsModal.classList.remove("active");
-      if (adminModal) adminModal.classList.remove("active");
-      document.body.style.overflow = "";
-    }
   });
 
-  // 문자 문의 팝업 모달 제어 및 복사 기능
-  const btnCloseSmsModal = document.getElementById("btnCloseSmsModal");
-  const btnCopyPhone = document.getElementById("btnCopyPhone");
-  const btnCopySmsText = document.getElementById("btnCopySmsText");
+  // 2. 가입 거절
+  document.querySelectorAll(".btn-reject-user").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      await updateUserProfile(id, { status: "rejected" });
+    });
+  });
 
-  if (btnCloseSmsModal && smsModal) {
-    btnCloseSmsModal.addEventListener("click", () => {
-      smsModal.classList.remove("active");
+  // 3. 승인 토글
+  document.querySelectorAll(".btn-toggle-status").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      const target = state.users.find(u => u.id === id);
+      const nextStatus = target.status === 'approved' ? 'pending' : 'approved';
+      await updateUserProfile(id, { status: nextStatus });
     });
-    smsModal.addEventListener("click", (e) => {
-      if (e.target === smsModal) smsModal.classList.remove("active");
+  });
+
+  // 4. 10단계 등급 변경
+  document.querySelectorAll(".user-level-select").forEach(sel => {
+    sel.addEventListener("change", async (e) => {
+      const id = sel.getAttribute("data-id");
+      const newLevel = parseInt(e.target.value, 10);
+      await updateUserProfile(id, { level: newLevel });
     });
+  });
+
+  // 5. 권한 체크박스 변경
+  document.querySelectorAll(".user-perm-check").forEach(chk => {
+    chk.addEventListener("change", async (e) => {
+      const id = chk.getAttribute("data-id");
+      const perm = chk.getAttribute("data-perm");
+      const isChecked = e.target.checked;
+      await updateUserProfile(id, { [perm]: isChecked });
+    });
+  });
+}
+
+/**
+ * DB 및 로컬 상태 회원 프로필 업데이트 유틸리티
+ */
+async function updateUserProfile(id, updateData) {
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient.from("profiles").update(updateData).eq("id", id);
+      if (error) console.error("Supabase 프로필 수정 오류:", error.message);
+    } catch (e) {
+      console.warn("프로필 업데이트 예외:", e);
+    }
   }
 
-  // 전화번호 복사 버튼
-  if (btnCopyPhone) {
-    btnCopyPhone.addEventListener("click", () => {
-      navigator.clipboard.writeText("010-8917-8383").then(() => {
-        alert("전화번호(010-8917-8383)가 클립보드에 복사되었습니다!");
-      }).catch(() => {
-        alert("010-8917-8383 번호를 복사해 주세요.");
-      });
-    });
+  const idx = state.users.findIndex(u => u.id === id);
+  if (idx !== -1) {
+    state.users[idx] = { ...state.users[idx], ...updateData };
+    renderUserAdminTable();
+    alert("🎉 회원 등급 및 권한 설정이 성공적으로 반영되었습니다!");
   }
+}
 
-  // 문자 내용 복사 버튼
-  if (btnCopySmsText && smsContentInput) {
-    btnCopySmsText.addEventListener("click", () => {
-      navigator.clipboard.writeText(smsContentInput.value).then(() => {
-        alert("📋 문의 메시지 내용이 클립보드에 복사되었습니다!\n\n수신번호 010-8917-8383 으로 문자를 전송해 주세요.");
-      }).catch(() => {
-        alert("문의 내용을 복사해 주세요.");
-      });
-    });
-  }
+// -----------------------------------------------------------------------------
+// 6.5. 이미지 파일 미리보기 & Supabase Storage 업로드
+// -----------------------------------------------------------------------------
+let selectedFiles = [];
 
-  // 갤러리 슬라이드 버튼
-  if (btnPrevImage) {
-    btnPrevImage.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const images = state.selectedProperty.images || [];
-      state.currentImageIndex = (state.currentImageIndex === 0) ? images.length - 1 : state.currentImageIndex - 1;
-      updateGallery();
-    });
-  }
-
-  if (btnNextImage) {
-    btnNextImage.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const images = state.selectedProperty.images || [];
-      state.currentImageIndex = (state.currentImageIndex === images.length - 1) ? 0 : state.currentImageIndex + 1;
-      updateGallery();
-    });
-  }
-
-  // -----------------------------------------------------------------------------
-  // 8. 관리자 및 지정 회원 비밀번호 인증 권한 제어
-  // -----------------------------------------------------------------------------
-  const ADMIN_PASSWORD = "admin1234"; // 관리자 및 지정 회원이 사용할 비밀번호 (자유롭게 변경 가능)
-  const authModal = document.getElementById("authModal");
-  const btnCloseAuthModal = document.getElementById("btnCloseAuthModal");
-  const authForm = document.getElementById("authForm");
-  const inputAuthPassword = document.getElementById("inputAuthPassword");
-
-  // 현재 관리자 인증 상태 확인 (sessionStorage 이용)
-  function isUserAdmin() {
-    return sessionStorage.getItem("buikbu_admin_auth") === "true";
-  }
-
-  // 브랜드 로고 클릭 시 관리자 로그인/로그아웃 팝업 제공
-  const brandLogo = document.querySelector(".brand-logo");
-  if (brandLogo) {
-    brandLogo.addEventListener("click", (e) => {
-      e.preventDefault();
-      if (!isUserAdmin() && authModal) {
-        authModal.classList.add("active");
-        document.body.style.overflow = "hidden";
-      } else if (isUserAdmin()) {
-        if (confirm("현재 관리자로 인증되어 있습니다. 로그아웃 하시겠습니까?")) {
-          sessionStorage.removeItem("buikbu_admin_auth");
-          alert("로그아웃 되었습니다.");
-          location.reload();
-        }
-      }
-    });
-  }
-
-  // 매물 등록 버튼 클릭 시 관리자 인증 체크 및 비밀번호 팝업 박스 오픈
-  if (btnOpenAdminModal) {
-    btnOpenAdminModal.addEventListener("click", () => {
-      // 1. 신규 등록 모드로 상태 설정
-      isEditMode = false;
-      editingPropertyId = null;
-      const adminModalTitle = document.getElementById("adminModalTitle");
-      if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록 (관리자)";
-      if (propertyForm) propertyForm.reset();
-      selectedFiles = [];
-      renderImagePreviews();
-
-      // 2. 미인증 상태인 경우 비밀번호 입력 메세지 박스 모달 바로 팝업!
-      if (!isUserAdmin()) {
-        if (authModal) {
-          authModal.classList.add("active");
-          document.body.style.overflow = "hidden";
-        }
-        return;
-      }
-
-      // 3. 인증 완료 상태인 경우 바로 매물 등록 모달 오픈
-      adminModal.classList.add("active");
-      document.body.style.overflow = "hidden";
-    });
-  }
-
-  // 인증 모달 닫기
-  if (btnCloseAuthModal && authModal) {
-    btnCloseAuthModal.addEventListener("click", () => {
-      authModal.classList.remove("active");
-      document.body.style.overflow = "";
-    });
-    authModal.addEventListener("click", (e) => {
-      if (e.target === authModal) {
-        authModal.classList.remove("active");
-        document.body.style.overflow = "";
-      }
-    });
-  }
-
-  // 비밀번호 인증 폼 제출 이벤트
-  if (authForm) {
-    authForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const enteredPassword = inputAuthPassword.value.trim();
-
-      if (enteredPassword === ADMIN_PASSWORD) {
-        // 인증 성공: 세션에 인증 완료 기록 저장
-        sessionStorage.setItem("buikbu_admin_auth", "true");
-        alert("🔑 관리자 인증이 완료되었습니다! 매물 등록 화면으로 이동합니다.");
-        
-        authForm.reset();
-        authModal.classList.remove("active");
-        
-        // 매물 등록 모달 팝업 오픈
-        adminModal.classList.add("active");
-        document.body.style.overflow = "hidden";
-      } else {
-        alert("⚠️ 비밀번호가 올바르지 않습니다. 관리자 및 지정 회원만 이용하실 수 있습니다.");
-        inputAuthPassword.value = "";
-        inputAuthPassword.focus();
-      }
-    });
-  }
-
-  // 관리자 매물 등록 모달 닫기
-  if (btnCloseAdminModal) {
-    btnCloseAdminModal.addEventListener("click", () => {
-      adminModal.classList.remove("active");
-      document.body.style.overflow = "";
-    });
-  }
-
-  // -----------------------------------------------------------------------------
-  // 7. 로컬 다중 이미지 선택 & 미리보기 및 Supabase Storage 업로드
-  // -----------------------------------------------------------------------------
+function setupImageUploadHandlers() {
   const inputImageFiles = document.getElementById("inputImageFiles");
   const imagePreviewContainer = document.getElementById("imagePreviewContainer");
-  let selectedFiles = []; // 사용자가 선택한 File 객체 리스트
 
   if (inputImageFiles) {
     inputImageFiles.addEventListener("change", (e) => {
       const files = Array.from(e.target.files);
       selectedFiles = [...selectedFiles, ...files];
       renderImagePreviews();
-      inputImageFiles.value = ""; // 동일 파일 다시 선택 가능하도록 초기화
+      inputImageFiles.value = "";
     });
   }
 
@@ -607,7 +698,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         imagePreviewContainer.appendChild(previewItem);
 
-        // 미리보기 개별 삭제 이벤트
         previewItem.querySelector(".preview-remove-btn").addEventListener("click", (evt) => {
           evt.stopPropagation();
           const removeIdx = parseInt(evt.target.getAttribute("data-index"), 10);
@@ -618,87 +708,196 @@ document.addEventListener("DOMContentLoaded", () => {
       reader.readAsDataURL(file);
     });
   }
+}
 
-  /**
-   * 선택된 파일들을 Supabase Storage 'property-images' 버킷에 업로드하고 Public URL 배열 반환
-   */
-  async function uploadFilesToSupabase(files) {
-    const uploadedUrls = [];
+async function uploadFilesToSupabase(files) {
+  const uploadedUrls = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const fileExt = file.name.split('.').pop();
+    const filePath = `property_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      // 파일 확장자 추출 및 유니크한 경로 생성
-      const fileExt = file.name.split('.').pop();
-      const filePath = `property_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-
-      if (supabaseClient) {
-        try {
-          // Supabase Storage 업로드 시도
-          const { data, error } = await supabaseClient
-            .storage
-            .from('property-images')
-            .upload(filePath, file, {
-              cacheControl: '3600',
-              upsert: false
-            });
-
-          if (error) {
-            console.warn(`[Storage 업로드 경고] ${file.name} 업로드 실패:`, error.message);
-            // Storage 업로드 실패 시 Base64 로컬 이미지 URL 사용
-            const base64Url = await fileToBase64(file);
-            uploadedUrls.push(base64Url);
-          } else {
-            // 업로드 성공 시 Public URL 획득
-            const { data: publicUrlData } = supabaseClient
-              .storage
-              .from('property-images')
-              .getPublicUrl(filePath);
-
-            uploadedUrls.push(publicUrlData.publicUrl);
-          }
-        } catch (err) {
-          console.error("Storage 업로드 예외 발생:", err);
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient.storage.from('property-images').upload(filePath, file, { cacheControl: '3600', upsert: false });
+        if (error) {
           const base64Url = await fileToBase64(file);
           uploadedUrls.push(base64Url);
+        } else {
+          const { data: publicUrlData } = supabaseClient.storage.from('property-images').getPublicUrl(filePath);
+          uploadedUrls.push(publicUrlData.publicUrl);
         }
-      } else {
-        // Supabase 비연동 시 Base64 Data URL로 변환하여 시연
+      } catch (err) {
         const base64Url = await fileToBase64(file);
         uploadedUrls.push(base64Url);
       }
+    } else {
+      const base64Url = await fileToBase64(file);
+      uploadedUrls.push(base64Url);
     }
-
-    return uploadedUrls;
   }
+  return uploadedUrls;
+}
 
-  // File 객체를 Base64 Data URL로 변환하는 유틸리티
-  function fileToBase64(file) {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.readAsDataURL(file);
+function fileToBase64(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+// -----------------------------------------------------------------------------
+// 7. 이벤트 바인딩 (DOM Loaded)
+// -----------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+
+  // 검색창 입력
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      state.searchQuery = e.target.value;
+      render();
     });
   }
 
-  // 매물 등록 및 수정 폼 제출 이벤트
+  // 카테고리 태그
+  if (categoryContainer) {
+    categoryContainer.addEventListener("click", (e) => {
+      if (e.target.classList.contains("btn-tag")) {
+        document.querySelectorAll(".btn-tag").forEach(b => b.classList.remove("active"));
+        e.target.classList.add("active");
+        state.selectedCategory = e.target.getAttribute("data-category");
+        render();
+      }
+    });
+  }
+
+  // 상세 모달 닫기
+  if (btnCloseDetailModal) btnCloseDetailModal.addEventListener("click", closeDetailModal);
+  if (btnCloseSignupModal) btnCloseSignupModal.addEventListener("click", () => signupModal.classList.remove("active"));
+  if (btnCloseLoginModal) btnCloseLoginModal.addEventListener("click", () => loginModal.classList.remove("active"));
+  if (btnCloseUserAdminModal) btnCloseUserAdminModal.addEventListener("click", () => userAdminModal.classList.remove("active"));
+
+  // ---------------------------------------------------------------------------
+  // 신규 회원가입 폼 제출 이벤트
+  // ---------------------------------------------------------------------------
+  if (signupForm) {
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const newMember = {
+        id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+        email: document.getElementById("signupEmail").value.trim(),
+        password: document.getElementById("signupPassword").value.trim(),
+        name: document.getElementById("signupName").value.trim(),
+        phone: document.getElementById("signupPhone").value.trim(),
+        role: "member",
+        level: 1, // 최초가입 시 Level 1 (준회원/승인대기)
+        status: "pending", // 관리자 승인 대기중
+        can_create: false,
+        can_edit: false,
+        can_delete: false,
+        created_at: new Date().toISOString()
+      };
+
+      if (supabaseClient) {
+        try {
+          const { error } = await supabaseClient.from("profiles").insert([newMember]);
+          if (error) {
+            alert(`[회원가입 실패] ${error.message}`);
+            return;
+          }
+        } catch (err) {
+          console.warn("Supabase 프로필 가입 실패, 메모리에 등록합니다:", err);
+        }
+      }
+
+      state.users.unshift(newMember);
+      alert("🎉 회원가입 신청이 정상적으로 완료되었습니다!\n\n현재 [Level 1 - 승인대기] 상태입니다. 관리자가 가입을 승인한 후 이용하실 수 있습니다.");
+      signupForm.reset();
+      signupModal.classList.remove("active");
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 로그인 폼 제출 이벤트
+  // ---------------------------------------------------------------------------
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      let targetUser = null;
+
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from("profiles")
+            .select("*")
+            .eq("email", email)
+            .eq("password", password)
+            .single();
+
+          if (!error && data) {
+            targetUser = data;
+          }
+        } catch (err) {}
+      }
+
+      if (!targetUser) {
+        targetUser = state.users.find(u => u.email === email && u.password === password);
+      }
+
+      if (!targetUser) {
+        alert("⚠️ 등록되지 않은 이메일이거나 비밀번호가 일치하지 않습니다.");
+        return;
+      }
+
+      // 승인 상태 체크
+      if (targetUser.status === "pending") {
+        alert("⏳ 현재 관리자의 가입 승인 대기 중입니다.\n관리자가 가입을 승인한 후 서비스 이용이 가능합니다.");
+        return;
+      }
+
+      if (targetUser.status === "rejected") {
+        alert("🔴 가입 승인이 거부된 계정입니다. 관리자에게 문의해 주세요.");
+        return;
+      }
+
+      // 로그인 성공
+      state.currentUser = targetUser;
+      sessionStorage.setItem("buikbu_user", JSON.stringify(targetUser));
+      alert(`🎉 반가워요, ${targetUser.name}님!\n(회원 등급: ${LEVEL_NAMES[targetUser.level] || targetUser.level + '단계'})`);
+      
+      loginForm.reset();
+      loginModal.classList.remove("active");
+      updateNavUI();
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 매물 등록 / 수정 폼 제출 이벤트
+  // ---------------------------------------------------------------------------
+  setupImageUploadHandlers();
+
   if (propertyForm) {
     propertyForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      // 버튼 로딩 상태 표시
       const submitBtn = propertyForm.querySelector('button[type="submit"]');
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<span>처리 중입니다...</span>`;
 
       try {
-        // 1. 첨부된 파일이 있으면 업로드 처리
         let finalImageUrls = [];
         if (selectedFiles.length > 0) {
           finalImageUrls = await uploadFilesToSupabase(selectedFiles);
         }
 
-        // 2. 수정(UPDATE) 모드 처리
         if (isEditMode && editingPropertyId) {
           const updatePayload = {
             title: document.getElementById("inputTitle").value,
@@ -709,48 +908,31 @@ document.addEventListener("DOMContentLoaded", () => {
             zoning_info: document.getElementById("inputZoning").value,
             description: document.getElementById("inputDescription").value,
           };
-          // 새 사진이 첨부된 경우만 이미지 배열 업데이트
-          if (finalImageUrls.length > 0) {
-            updatePayload.images = finalImageUrls;
-          }
+          if (finalImageUrls.length > 0) updatePayload.images = finalImageUrls;
 
           if (supabaseClient) {
-            const { error } = await supabaseClient
-              .from("properties")
-              .update(updatePayload)
-              .eq("id", editingPropertyId);
-
+            const { error } = await supabaseClient.from("properties").update(updatePayload).eq("id", editingPropertyId);
             if (error) {
-              console.error("Supabase DB 수정 에러:", error);
-              alert(`[Supabase DB 수정 실패]\n오류 원인: ${error.message}`);
+              alert(`[DB 수정 실패] ${error.message}`);
               return;
             }
-
-            alert("🎉 매물 정보가 성공적으로 수정 반영되었습니다!");
+            alert("🎉 매물 정보가 성공적으로 수정되었습니다!");
             await fetchProperties();
           } else {
-            const targetIdx = state.properties.findIndex(p => p.id === editingPropertyId);
-            if (targetIdx !== -1) {
-              state.properties[targetIdx] = { ...state.properties[targetIdx], ...updatePayload };
+            const idx = state.properties.findIndex(p => p.id === editingPropertyId);
+            if (idx !== -1) {
+              state.properties[idx] = { ...state.properties[idx], ...updatePayload };
               render();
             }
             alert("매물 정보가 수정되었습니다 (데모 모드).");
           }
-        } 
-        // 3. 신규 등록(INSERT) 모드 처리
-        else {
+        } else {
           if (finalImageUrls.length === 0) {
             finalImageUrls = ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
           }
 
-          const generatedId = (typeof crypto !== "undefined" && crypto.randomUUID) 
-            ? crypto.randomUUID() 
-            : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
-                (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
-              );
-
           const newProperty = {
-            id: generatedId,
+            id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
             title: document.getElementById("inputTitle").value,
             property_type: document.getElementById("inputType").value,
             location: document.getElementById("inputLocation").value,
@@ -763,18 +945,12 @@ document.addEventListener("DOMContentLoaded", () => {
           };
 
           if (supabaseClient) {
-            const { data, error } = await supabaseClient
-              .from("properties")
-              .insert([newProperty])
-              .select();
-
+            const { error } = await supabaseClient.from("properties").insert([newProperty]);
             if (error) {
-              console.error("Supabase DB 저장 에러 상세:", error);
-              alert(`[Supabase DB 저장 실패]\n오류 원인: ${error.message}`);
+              alert(`[DB 등록 실패] ${error.message}`);
               return;
             }
-
-            alert(`🎉 Supabase 데이터베이스에 신규 매물이 등록되었습니다!`);
+            alert("🎉 신규 매물이 데이터베이스에 등록되었습니다!");
             await fetchProperties();
           } else {
             state.properties.unshift(newProperty);
@@ -782,17 +958,14 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        // 폼 및 모달 상태 리셋
         propertyForm.reset();
         selectedFiles = [];
-        renderImagePreviews();
         isEditMode = false;
         editingPropertyId = null;
         adminModal.classList.remove("active");
         document.body.style.overflow = "";
       } catch (err) {
-        console.error("처리 중 예외 발생:", err);
-        alert(`처리 중 오류가 발생했습니다: ${err.message}`);
+        alert(`처리 중 오류: ${err.message}`);
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
