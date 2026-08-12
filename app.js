@@ -526,9 +526,11 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         if (supabaseClient) {
-          const { error } = await supabaseClient
+          console.log("Supabase DB 전송 데이터:", newProperty);
+          const { data, error } = await supabaseClient
             .from("properties")
-            .insert([newProperty]);
+            .insert([newProperty])
+            .select();
 
           if (error) {
             console.error("Supabase DB 저장 에러 상세:", error);
@@ -536,12 +538,18 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
-          alert("🎉 사진 업로드 및 신규 매물 등록이 완료되었습니다!");
+          console.log("Supabase DB 저장 결과:", data);
+          if (!data || data.length === 0) {
+            alert("⚠️ 데이터베이스에 저장은 되었으나 반환된 데이터가 없습니다. Supabase Table Editor를 확인해 보세요.");
+          } else {
+            alert(`🎉 Supabase 데이터베이스 (Table Editor)에 데이터가 성공적으로 등록되었습니다!\n(등록된 매물 ID: ${data[0].id})`);
+          }
+
           await fetchProperties();
         } else {
+          alert("⚠️ Supabase 클라이언트 연결이 되지 않아 로컬 모드로 등록되었습니다. 페이지를 새로고침(F5) 후 다시 시도해 주세요.");
           state.properties.unshift(newProperty);
           render();
-          alert("새 매물이 등록되었습니다 (데모 모드).");
         }
 
         // 폼 및 미리보기 상태 초기화
