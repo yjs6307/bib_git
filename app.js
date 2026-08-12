@@ -866,11 +866,52 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 상세 모달 닫기
+  // 모든 모달 닫기 이벤트 연결
   if (btnCloseDetailModal) btnCloseDetailModal.addEventListener("click", closeDetailModal);
-  if (btnCloseSignupModal) btnCloseSignupModal.addEventListener("click", () => signupModal.classList.remove("active"));
-  if (btnCloseLoginModal) btnCloseLoginModal.addEventListener("click", () => loginModal.classList.remove("active"));
-  if (btnCloseUserAdminModal) btnCloseUserAdminModal.addEventListener("click", () => userAdminModal.classList.remove("active"));
+  if (btnCloseSignupModal) btnCloseSignupModal.addEventListener("click", () => { signupModal.classList.remove("active"); document.body.style.overflow = ""; });
+  if (btnCloseLoginModal) btnCloseLoginModal.addEventListener("click", () => { loginModal.classList.remove("active"); document.body.style.overflow = ""; });
+  if (btnCloseUserAdminModal) btnCloseUserAdminModal.addEventListener("click", () => { userAdminModal.classList.remove("active"); document.body.style.overflow = ""; });
+  
+  // 매물 등록/수정 모달 닫기 버튼연결
+  const btnCloseAdminModal = document.getElementById("btnCloseAdminModal");
+  if (btnCloseAdminModal) {
+    btnCloseAdminModal.addEventListener("click", () => {
+      adminModal.classList.remove("active");
+      document.body.style.overflow = "";
+    });
+  }
+
+  // 문자 모달 닫기 버튼연결
+  const btnCloseSmsModal = document.getElementById("btnCloseSmsModal");
+  const smsModal = document.getElementById("smsModal");
+  if (btnCloseSmsModal && smsModal) {
+    btnCloseSmsModal.addEventListener("click", () => {
+      smsModal.classList.remove("active");
+      document.body.style.overflow = "";
+    });
+  }
+
+  // 모달 배경(Backdrop) 클릭 시 모달 닫기
+  [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal].forEach(modal => {
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          modal.classList.remove("active");
+          document.body.style.overflow = "";
+        }
+      });
+    }
+  });
+
+  // ESC 키 눌렀을 때 활성화된 모든 모달 닫기
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal].forEach(modal => {
+        if (modal) modal.classList.remove("active");
+      });
+      document.body.style.overflow = "";
+    }
+  });
 
   // ---------------------------------------------------------------------------
   // 신규 회원가입 폼 제출 이벤트
