@@ -168,8 +168,50 @@
           <i data-lucide="message-square" style="width:16px; height:16px;"></i>
           <span>문자 문의하기</span>
         </a>
+  <!-- 5. 웹 전용 문자 문의 작성 팝업 모달 -->
+  <div id="smsModal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="message-square" style="width:20px; height:20px; color:#10b981;"></i>
+          <h3 style="font-size: 1.125rem; font-weight: 700;">매물 문자 문의하기</h3>
+        </div>
+        <button id="btnCloseSmsModal" class="btn-close-modal">
+          <i data-lucide="x" style="width:20px; height:20px;"></i>
+        </button>
       </div>
+      <div class="modal-body">
+        
+        <!-- 받는 사람 안내 -->
+        <div style="background-color:#f1f5f9; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-size:0.75rem; color:#64748b; display:block;">수신 전문 상담원 번호</span>
+            <strong style="font-size:1.1rem; color:#0f172a;">010-8917-8383</strong>
+          </div>
+          <button id="btnCopyPhone" style="font-size:0.75rem; background:#0f172a; color:#fff; padding:6px 12px; border-radius:8px; font-weight:600;">
+            번호 복사
+          </button>
+        </div>
 
+        <!-- 문의 내용 텍스트 박스 -->
+        <div class="form-group">
+          <label class="form-label" for="smsContentInput">문의 메시지 내용</label>
+          <textarea id="smsContentInput" class="form-control" rows="5" style="line-height:1.6; font-size:0.9rem;"></textarea>
+        </div>
+
+        <!-- 하단 액션 버튼 그룹 -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
+          <button id="btnCopySmsText" class="btn-admin" style="background-color:#475569; justify-content:center; padding:12px;">
+            <i data-lucide="copy" style="width:16px; height:16px;"></i>
+            <span>문자 내용 복사</span>
+          </button>
+          <a id="btnSendSmsApp" href="#" class="btn-admin-add" style="justify-content:center; padding:12px; text-decoration:none;">
+            <i data-lucide="send" style="width:16px; height:16px;"></i>
+            <span>문자 앱으로 발송</span>
+          </a>
+        </div>
+
+      </div>
     </div>
   </div>
 

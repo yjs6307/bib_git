@@ -268,13 +268,31 @@ function openDetailModal(property) {
   modalCreatedAt.textContent = new Date(property.created_at).toLocaleDateString("ko-KR");
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
 
-  // 010-8917-8383 번호로 매물 정보 자동 완성 SMS 문자 링크 생성
+  // 010-8917-8383 번호로 문자 문의하기 모달 팝업 바인딩
   const btnContactSms = document.getElementById("btnContactSms");
-  if (btnContactSms) {
-    const message = `안녕하세요! 아래 매물에 대해 문의드립니다.\n- 매물명: ${property.title}\n- 가격: ${property.price}\n- 위치: ${property.location}`;
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const separator = isIOS ? '&' : '?';
-    btnContactSms.href = `sms:010-8917-8383${separator}body=${encodeURIComponent(message)}`;
+  const smsModal = document.getElementById("smsModal");
+  const smsContentInput = document.getElementById("smsContentInput");
+  const btnSendSmsApp = document.getElementById("btnSendSmsApp");
+
+  if (btnContactSms && smsModal) {
+    btnContactSms.onclick = (e) => {
+      e.preventDefault();
+      
+      const message = `안녕하세요! [${property.title}] 매물에 대해 문의드립니다.\n\n- 매물명: ${property.title}\n- 매매/임대가: ${property.price}\n- 위치: ${property.location}\n\n상세 정보 및 방문 상담 가능 여부를 확인하고 싶습니다.`;
+      
+      if (smsContentInput) {
+        smsContentInput.value = message;
+      }
+
+      // 스마트폰 SMS 앱 연결 링크 설정
+      if (btnSendSmsApp) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const separator = isIOS ? '&' : '?';
+        btnSendSmsApp.href = `sms:010-8917-8383${separator}body=${encodeURIComponent(message)}`;
+      }
+
+      smsModal.classList.add("active");
+    };
   }
 
   // 갤러리 이미지 업데이트
@@ -346,11 +364,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 상세보기 모달 닫기
-  if (btnCloseDetailModal) btnCloseDetailModal.addEventListener("click", closeDetailModal);
-  if (detailModal) {
-    detailModal.addEventListener("click", (e) => {
-      if (e.target === detailModal) closeDetailModal();
+  // 문자 문의 팝업 모달 제어 및 복사 기능
+  const btnCloseSmsModal = document.getElementById("btnCloseSmsModal");
+  const btnCopyPhone = document.getElementById("btnCopyPhone");
+  const btnCopySmsText = document.getElementById("btnCopySmsText");
+
+  if (btnCloseSmsModal && smsModal) {
+    btnCloseSmsModal.addEventListener("click", () => {
+      smsModal.classList.remove("active");
+    });
+    smsModal.addEventListener("click", (e) => {
+      if (e.target === smsModal) smsModal.classList.remove("active");
+    });
+  }
+
+  // 전화번호 복사 버튼
+  if (btnCopyPhone) {
+    btnCopyPhone.addEventListener("click", () => {
+      navigator.clipboard.writeText("010-8917-8383").then(() => {
+        alert("전화번호(010-8917-8383)가 클립보드에 복사되었습니다!");
+      }).catch(() => {
+        alert("010-8917-8383 번호를 복사해 주세요.");
+      });
+    });
+  }
+
+  // 문자 내용 복사 버튼
+  if (btnCopySmsText && smsContentInput) {
+    btnCopySmsText.addEventListener("click", () => {
+      navigator.clipboard.writeText(smsContentInput.value).then(() => {
+        alert("📋 문의 메시지 내용이 클립보드에 복사되었습니다!\n\n수신번호 010-8917-8383 으로 문자를 전송해 주세요.");
+      }).catch(() => {
+        alert("문의 내용을 복사해 주세요.");
+      });
     });
   }
 
