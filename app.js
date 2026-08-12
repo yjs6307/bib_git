@@ -428,14 +428,77 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 관리자 매물 등록 모달 제어
+  // -----------------------------------------------------------------------------
+  // 8. 관리자 및 지정 회원 비밀번호 인증 권한 제어
+  // -----------------------------------------------------------------------------
+  const ADMIN_PASSWORD = "admin1234"; // 관리자 및 지정 회원이 사용할 비밀번호 (자유롭게 변경 가능)
+  const authModal = document.getElementById("authModal");
+  const btnCloseAuthModal = document.getElementById("btnCloseAuthModal");
+  const authForm = document.getElementById("authForm");
+  const inputAuthPassword = document.getElementById("inputAuthPassword");
+
+  // 현재 관리자 인증 상태 확인 (sessionStorage 이용)
+  function isUserAdmin() {
+    return sessionStorage.getItem("buikbu_admin_auth") === "true";
+  }
+
+  // 매물 등록 버튼 클릭 시 인증 여부 체크
   if (btnOpenAdminModal) {
     btnOpenAdminModal.addEventListener("click", () => {
-      adminModal.classList.add("active");
-      document.body.style.overflow = "hidden";
+      if (isUserAdmin()) {
+        // 이미 인증된 회원인 경우 바로 매물 등록 모달 오픈
+        adminModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      } else {
+        // 미인증 상태인 경우 관리자 비밀번호 입력 모달 팝업
+        if (authModal) {
+          authModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+      }
     });
   }
 
+  // 인증 모달 닫기
+  if (btnCloseAuthModal && authModal) {
+    btnCloseAuthModal.addEventListener("click", () => {
+      authModal.classList.remove("active");
+      document.body.style.overflow = "";
+    });
+    authModal.addEventListener("click", (e) => {
+      if (e.target === authModal) {
+        authModal.classList.remove("active");
+        document.body.style.overflow = "";
+      }
+    });
+  }
+
+  // 비밀번호 인증 폼 제출 이벤트
+  if (authForm) {
+    authForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const enteredPassword = inputAuthPassword.value.trim();
+
+      if (enteredPassword === ADMIN_PASSWORD) {
+        // 인증 성공: 세션에 인증 완료 기록 저장
+        sessionStorage.setItem("buikbu_admin_auth", "true");
+        alert("🔑 관리자 인증이 완료되었습니다! 매물 등록 화면으로 이동합니다.");
+        
+        authForm.reset();
+        authModal.classList.remove("active");
+        
+        // 매물 등록 모달 팝업 오픈
+        adminModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      } else {
+        alert("⚠️ 비밀번호가 올바르지 않습니다. 관리자 및 지정 회원만 이용하실 수 있습니다.");
+        inputAuthPassword.value = "";
+        inputAuthPassword.focus();
+      }
+    });
+  }
+
+  // 관리자 매물 등록 모달 닫기
   if (btnCloseAdminModal) {
     btnCloseAdminModal.addEventListener("click", () => {
       adminModal.classList.remove("active");
