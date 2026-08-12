@@ -841,6 +841,23 @@ input, textarea, select {
   line-height: 1.6;
 }
 
+/* 11. 유튜브 플레이어 전용 반응형 스타일 */
+.youtube-player-card {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  background-color: #000000;
+}
+
+.youtube-player-card iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 /* 반응형 모바일 & 태블릿 스마트폰 폭 자동 조절 대응 */
 @media (max-width: 768px) {
   .navbar-container {

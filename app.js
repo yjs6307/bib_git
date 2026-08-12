@@ -448,6 +448,16 @@ function render() {
   });
 }
 
+/**
+ * 유튜브 URL에서 11자리 비디오 ID를 추출하는 유틸리티
+ */
+function extractYoutubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
 function openDetailModal(property) {
   state.selectedProperty = property;
   state.currentImageIndex = 0;
@@ -460,6 +470,28 @@ function openDetailModal(property) {
   modalZoningInfo.textContent = property.zoning_info || "정보 없음";
   modalCreatedAt.textContent = new Date(property.created_at).toLocaleDateString("ko-KR");
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
+
+  // 유튜브 비디오 임베드 처리
+  const modalYoutubeWrap = document.getElementById("modalYoutubeWrap");
+  const youtubeId = extractYoutubeId(property.youtube_url);
+  if (modalYoutubeWrap) {
+    if (youtubeId) {
+      modalYoutubeWrap.style.display = "block";
+      modalYoutubeWrap.innerHTML = `
+        <div style="font-size:0.875rem; font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          <i data-lucide="video" style="width:16px; height:16px; color:#ef4444;"></i>
+          <span>매물 홍보/임장 영상</span>
+        </div>
+        <div class="youtube-player-card">
+          <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=0" allowfullscreen></iframe>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    } else {
+      modalYoutubeWrap.style.display = "none";
+      modalYoutubeWrap.innerHTML = "";
+    }
+  }
 
   const btnEditProperty = document.getElementById("btnEditProperty");
   if (btnEditProperty) {
@@ -484,6 +516,7 @@ function openDetailModal(property) {
       document.getElementById("inputPrice").value = property.price || "";
       document.getElementById("inputArea").value = property.area_size || "";
       document.getElementById("inputZoning").value = property.zoning_info || "";
+      document.getElementById("inputYoutubeUrl").value = property.youtube_url || "";
       document.getElementById("inputDescription").value = property.description || "";
 
       closeDetailModal();
@@ -710,10 +743,68 @@ function setupImageUploadHandlers() {
   }
 }
 
+/**
+ * 고용량 로컬 사진을 웹/모바일 최적화 규격(최대 너비 1200px, JPEG 0.75 품질)으로 
+ * 자동 다이어트 리사이징하는 유틸리티 (수십 MB 사진도 100KB대로 경량화)
+ */
+function compressImage(file, maxWidth = 1200, quality = 0.75) {
+  return new Promise((resolve) => {
+    if (file.size < 300 * 1024) {
+      resolve(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                type: "image/jpeg",
+                lastModified: Date.now()
+              });
+              console.log(`[이미지 압축 성공] ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(compressedFile.size / 1024).toFixed(1)}KB)`);
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 async function uploadFilesToSupabase(files) {
   const uploadedUrls = [];
   for (let i = 0; i < files.length; i++) {
-    const file = files[i];
+    // 1. 고용량 이미지를 업로드 전 자동으로 압축 다이어트 처리!
+    const originalFile = files[i];
+    const file = await compressImage(originalFile);
+    
     const fileExt = file.name.split('.').pop();
     const filePath = `property_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
 
@@ -721,6 +812,7 @@ async function uploadFilesToSupabase(files) {
       try {
         const { data, error } = await supabaseClient.storage.from('property-images').upload(filePath, file, { cacheControl: '3600', upsert: false });
         if (error) {
+          console.warn(`[Storage 업로드 실패 경고] ${file.name}: ${error.message}`);
           const base64Url = await fileToBase64(file);
           uploadedUrls.push(base64Url);
         } else {
@@ -728,6 +820,7 @@ async function uploadFilesToSupabase(files) {
           uploadedUrls.push(publicUrlData.publicUrl);
         }
       } catch (err) {
+        console.error("Storage 예외 발생:", err);
         const base64Url = await fileToBase64(file);
         uploadedUrls.push(base64Url);
       }
@@ -906,6 +999,7 @@ document.addEventListener("DOMContentLoaded", () => {
             price: document.getElementById("inputPrice").value,
             area_size: document.getElementById("inputArea").value,
             zoning_info: document.getElementById("inputZoning").value,
+            youtube_url: document.getElementById("inputYoutubeUrl").value.trim(),
             description: document.getElementById("inputDescription").value,
           };
           if (finalImageUrls.length > 0) updatePayload.images = finalImageUrls;
@@ -939,6 +1033,7 @@ document.addEventListener("DOMContentLoaded", () => {
             price: document.getElementById("inputPrice").value,
             area_size: document.getElementById("inputArea").value,
             zoning_info: document.getElementById("inputZoning").value,
+            youtube_url: document.getElementById("inputYoutubeUrl").value.trim(),
             description: document.getElementById("inputDescription").value,
             images: finalImageUrls,
             created_at: new Date().toISOString()
