@@ -1,292 +1,320 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BU-IK-BU Real Estate | 부동산 매물 관리 서비스</title>
-  
-  <!-- 폰트: Pretendard CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
-  
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <!-- Supabase JS Client CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- 커스텀 스타일시트 -->
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BU-IK-BU Real Estate | 부동산 매물 관리 서비스</title>
+
+    <!-- 폰트: Pretendard CDN -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- 커스텀 스타일시트 -->
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <!-- 1. 상단 글로벌 네비게이션 헤더 -->
-  <header class="navbar">
-    <div class="navbar-container">
-      <a href="#" class="brand-logo">
-        <div class="logo-icon">
-          <i data-lucide="building"></i>
-        </div>
-        <div class="brand-text">
-          <h1>BU-IK-BU</h1>
-          <span>Real Estate Asset Management</span>
-        </div>
-      </a>
-      
-      <div class="nav-actions">
-        <button id="btnOpenAdminModal" class="btn-admin-add">
-          <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
-          <span>매물 등록 (Admin)</span>
-        </button>
-      </div>
-    </div>
-  </header>
+    <!-- 1. 상단 글로벌 네비게이션 헤더 -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <a href="#" class="brand-logo">
+                <div class="logo-icon">
+                    <i data-lucide="building"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>BU-IK-BU</h1>
+                    <span>Real Estate Asset Management</span>
+                </div>
+            </a>
 
-  <!-- 2. 히어로 안내 섹션 -->
-  <section class="hero-section">
-    <div class="hero-container">
-      <div class="badge-live">
-        <span class="dot-live"></span>
-        프리미엄 검증 자산 매물
-      </div>
-      <h2 class="hero-title">
-        가장 신뢰할 수 있는 <br />
-        부동산 매물 정보를 만나보세요.
-      </h2>
-      <p class="hero-subtitle">
-        상가, 아파트, 지식산업센터부터 사업용 용지까지 체계적으로 검증된 자산 정보를 실시간으로 확인하실 수 있습니다.
-      </p>
-    </div>
-  </section>
-
-  <!-- 3. 메인 콘텐츠 (검색 & 카테고리 필터 & 카드리스트 그리드) -->
-  <main class="main-container">
-    
-    <!-- 필터 및 검색 바 -->
-    <div class="filter-card">
-      <div class="filter-top-row">
-        <div class="search-box">
-          <i data-lucide="search" class="search-icon"></i>
-          <input 
-            type="text" 
-            id="searchInput" 
-            class="search-input" 
-            placeholder="매물명, 위치, 가격 검색..." 
-          />
-        </div>
-        <div id="propertyCount" class="property-count">
-          총 <strong>0</strong>개 매물
-        </div>
-      </div>
-
-      <!-- 카테고리 필터 태그 버튼들 -->
-      <div id="categoryContainer" class="category-tags">
-        <button class="btn-tag active" data-category="전체">전체</button>
-        <button class="btn-tag" data-category="상가">상가</button>
-        <button class="btn-tag" data-category="아파트">아파트</button>
-        <button class="btn-tag" data-category="공장/산업용지">공장/산업용지</button>
-        <button class="btn-tag" data-category="오피스텔">오피스텔</button>
-      </div>
-    </div>
-
-    <!-- 매물 카드 동적 그리드 영역 -->
-    <div id="propertyGrid" class="property-grid">
-      <!-- JavaScript(app.js)에 의해 매물 카드가 이곳에 실시간 동적 생성됩니다 -->
-    </div>
-
-  </main>
-
-  <!-- 4. 매물 상세 정보 팝업 모달 (배경 백드롭 블러) -->
-  <div id="detailModal" class="modal-overlay">
-    <div class="modal-container">
-      
-      <!-- 모달 상단 헤더 -->
-      <div class="modal-header">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span id="modalTypeBadge" class="card-badge-type" style="position:static;">상가</span>
-          <span id="modalCreatedAt" style="font-size:0.75rem; color:#94a3b8;">등록일: -</span>
-        </div>
-        <button id="btnCloseDetailModal" class="btn-close-modal">
-          <i data-lucide="x" style="width:20px; height:20px;"></i>
-        </button>
-      </div>
-
-      <!-- 모달 스크롤 본문 -->
-      <div class="modal-body">
-        
-        <!-- 갤러리 슬라이더 -->
-        <div class="gallery-slider">
-          <img id="modalGalleryMain" src="" alt="매물 이미지" class="gallery-main-img" />
-          <button id="btnPrevImage" class="gallery-nav prev">
-            <i data-lucide="chevron-left" style="width:20px; height:20px;"></i>
-          </button>
-          <button id="btnNextImage" class="gallery-nav next">
-            <i data-lucide="chevron-right" style="width:20px; height:20px;"></i>
-          </button>
-          <div id="galleryCounter" class="gallery-counter">1 / 1</div>
-        </div>
-
-        <!-- 썸네일 목록 -->
-        <div id="modalGalleryThumbs" class="gallery-thumbs"></div>
-
-        <!-- 매물 제목 및 가격 -->
-        <div style="margin-bottom: 20px;">
-          <div id="modalPrice" style="font-size: 1.75rem; font-weight: 800; color: #0f172a;">-</div>
-          <h2 id="modalTitle" style="font-size: 1.35rem; font-weight: 700; margin-top: 4px; color: #1e293b;">-</h2>
-          <div style="display:flex; align-items:center; gap:6px; color:#64748b; font-size:0.9rem; margin-top:8px;">
-            <i data-lucide="map-pin" style="width:16px; height:16px;"></i>
-            <span id="modalLocation">-</span>
-          </div>
-        </div>
-
-        <!-- 스펙 상자 요약 -->
-        <div class="spec-grid">
-          <div class="spec-box">
-            <div class="spec-label">공급 / 전용 면적</div>
-            <div id="modalAreaSize" class="spec-value">-</div>
-          </div>
-          <div class="spec-box">
-            <div class="spec-label">용도지역 / 지구</div>
-            <div id="modalZoningInfo" class="spec-value">-</div>
-          </div>
-        </div>
-
-        <!-- 상세 설명 -->
-        <div style="margin-top: 24px;">
-          <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 10px;">매물 상세 설명</h3>
-          <div id="modalDescription" class="modal-description-box"></div>
-        </div>
-
-      </div>
-
-      <!-- 모달 하단 고정 바 -->
-      <div class="modal-footer">
-        <div>
-          <span style="font-size:0.75rem; color:#94a3b8; display:block;">전문가 직접 문자 상담 (010-8917-8383)</span>
-          <span style="font-weight:700; color:#0f172a;">신속 문자 문의</span>
-        </div>
-        <a id="btnContactSms" href="sms:01089178383" class="btn-contact" style="background-color: #10b981;">
-          <i data-lucide="message-square" style="width:16px; height:16px;"></i>
-          <span>문자 문의하기</span>
-        </a>
-  <!-- 5. 웹 전용 문자 문의 작성 팝업 모달 -->
-  <div id="smsModal" class="modal-overlay">
-    <div class="modal-container" style="max-width: 520px;">
-      <div class="modal-header">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <i data-lucide="message-square" style="width:20px; height:20px; color:#10b981;"></i>
-          <h3 style="font-size: 1.125rem; font-weight: 700;">매물 문자 문의하기</h3>
-        </div>
-        <button id="btnCloseSmsModal" class="btn-close-modal">
-          <i data-lucide="x" style="width:20px; height:20px;"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        
-        <!-- 받는 사람 안내 -->
-        <div style="background-color:#f1f5f9; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <span style="font-size:0.75rem; color:#64748b; display:block;">수신 전문 상담원 번호</span>
-            <strong style="font-size:1.1rem; color:#0f172a;">010-8917-8383</strong>
-          </div>
-          <button id="btnCopyPhone" style="font-size:0.75rem; background:#0f172a; color:#fff; padding:6px 12px; border-radius:8px; font-weight:600;">
-            번호 복사
-          </button>
-        </div>
-
-        <!-- 문의 내용 텍스트 박스 -->
-        <div class="form-group">
-          <label class="form-label" for="smsContentInput">문의 메시지 내용</label>
-          <textarea id="smsContentInput" class="form-control" rows="5" style="line-height:1.6; font-size:0.9rem;"></textarea>
-        </div>
-
-        <!-- 하단 액션 버튼 그룹 -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
-          <button id="btnCopySmsText" class="btn-admin" style="background-color:#475569; justify-content:center; padding:12px;">
-            <i data-lucide="copy" style="width:16px; height:16px;"></i>
-            <span>문자 내용 복사</span>
-          </button>
-          <a id="btnSendSmsApp" href="#" class="btn-admin-add" style="justify-content:center; padding:12px; text-decoration:none;">
-            <i data-lucide="send" style="width:16px; height:16px;"></i>
-            <span>문자 앱으로 발송</span>
-          </a>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- 5. 관리자 매물 등록 팝업 모달 (Admin Only) -->
-  <div id="adminModal" class="modal-overlay">
-    <div class="modal-container" style="max-width: 600px;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.125rem; font-weight: 700;">신규 매물 등록 (관리자)</h3>
-        <button id="btnCloseAdminModal" class="btn-close-modal">
-          <i data-lucide="x" style="width:20px; height:20px;"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="propertyForm">
-          <div class="form-group">
-            <label class="form-label" for="inputTitle">매물 제목</label>
-            <input type="text" id="inputTitle" class="form-control" placeholder="예: 역삼동 신축 메디컬 상가 임대" required />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="inputType">매물 종류</label>
-              <select id="inputType" class="form-control" required>
-                <option value="상가">상가</option>
-                <option value="아파트">아파트</option>
-                <option value="공장/산업용지">공장/산업용지</option>
-                <option value="오피스텔">오피스텔</option>
-              </select>
+            <div class="nav-actions">
+                <button id="btnOpenAdminModal" class="btn-admin-add">
+                    <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
+                    <span>매물 등록 (Admin)</span>
+                </button>
             </div>
-            <div class="form-group">
-              <label class="form-label" for="inputPrice">가격 조건</label>
-              <input type="text" id="inputPrice" class="form-control" placeholder="예: 매매 45억원 / 월 500만" required />
+        </div>
+    </header>
+
+    <!-- 2. 히어로 안내 섹션 -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="badge-live">
+                <span class="dot-live"></span>
+                프리미엄 검증 자산 매물
             </div>
-          </div>
+            <h2 class="hero-title">
+                가장 신뢰할 수 있는 <br />
+                부동산 매물 정보를 만나보세요.
+            </h2>
+            <p class="hero-subtitle">
+                상가, 아파트, 지식산업센터부터 사업용 용지까지 체계적으로 검증된 자산 정보를 실시간으로 확인하실 수 있습니다.
+            </p>
+        </div>
+    </section>
 
-          <div class="form-group">
-            <label class="form-label" for="inputLocation">소재지/위치</label>
-            <input type="text" id="inputLocation" class="form-control" placeholder="예: 서울시 강남구 역삼동 123-4" required />
-          </div>
+    <!-- 3. 메인 콘텐츠 (검색 & 카테고리 필터 & 카드리스트 그리드) -->
+    <main class="main-container">
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="inputArea">면적 (공급/전용)</label>
-              <input type="text" id="inputArea" class="form-control" placeholder="예: 공급 165㎡ / 전용 110㎡" required />
+        <!-- 필터 및 검색 바 -->
+        <div class="filter-card">
+            <div class="filter-top-row">
+                <div class="search-box">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="매물명, 위치, 가격 검색..." />
+                </div>
+                <div id="propertyCount" class="property-count">
+                    총 <strong>0</strong>개 매물
+                </div>
             </div>
-            <div class="form-group">
-              <label class="form-label" for="inputZoning">용도지역/지구</label>
-              <input type="text" id="inputZoning" class="form-control" placeholder="예: 중심상업지역" />
+
+            <!-- 카테고리 필터 태그 버튼들 -->
+            <div id="categoryContainer" class="category-tags">
+                <button class="btn-tag active" data-category="전체">전체</button>
+                <button class="btn-tag" data-category="상가">상가</button>
+                <button class="btn-tag" data-category="아파트">아파트</button>
+                <button class="btn-tag" data-category="공장/산업용지">공장/산업용지</button>
+                <button class="btn-tag" data-category="오피스텔">오피스텔</button>
             </div>
-          </div>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label" for="inputImageFiles">매물 이미지 첨부 (로컬 사진 다중 선택 가능)</label>
-            <input type="file" id="inputImageFiles" class="form-control" accept="image/*" multiple />
-            <div id="imagePreviewContainer" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
-            <div style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">
-              * 첫 번째 이미지가 대표 이미지로 등록됩니다. (컴퓨터에서 여러 장의 사진을 한 번에 선택할 수 있습니다)
+        <!-- 매물 카드 동적 그리드 영역 -->
+        <div id="propertyGrid" class="property-grid">
+            <!-- JavaScript(app.js)에 의해 매물 카드가 이곳에 실시간 동적 생성됩니다 -->
+        </div>
+
+    </main>
+
+    <!-- 4. 심플 푸터 (Footer) 영역 -->
+    <footer class="footer-site">
+        <div class="footer-container" style="text-align: center; padding: 40px 24px;">
+            <div
+                style="font-weight: 800; font-size: 1.25rem; color: #ffffff; letter-spacing: -0.02em; margin-bottom: 8px;">
+                부익부
             </div>
-          </div>
+            <p style="font-size: 0.85rem; color: #94a3b8;">
+                © 2026 부익부. All rights reserved.
+            </p>
+        </div>
+    </footer>
 
-          <div class="form-group">
-            <label class="form-label" for="inputDescription">매물 상세 설명</label>
-            <textarea id="inputDescription" class="form-control" rows="4" placeholder="매물의 주요 특장점 및 수익률, 입지 조건을 기재하세요."></textarea>
-          </div>
+    <!-- 4. 매물 상세 정보 팝업 모달 (배경 백드롭 블러) -->
+    <div id="detailModal" class="modal-overlay">
+        <div class="modal-container">
 
-          <button type="submit" class="btn-admin" style="width: 100%; justify-content: center; padding: 14px; margin-top: 10px;">
-            <i data-lucide="check-circle" style="width:18px; height:18px;"></i>
-            <span>매물 정보 저장하기</span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
+            <!-- 모달 상단 헤더 -->
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span id="modalTypeBadge" class="card-badge-type" style="position:static;">상가</span>
+                    <span id="modalCreatedAt" style="font-size:0.75rem; color:#94a3b8;">등록일: -</span>
+                </div>
+                <button id="btnCloseDetailModal" class="btn-close-modal">
+                    <i data-lucide="x" style="width:20px; height:20px;"></i>
+                </button>
+            </div>
 
-  <!-- 메인 스크립트 연결 -->
-  <script src="app.js"></script>
+            <!-- 모달 스크롤 본문 -->
+            <div class="modal-body">
+
+                <!-- 갤러리 슬라이더 -->
+                <div class="gallery-slider">
+                    <img id="modalGalleryMain" src="" alt="매물 이미지" class="gallery-main-img" />
+                    <button id="btnPrevImage" class="gallery-nav prev">
+                        <i data-lucide="chevron-left" style="width:20px; height:20px;"></i>
+                    </button>
+                    <button id="btnNextImage" class="gallery-nav next">
+                        <i data-lucide="chevron-right" style="width:20px; height:20px;"></i>
+                    </button>
+                    <div id="galleryCounter" class="gallery-counter">1 / 1</div>
+                </div>
+
+                <!-- 썸네일 목록 -->
+                <div id="modalGalleryThumbs" class="gallery-thumbs"></div>
+
+                <!-- 매물 제목 및 가격 -->
+                <div style="margin-bottom: 20px;">
+                    <div id="modalPrice" style="font-size: 1.75rem; font-weight: 800; color: #0f172a;">-</div>
+                    <h2 id="modalTitle" style="font-size: 1.35rem; font-weight: 700; margin-top: 4px; color: #1e293b;">-
+                    </h2>
+                    <div
+                        style="display:flex; align-items:center; gap:6px; color:#64748b; font-size:0.9rem; margin-top:8px;">
+                        <i data-lucide="map-pin" style="width:16px; height:16px;"></i>
+                        <span id="modalLocation">-</span>
+                    </div>
+                </div>
+
+                <!-- 스펙 상자 요약 -->
+                <div class="spec-grid">
+                    <div class="spec-box">
+                        <div class="spec-label">공급 / 전용 면적</div>
+                        <div id="modalAreaSize" class="spec-value">-</div>
+                    </div>
+                    <div class="spec-box">
+                        <div class="spec-label">용도지역 / 지구</div>
+                        <div id="modalZoningInfo" class="spec-value">-</div>
+                    </div>
+                </div>
+
+                <!-- 상세 설명 -->
+                <div style="margin-top: 24px;">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 10px;">매물 상세 설명</h3>
+                    <div id="modalDescription" class="modal-description-box"></div>
+                </div>
+
+            </div>
+
+            <!-- 모달 하단 고정 바 -->
+            <div class="modal-footer">
+                <div>
+                    <span style="font-size:0.75rem; color:#94a3b8; display:block;">전문가 직접 문자 상담 (010-8917-8383)</span>
+                    <span style="font-weight:700; color:#0f172a;">신속 문자 문의</span>
+                </div>
+                <a id="btnContactSms" href="sms:01089178383" class="btn-contact" style="background-color: #10b981;">
+                    <i data-lucide="message-square" style="width:16px; height:16px;"></i>
+                    <span>문자 문의하기</span>
+                </a>
+                <!-- 5. 웹 전용 문자 문의 작성 팝업 모달 -->
+                <div id="smsModal" class="modal-overlay">
+                    <div class="modal-container" style="max-width: 520px;">
+                        <div class="modal-header">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <i data-lucide="message-square" style="width:20px; height:20px; color:#10b981;"></i>
+                                <h3 style="font-size: 1.125rem; font-weight: 700;">매물 문자 문의하기</h3>
+                            </div>
+                            <button id="btnCloseSmsModal" class="btn-close-modal">
+                                <i data-lucide="x" style="width:20px; height:20px;"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+
+                            <!-- 받는 사람 안내 -->
+                            <div
+                                style="background-color:#f1f5f9; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <span style="font-size:0.75rem; color:#64748b; display:block;">수신 전문 상담원 번호</span>
+                                    <strong style="font-size:1.1rem; color:#0f172a;">010-8917-8383</strong>
+                                </div>
+                                <button id="btnCopyPhone"
+                                    style="font-size:0.75rem; background:#0f172a; color:#fff; padding:6px 12px; border-radius:8px; font-weight:600;">
+                                    번호 복사
+                                </button>
+                            </div>
+
+                            <!-- 문의 내용 텍스트 박스 -->
+                            <div class="form-group">
+                                <label class="form-label" for="smsContentInput">문의 메시지 내용</label>
+                                <textarea id="smsContentInput" class="form-control" rows="5"
+                                    style="line-height:1.6; font-size:0.9rem;"></textarea>
+                            </div>
+
+                            <!-- 하단 액션 버튼 그룹 -->
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
+                                <button id="btnCopySmsText" class="btn-admin"
+                                    style="background-color:#475569; justify-content:center; padding:12px;">
+                                    <i data-lucide="copy" style="width:16px; height:16px;"></i>
+                                    <span>문자 내용 복사</span>
+                                </button>
+                                <a id="btnSendSmsApp" href="#" class="btn-admin-add"
+                                    style="justify-content:center; padding:12px; text-decoration:none;">
+                                    <i data-lucide="send" style="width:16px; height:16px;"></i>
+                                    <span>문자 앱으로 발송</span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. 관리자 매물 등록 팝업 모달 (Admin Only) -->
+                <div id="adminModal" class="modal-overlay">
+                    <div class="modal-container" style="max-width: 600px;">
+                        <div class="modal-header">
+                            <h3 style="font-size: 1.125rem; font-weight: 700;">신규 매물 등록 (관리자)</h3>
+                            <button id="btnCloseAdminModal" class="btn-close-modal">
+                                <i data-lucide="x" style="width:20px; height:20px;"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="propertyForm">
+                                <div class="form-group">
+                                    <label class="form-label" for="inputTitle">매물 제목</label>
+                                    <input type="text" id="inputTitle" class="form-control"
+                                        placeholder="예: 역삼동 신축 메디컬 상가 임대" required />
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="inputType">매물 종류</label>
+                                        <select id="inputType" class="form-control" required>
+                                            <option value="상가">상가</option>
+                                            <option value="아파트">아파트</option>
+                                            <option value="공장/산업용지">공장/산업용지</option>
+                                            <option value="오피스텔">오피스텔</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="inputPrice">가격 조건</label>
+                                        <input type="text" id="inputPrice" class="form-control"
+                                            placeholder="예: 매매 45억원 / 월 500만" required />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="inputLocation">소재지/위치</label>
+                                    <input type="text" id="inputLocation" class="form-control"
+                                        placeholder="예: 서울시 강남구 역삼동 123-4" required />
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="inputArea">면적 (공급/전용)</label>
+                                        <input type="text" id="inputArea" class="form-control"
+                                            placeholder="예: 공급 165㎡ / 전용 110㎡" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="inputZoning">용도지역/지구</label>
+                                        <input type="text" id="inputZoning" class="form-control"
+                                            placeholder="예: 중심상업지역" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="inputImageFiles">매물 이미지 첨부 (로컬 사진 다중 선택 가능)</label>
+                                    <input type="file" id="inputImageFiles" class="form-control" accept="image/*"
+                                        multiple />
+                                    <div id="imagePreviewContainer"
+                                        style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
+                                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">
+                                        * 첫 번째 이미지가 대표 이미지로 등록됩니다. (컴퓨터에서 여러 장의 사진을 한 번에 선택할 수 있습니다)
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="inputDescription">매물 상세 설명</label>
+                                    <textarea id="inputDescription" class="form-control" rows="4"
+                                        placeholder="매물의 주요 특장점 및 수익률, 입지 조건을 기재하세요."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn-admin"
+                                    style="width: 100%; justify-content: center; padding: 14px; margin-top: 10px;">
+                                    <i data-lucide="check-circle" style="width:18px; height:18px;"></i>
+                                    <span>매물 정보 저장하기</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 메인 스크립트 연결 -->
+                <script src="app.js"></script>
 </body>
+
 </html>

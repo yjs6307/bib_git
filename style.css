@@ -732,7 +732,114 @@ input, textarea, select {
   transform: scale(1.1);
 }
 
+/* 10. 심플 푸터 (Footer) 전용 스타일 */
+.footer-site {
+  background-color: #0f172a;
+  color: #94a3b8;
+  border-top: 1px solid #1e293b;
+  padding: 20px 0;
+  margin-top: 60px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.footer-desc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin-bottom: 20px;
+  max-width: 480px;
+}
+
+.footer-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: #cbd5e1;
+}
+
+.footer-contact-info div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-title {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: #10b981;
+  padding-left: 4px;
+}
+
+.footer-cs-box {
+  background-color: #1e293b;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid #334155;
+}
+
+.footer-bottom {
+  padding-top: 24px;
+  font-size: 0.775rem;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-legal {
+  color: #94a3b8;
+}
+
+.footer-copy {
+  line-height: 1.6;
+}
+
 /* 반응형 모바일 대응 */
+@media (max-width: 768px) {
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+
 @media (max-width: 640px) {
   .hero-title { font-size: 1.75rem; }
   .form-row { grid-template-columns: 1fr; }
