@@ -166,7 +166,7 @@
 
                 <div class="spec-grid">
                     <div class="spec-box">
-                        <div class="spec-label">면적(㎡)</div>
+                        <div class="spec-label">면적(㎡) 공급/전용</div>
                         <div id="modalAreaSize" class="spec-value">-</div>
                     </div>
                     <div class="spec-box">
@@ -184,7 +184,7 @@
                     </div>
                 </div>
 
-                <!-- 투자 & 수익 자동 계산표 박스 (만원 단위) -->
+                <!-- 투자 & 수익 자동 계산표 박스 (단위: 만원) -->
                 <div id="modalInvestmentWrap" style="margin-top: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
                     <h3 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
                         <i data-lucide="calculator" style="width:16px; height:16px; color:#10b981;"></i>
@@ -394,7 +394,7 @@
         </div>
     </div>
 
-    <!-- 모달 6: 신규 매물 등록/수정 팝업 모달 (단위: 만원 & 면적(㎡)) -->
+    <!-- 모달 6: 신규 매물 등록/수정 팝업 모달 ("면적(㎡) 공급/전용" & "표시가격조건(요약) (만원)") -->
     <div id="adminModal" class="modal-overlay">
         <div class="modal-container" style="max-width: 650px;">
             <div class="modal-header">
@@ -450,22 +450,22 @@
                         <input type="text" id="inputLocation" class="form-control" placeholder="예: 서울시 강남구 역삼동 123-4" required />
                     </div>
 
-                    <!-- 소재지/위치 아래 층수 및 면적(㎡) 입력란 -->
+                    <!-- 소재지/위치 아래 층수 및 면적(㎡) 공급/전용 입력란 -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="inputFloorInfo">층수 / 총층수</label>
                             <input type="text" id="inputFloorInfo" class="form-control" placeholder="예: 3층 / 5층" required />
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="inputArea">면적(㎡)</label>
+                            <label class="form-label" for="inputArea">면적(㎡) 공급/전용</label>
                             <input type="text" id="inputArea" class="form-control" placeholder="예: 공급 85㎡ / 전용 59㎡" required />
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="inputPrice">표시 가격 조건 (요약)</label>
-                            <input type="text" id="inputPrice" class="form-control" placeholder="예: 매매 4억 5천만원" required />
+                            <label class="form-label" for="inputPrice">표시가격조건(요약) (만원)</label>
+                            <input type="text" id="inputPrice" class="form-control" placeholder="예: 매매 38000 (3억 8천만원)" required />
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="inputZoning">용도지역 / 지구</label>
