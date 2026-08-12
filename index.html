@@ -356,7 +356,7 @@
         <div class="modal-container" style="max-width: 600px;">
             <div class="modal-header">
                 <h3 id="adminModalTitle" style="font-size: 1.125rem; font-weight: 700;">신규 매물 등록 (관리자)</h3>
-                <button id="btnCloseAdminModal" class="btn-close-modal">
+                <button type="button" id="btnCloseAdminModal" class="btn-close-modal">
                     <i data-lucide="x" style="width:20px; height:20px;"></i>
                 </button>
             </div>
@@ -421,10 +421,16 @@
                         <textarea id="inputDescription" class="form-control" rows="4" placeholder="매물의 주요 특장점 및 수익률, 입지 조건을 기재하세요."></textarea>
                     </div>
 
-                    <button type="submit" class="btn-admin" style="width: 100%; justify-content: center; padding: 14px; margin-top: 10px;">
-                        <i data-lucide="check-circle" style="width:18px; height:18px;"></i>
-                        <span>매물 정보 저장하기</span>
-                    </button>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top: 16px;">
+                        <button type="button" id="btnCancelAdminModal" class="btn-admin" style="background-color:#64748b; justify-content: center; padding: 14px;">
+                            <i data-lucide="x-circle" style="width:18px; height:18px;"></i>
+                            <span>취소 (저장안함)</span>
+                        </button>
+                        <button type="submit" class="btn-admin" style="justify-content: center; padding: 14px;">
+                            <i data-lucide="check-circle" style="width:18px; height:18px;"></i>
+                            <span>매물 정보 저장하기</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

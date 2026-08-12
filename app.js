@@ -872,14 +872,23 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnCloseLoginModal) btnCloseLoginModal.addEventListener("click", () => { loginModal.classList.remove("active"); document.body.style.overflow = ""; });
   if (btnCloseUserAdminModal) btnCloseUserAdminModal.addEventListener("click", () => { userAdminModal.classList.remove("active"); document.body.style.overflow = ""; });
   
-  // 매물 등록/수정 모달 닫기 버튼연결
+  // 매물 등록/수정 모달 닫기 및 취소 버튼연결 (저장 없이 종료 보장)
   const btnCloseAdminModal = document.getElementById("btnCloseAdminModal");
-  if (btnCloseAdminModal) {
-    btnCloseAdminModal.addEventListener("click", () => {
+  const btnCancelAdminModal = document.getElementById("btnCancelAdminModal");
+
+  function closeAdminModalSafe(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (adminModal) {
       adminModal.classList.remove("active");
       document.body.style.overflow = "";
-    });
+    }
   }
+
+  if (btnCloseAdminModal) btnCloseAdminModal.addEventListener("click", closeAdminModalSafe);
+  if (btnCancelAdminModal) btnCancelAdminModal.addEventListener("click", closeAdminModalSafe);
 
   // 문자 모달 닫기 버튼연결
   const btnCloseSmsModal = document.getElementById("btnCloseSmsModal");
