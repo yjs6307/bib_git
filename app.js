@@ -2,7 +2,7 @@
  * =============================================================================
  * 파일명: app.js
  * 설명: 부동산 매물 관리 웹 애플리케이션 프론트엔드 비즈니스 로직 및 
- *       승인제 10단계 회원 등급 / 권한 관리 시스템 (Vanilla JS)
+ *       빌라/상가/기타 매물 관리 & 투자 수익 자동 계산 기능
  * =============================================================================
  */
 
@@ -31,7 +31,7 @@ const LEVEL_NAMES = {
   10: "Level 10 (최고 관리자)"
 };
 
-// 데모 초기 회원 데이터 (DB 연결 전 시연용)
+// 데모 회원 데이터
 const MOCK_USERS = [
   {
     id: "user-admin",
@@ -46,91 +46,57 @@ const MOCK_USERS = [
     can_edit: true,
     can_delete: true,
     created_at: new Date().toISOString()
-  },
-  {
-    id: "user-agent",
-    email: "agent@buikbu.com",
-    password: "1234",
-    name: "김에이전트 공인중개사",
-    phone: "010-2222-3333",
-    role: "member",
-    level: 8,
-    status: "approved",
-    can_create: true,
-    can_edit: true,
-    can_delete: false,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "user-pending",
-    email: "newmember@buikbu.com",
-    password: "1234",
-    name: "신규가입자 (승인대기중)",
-    phone: "010-9999-8888",
-    role: "member",
-    level: 1,
-    status: "pending",
-    can_create: false,
-    can_edit: false,
-    can_delete: false,
-    created_at: new Date().toISOString()
   }
 ];
 
-// 데모 매물 데이터
+// 데모 매물 데이터 ("빌라", "상가", "기타")
 const MOCK_PROPERTIES = [
   {
     id: "1",
-    title: "강남구 역삼동 신축 프라임 메디컬/오피스 타워 상가",
-    property_type: "상가",
+    title: "역삼동 고급 올리모델링 신축급 빌라 (투룸/화1)",
+    property_type: "빌라",
+    trade_status: "매매진행중",
     location: "서울특별시 강남구 역삼동 824-1",
-    price: "매매 45억원 (보증금 2억/월 1,500만)",
-    area_size: "공급 330.5㎡ / 전용 214.8㎡ (100평/65평)",
-    zoning_info: "중심상업지역",
-    description: `역삼역 도보 3분 거리의 가시성 및 접근성이 매우 뛰어난 신축 타워 상가입니다.\n
-- 병의원, 클리닉, 고급 브런치 카페 및 리테일 프랜차이즈 강추\n
-- 층고 4.5m로 개방감 우수하며 자주식 주차 10대 가능\n
-- 안정적인 고수익 임대수익률 (연 4.5% 예상)`,
+    floor_info: "3층 / 5층",
+    rooms: 2,
+    bathrooms: 1,
+    price: "매매 3억 8천만원",
+    area_size: "공급 65.5㎡ / 전용 48.8㎡",
+    zoning_info: "제2종일반주거지역",
+    purchase_price: 300000000,
+    expected_cost: 20000000,
+    expected_selling_price: 380000000,
+    expected_profit: 60000000,
+    participant_members: "홍길동(50%), 김에이전트(30%), 박투자(20%)",
+    description: `역삼역 도보 5분 거리의 리모델링 완료된 빌라 매물입니다.\n
+- 내부 고급 인테리어 및 시스템 에어컨, 세탁기 풀옵션 제공\n
+- 실주거 및 갭투자 모두 매우 우수`,
     images: [
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80"
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80"
     ],
     created_at: new Date().toISOString()
   },
   {
     id: "2",
-    title: "성수동 지식산업센터 펜트하우스형 지식공장 & 전용 테라스",
-    property_type: "공장/산업용지",
+    title: "성수동 메인 상권 1층 메디컬/카페 코너 상가",
+    property_type: "상가",
+    trade_status: "인테리어중",
     location: "서울특별시 성동구 성수동2가 289",
-    price: "매매 28억원",
-    area_size: "공급 297.5㎡ / 전용 181.8㎡",
+    floor_info: "1층 / 4층",
+    rooms: 0,
+    bathrooms: 0,
+    price: "매매 25억원",
+    area_size: "공급 198.5㎡ / 전용 132.2㎡",
     zoning_info: "준공업지역",
-    description: `성수 IT 밸리 중심에 위치한 최고층 지식산업센터 매물입니다.\n
-- IT, 스튜디오, 디자인 기업 사옥용으로 최적\n
-- 화물 엘리베이터 직접 연결 및 넉넉한 층고 확보\n
-- 전용 야외 루프탑 테라스 포함`,
+    purchase_price: 2000000000,
+    expected_cost: 150000000,
+    expected_selling_price: 2500000000,
+    expected_profit: 350000000,
+    participant_members: "부익부 부동산 펀드 1호 회원단",
+    description: `성수동 연무장길 코너에 위치한 고수익 상가 매물입니다.`,
     images: [
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80"
-    ],
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "3",
-    title: "한남동 UN빌리지 초입 최고급 럭셔리 하이엔드 아파트",
-    property_type: "아파트",
-    location: "서울특별시 용산구 한남동 11-1",
-    price: "매매 75억원",
-    area_size: "공급 264.4㎡ / 전용 220.1㎡",
-    zoning_info: "제1종전용주거지역",
-    description: `파노라마 한강뷰가 일품인 최상급 주거 공간입니다.\n
-- 철저한 보안 및 24시간 단지 관리 시스템 제공\n
-- 최상급 천연 대리석 인테리어 및 최고급 가전 풀옵션 빌트인\n
-- 주차 가구당 3대 지원`,
-    images: [
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80"
     ],
     created_at: new Date().toISOString()
   }
@@ -146,7 +112,7 @@ let state = {
   searchQuery: "",
   selectedProperty: null,
   currentImageIndex: 0,
-  currentUser: null // 현재 로그인된 사용자 정보
+  currentUser: null
 };
 
 let isEditMode = false;
@@ -171,15 +137,25 @@ const btnNextImage = document.getElementById("btnNextImage");
 const galleryCounter = document.getElementById("galleryCounter");
 
 const modalTypeBadge = document.getElementById("modalTypeBadge");
+const modalStatusBadge = document.getElementById("modalStatusBadge");
 const modalPrice = document.getElementById("modalPrice");
 const modalTitle = document.getElementById("modalTitle");
 const modalLocation = document.getElementById("modalLocation");
 const modalAreaSize = document.getElementById("modalAreaSize");
+const modalFloorInfo = document.getElementById("modalFloorInfo");
+const modalVillaSpecBox = document.getElementById("modalVillaSpecBox");
+const modalVillaRooms = document.getElementById("modalVillaRooms");
 const modalZoningInfo = document.getElementById("modalZoningInfo");
 const modalCreatedAt = document.getElementById("modalCreatedAt");
 const modalDescription = document.getElementById("modalDescription");
 
-// 신규 회원가입 & 로그인 & 회원관리 모달 참조
+const modalPurchasePrice = document.getElementById("modalPurchasePrice");
+const modalExpectedCost = document.getElementById("modalExpectedCost");
+const modalExpectedSellingPrice = document.getElementById("modalExpectedSellingPrice");
+const modalExpectedProfit = document.getElementById("modalExpectedProfit");
+const modalParticipants = document.getElementById("modalParticipants");
+
+// 모달 팝업 참조
 const signupModal = document.getElementById("signupModal");
 const btnOpenSignupModal = document.getElementById("btnOpenSignupModal");
 const btnCloseSignupModal = document.getElementById("btnCloseSignupModal");
@@ -203,7 +179,6 @@ const propertyForm = document.getElementById("propertyForm");
 // 4. 데이터 로딩 & 인증 상태 초기화
 // -----------------------------------------------------------------------------
 async function initApp() {
-  // 1. 저장된 세션 유저 로드
   const savedUser = sessionStorage.getItem("buikbu_user");
   if (savedUser) {
     try {
@@ -213,10 +188,10 @@ async function initApp() {
     }
   }
 
-  // 2. 매물 및 회원 데이터 로드
   await fetchUsers();
   await fetchProperties();
   updateNavUI();
+  setupCalculationEvents();
 }
 
 async function fetchUsers() {
@@ -226,7 +201,6 @@ async function fetchUsers() {
       if (error) throw error;
       state.users = data && data.length > 0 ? data : MOCK_USERS;
     } catch (err) {
-      console.warn("Supabase 프로필 조회 경고, 데모 유저 데이터를 사용합니다:", err);
       state.users = MOCK_USERS;
     }
   } else {
@@ -241,7 +215,6 @@ async function fetchProperties() {
       if (error) throw error;
       state.properties = data && data.length > 0 ? data : MOCK_PROPERTIES;
     } catch (err) {
-      console.warn("Supabase 매물 조회 경고, 데모 매물 데이터를 사용합니다:", err);
       state.properties = MOCK_PROPERTIES;
     }
   } else {
@@ -250,16 +223,12 @@ async function fetchProperties() {
   render();
 }
 
-/**
- * 로그인 상태에 맞춰 헤더 네비게이션 액션 버튼 렌더링
- */
 function updateNavUI() {
   if (!navActions) return;
 
   const user = state.currentUser;
 
   if (user) {
-    // 최고 관리자 (Role === 'admin' 또는 Level 10)
     const isAdmin = user.role === 'admin' || user.level === 10;
 
     navActions.innerHTML = `
@@ -268,59 +237,48 @@ function updateNavUI() {
           👤 ${user.name} (${user.level}단계)
         </span>
         ${isAdmin ? `
-          <button id="btnOpenUserAdmin" class="btn-admin" style="background-color:#10b981;">
+          <button type="button" id="btnOpenUserAdmin" class="btn-admin" style="background-color:#10b981;">
             <i data-lucide="shield-check" style="width:16px; height:16px;"></i>
             <span>회원 승인/등급</span>
           </button>
         ` : ''}
-        <button id="btnOpenAdminModal" class="btn-admin-add">
+        <button type="button" id="btnOpenAdminModal" class="btn-admin-add">
           <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
           <span>매물 등록</span>
         </button>
-        <button id="btnLogout" class="btn-admin" style="background-color:#64748b;">
+        <button type="button" id="btnLogout" class="btn-admin" style="background-color:#64748b;">
           <i data-lucide="log-out" style="width:16px; height:16px;"></i>
           <span>로그아웃</span>
         </button>
       </div>
     `;
 
-    // 이벤트 다시 바인딩
-    const btnLogout = document.getElementById("btnLogout");
-    if (btnLogout) {
-      btnLogout.addEventListener("click", () => {
-        sessionStorage.removeItem("buikbu_user");
-        state.currentUser = null;
-        alert("로그아웃 되었습니다.");
-        updateNavUI();
-      });
-    }
+    document.getElementById("btnLogout")?.addEventListener("click", () => {
+      sessionStorage.removeItem("buikbu_user");
+      state.currentUser = null;
+      alert("로그아웃 되었습니다.");
+      updateNavUI();
+    });
 
-    const btnOpenUserAdmin = document.getElementById("btnOpenUserAdmin");
-    if (btnOpenUserAdmin) {
-      btnOpenUserAdmin.addEventListener("click", () => {
-        renderUserAdminTable();
-        userAdminModal.classList.add("active");
-        document.body.style.overflow = "hidden";
-      });
-    }
+    document.getElementById("btnOpenUserAdmin")?.addEventListener("click", () => {
+      renderUserAdminTable();
+      userAdminModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    });
 
-    const btnReg = document.getElementById("btnOpenAdminModal");
-    if (btnReg) {
-      btnReg.addEventListener("click", handleRegisterClick);
-    }
+    document.getElementById("btnOpenAdminModal")?.addEventListener("click", handleRegisterClick);
 
   } else {
-    // 미로그인 상태
     navActions.innerHTML = `
-      <button id="btnOpenLoginModal" class="btn-admin" style="background-color:#475569;">
+      <button type="button" id="btnOpenLoginModal" class="btn-admin" style="background-color:#475569;">
         <i data-lucide="log-in" style="width:16px; height:16px;"></i>
         <span>로그인</span>
       </button>
-      <button id="btnOpenSignupModal" class="btn-admin" style="background-color:#0f172a;">
+      <button type="button" id="btnOpenSignupModal" class="btn-admin" style="background-color:#0f172a;">
         <i data-lucide="user-plus" style="width:16px; height:16px;"></i>
         <span>회원가입</span>
       </button>
-      <button id="btnOpenAdminModal" class="btn-admin-add">
+      <button type="button" id="btnOpenAdminModal" class="btn-admin-add">
         <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
         <span>매물 등록</span>
       </button>
@@ -334,9 +292,6 @@ function updateNavUI() {
   if (window.lucide) lucide.createIcons();
 }
 
-/**
- * 매물 등록 버튼 클릭 권한 체크
- */
 function handleRegisterClick() {
   const user = state.currentUser;
 
@@ -351,29 +306,79 @@ function handleRegisterClick() {
     return;
   }
 
-  // 매물 등록 권한(can_create) 또는 최고 관리자 여부 체크
   if (!user.can_create && user.level < 8 && user.role !== 'admin') {
     alert(`🔒 매물 등록 권한이 부여되지 않았습니다.\n(현재 등급: ${LEVEL_NAMES[user.level] || user.level + '단계'})\n관리자에게 매물 등록 권한을 신청해 주세요.`);
     return;
   }
 
-  // 승인된 권한자 등록 모달 열기
   isEditMode = false;
   editingPropertyId = null;
   const adminModalTitle = document.getElementById("adminModalTitle");
-  if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록";
+  if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록 (관리자)";
   if (propertyForm) propertyForm.reset();
   
+  toggleVillaSpec();
+  calculateProfit();
   adminModal.classList.add("active");
   document.body.style.overflow = "hidden";
 }
 
 // -----------------------------------------------------------------------------
+// 4.5. 자동 예상 수익 실시간 계산 및 빌라 전용 필드 토글
+// -----------------------------------------------------------------------------
+function setupCalculationEvents() {
+  const inputType = document.getElementById("inputType");
+  const inputPurchasePrice = document.getElementById("inputPurchasePrice");
+  const inputExpectedCost = document.getElementById("inputExpectedCost");
+  const inputExpectedSellingPrice = document.getElementById("inputExpectedSellingPrice");
+
+  if (inputType) {
+    inputType.addEventListener("change", toggleVillaSpec);
+  }
+
+  [inputPurchasePrice, inputExpectedCost, inputExpectedSellingPrice].forEach(input => {
+    if (input) {
+      input.addEventListener("input", calculateProfit);
+    }
+  });
+}
+
+function toggleVillaSpec() {
+  const inputType = document.getElementById("inputType");
+  const villaSpecRow = document.getElementById("villaSpecRow");
+  if (inputType && villaSpecRow) {
+    if (inputType.value === "빌라") {
+      villaSpecRow.style.display = "flex";
+    } else {
+      villaSpecRow.style.display = "none";
+    }
+  }
+}
+
+function calculateProfit() {
+  const purchasePrice = parseFloat(document.getElementById("inputPurchasePrice")?.value) || 0;
+  const expectedCost = parseFloat(document.getElementById("inputExpectedCost")?.value) || 0;
+  const expectedSellingPrice = parseFloat(document.getElementById("inputExpectedSellingPrice")?.value) || 0;
+
+  const profit = expectedSellingPrice - purchasePrice - expectedCost;
+  const calcProfitText = document.getElementById("calcProfitText");
+
+  if (calcProfitText) {
+    const formattedProfit = Number(profit).toLocaleString('ko-KR');
+    calcProfitText.textContent = `${formattedProfit} 원`;
+    if (profit > 0) {
+      calcProfitText.style.color = "#059669";
+    } else if (profit < 0) {
+      calcProfitText.style.color = "#ef4444";
+    } else {
+      calcProfitText.style.color = "#64748b";
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
 // 5. 매물 그리드 렌더링 및 모달
 // -----------------------------------------------------------------------------
-/**
- * 진행 상태별 CSS 뱃지 클래스명을 반환하는 유틸리티
- */
 function getStatusBadgeClass(status) {
   switch (status) {
     case "매입준비중": return "badge-status-ready";
@@ -442,10 +447,10 @@ function render() {
                 <i data-lucide="maximize-2" style="width:14px; height:14px; color:#94a3b8;"></i>
                 <span>${property.area_size}</span>
               </div>
-              ${property.zoning_info ? `
+              ${property.floor_info ? `
                 <div class="card-footer-item">
-                  <i data-lucide="tag" style="width:14px; height:14px; color:#94a3b8;"></i>
-                  <span>${property.zoning_info}</span>
+                  <i data-lucide="layers" style="width:14px; height:14px; color:#94a3b8;"></i>
+                  <span>${property.floor_info}</span>
                 </div>
               ` : ''}
             </div>
@@ -466,9 +471,6 @@ function render() {
   });
 }
 
-/**
- * 유튜브 URL에서 11자리 비디오 ID를 추출하는 유틸리티
- */
 function extractYoutubeId(url) {
   if (!url) return null;
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -485,20 +487,35 @@ function openDetailModal(property) {
   modalTitle.textContent = property.title;
   modalLocation.textContent = property.location;
   modalAreaSize.textContent = property.area_size;
+  modalFloorInfo.textContent = property.floor_info || "정보 없음";
   modalZoningInfo.textContent = property.zoning_info || "정보 없음";
   modalCreatedAt.textContent = new Date(property.created_at).toLocaleDateString("ko-KR");
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
 
-  // 매물 진행 상태 뱃지 렌더링
-  const modalStatusBadge = document.getElementById("modalStatusBadge");
-  if (modalStatusBadge) {
-    const status = property.trade_status || "매매진행중";
-    modalStatusBadge.textContent = status;
-    modalStatusBadge.className = getStatusBadgeClass(status);
-    modalStatusBadge.style.cssText = "position:static; padding:4px 10px; border-radius:9999px; font-size:0.75rem; font-weight:700; color:#fff;";
+  // 빌라 전용 사양 표시
+  if (property.property_type === "빌라") {
+    modalVillaSpecBox.style.display = "block";
+    modalVillaRooms.textContent = `방 ${property.rooms || 0}개 / 화장실 ${property.bathrooms || 0}개`;
+  } else {
+    modalVillaSpecBox.style.display = "none";
   }
 
-  // 유튜브 비디오 임베드 처리
+  // 투자 & 수익 산출표 표시
+  modalPurchasePrice.textContent = Number(property.purchase_price || 0).toLocaleString('ko-KR') + " 원";
+  modalExpectedCost.textContent = Number(property.expected_cost || 0).toLocaleString('ko-KR') + " 원";
+  modalExpectedSellingPrice.textContent = Number(property.expected_selling_price || 0).toLocaleString('ko-KR') + " 원";
+  modalExpectedProfit.textContent = Number(property.expected_profit || 0).toLocaleString('ko-KR') + " 원";
+
+  // 참여 회원 명단
+  modalParticipants.textContent = property.participant_members || "등록된 참여 회원 명단이 없습니다.";
+
+  // 진행 상태 뱃지
+  const status = property.trade_status || "매매진행중";
+  modalStatusBadge.textContent = status;
+  modalStatusBadge.className = getStatusBadgeClass(status);
+  modalStatusBadge.style.cssText = "position:static; padding:4px 10px; border-radius:9999px; font-size:0.75rem; font-weight:700; color:#fff;";
+
+  // 유튜브 비디오 임베드
   const modalYoutubeWrap = document.getElementById("modalYoutubeWrap");
   const youtubeId = extractYoutubeId(property.youtube_url);
   if (modalYoutubeWrap) {
@@ -538,14 +555,26 @@ function openDetailModal(property) {
       document.getElementById("adminModalTitle").textContent = "매물 정보 수정";
 
       document.getElementById("inputTitle").value = property.title || "";
-      document.getElementById("inputType").value = property.property_type || "상가";
+      document.getElementById("inputType").value = property.property_type || "빌라";
       document.getElementById("inputTradeStatus").value = property.trade_status || "매매진행중";
+      document.getElementById("inputRooms").value = property.rooms || 3;
+      document.getElementById("inputBathrooms").value = property.bathrooms || 2;
       document.getElementById("inputLocation").value = property.location || "";
-      document.getElementById("inputPrice").value = property.price || "";
+      document.getElementById("inputFloorInfo").value = property.floor_info || "";
       document.getElementById("inputArea").value = property.area_size || "";
+      document.getElementById("inputPrice").value = property.price || "";
       document.getElementById("inputZoning").value = property.zoning_info || "";
+
+      document.getElementById("inputPurchasePrice").value = property.purchase_price || "";
+      document.getElementById("inputExpectedCost").value = property.expected_cost || "";
+      document.getElementById("inputExpectedSellingPrice").value = property.expected_selling_price || "";
+      document.getElementById("inputParticipants").value = property.participant_members || "";
+
       document.getElementById("inputYoutubeUrl").value = property.youtube_url || "";
       document.getElementById("inputDescription").value = property.description || "";
+
+      toggleVillaSpec();
+      calculateProfit();
 
       closeDetailModal();
       adminModal.classList.add("active");
@@ -557,7 +586,7 @@ function openDetailModal(property) {
   if (btnContactSms) {
     btnContactSms.onclick = (e) => {
       e.preventDefault();
-      const message = `안녕하세요! [${property.title}] 매물에 대해 문의드립니다.\n\n- 매물명: ${property.title}\n- 매매/임대가: ${property.price}\n- 위치: ${property.location}`;
+      const message = `안녕하세요! [${property.title}] 매물에 대해 문의드립니다.\n\n- 매물명: ${property.title}\n- 가격: ${property.price}\n- 위치: ${property.location}`;
       document.getElementById("smsContentInput").value = message;
       
       const btnSendSmsApp = document.getElementById("btnSendSmsApp");
@@ -647,18 +676,16 @@ function renderUserAdminTable() {
         </td>
         <td style="padding: 10px; text-align: right;">
           ${isPending ? `
-            <button class="btn-approve-user" data-id="${u.id}" style="background:#10b981; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; margin-right:4px;">승인</button>
-            <button class="btn-reject-user" data-id="${u.id}" style="background:#ef4444; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">거절</button>
+            <button type="button" class="btn-approve-user" data-id="${u.id}" style="background:#10b981; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; margin-right:4px;">승인</button>
+            <button type="button" class="btn-reject-user" data-id="${u.id}" style="background:#ef4444; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">거절</button>
           ` : `
-            <button class="btn-toggle-status" data-id="${u.id}" style="background:#64748b; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem;">${isApproved ? '승인취소' : '재승인'}</button>
+            <button type="button" class="btn-toggle-status" data-id="${u.id}" style="background:#64748b; color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem;">${isApproved ? '승인취소' : '재승인'}</button>
           `}
         </td>
       </tr>
     `;
   }).join('');
 
-  // 이벤트 바인딩
-  // 1. 회원 승인
   document.querySelectorAll(".btn-approve-user").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-id");
@@ -666,7 +693,6 @@ function renderUserAdminTable() {
     });
   });
 
-  // 2. 가입 거절
   document.querySelectorAll(".btn-reject-user").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-id");
@@ -674,7 +700,6 @@ function renderUserAdminTable() {
     });
   });
 
-  // 3. 승인 토글
   document.querySelectorAll(".btn-toggle-status").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-id");
@@ -684,7 +709,6 @@ function renderUserAdminTable() {
     });
   });
 
-  // 4. 10단계 등급 변경
   document.querySelectorAll(".user-level-select").forEach(sel => {
     sel.addEventListener("change", async (e) => {
       const id = sel.getAttribute("data-id");
@@ -693,7 +717,6 @@ function renderUserAdminTable() {
     });
   });
 
-  // 5. 권한 체크박스 변경
   document.querySelectorAll(".user-perm-check").forEach(chk => {
     chk.addEventListener("change", async (e) => {
       const id = chk.getAttribute("data-id");
@@ -704,17 +727,12 @@ function renderUserAdminTable() {
   });
 }
 
-/**
- * DB 및 로컬 상태 회원 프로필 업데이트 유틸리티
- */
 async function updateUserProfile(id, updateData) {
   if (supabaseClient) {
     try {
       const { error } = await supabaseClient.from("profiles").update(updateData).eq("id", id);
       if (error) console.error("Supabase 프로필 수정 오류:", error.message);
-    } catch (e) {
-      console.warn("프로필 업데이트 예외:", e);
-    }
+    } catch (e) {}
   }
 
   const idx = state.users.findIndex(u => u.id === id);
@@ -771,10 +789,6 @@ function setupImageUploadHandlers() {
   }
 }
 
-/**
- * 고용량 로컬 사진을 웹/모바일 최적화 규격(최대 너비 1200px, JPEG 0.75 품질)으로 
- * 자동 다이어트 리사이징하는 유틸리티 (수십 MB 사진도 100KB대로 경량화)
- */
 function compressImage(file, maxWidth = 1200, quality = 0.75) {
   return new Promise((resolve) => {
     if (file.size < 300 * 1024) {
@@ -808,7 +822,6 @@ function compressImage(file, maxWidth = 1200, quality = 0.75) {
                 type: "image/jpeg",
                 lastModified: Date.now()
               });
-              console.log(`[이미지 압축 성공] ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(compressedFile.size / 1024).toFixed(1)}KB)`);
               resolve(compressedFile);
             } else {
               resolve(file);
@@ -829,7 +842,6 @@ function compressImage(file, maxWidth = 1200, quality = 0.75) {
 async function uploadFilesToSupabase(files) {
   const uploadedUrls = [];
   for (let i = 0; i < files.length; i++) {
-    // 1. 고용량 이미지를 업로드 전 자동으로 압축 다이어트 처리!
     const originalFile = files[i];
     const file = await compressImage(originalFile);
     
@@ -840,7 +852,6 @@ async function uploadFilesToSupabase(files) {
       try {
         const { data, error } = await supabaseClient.storage.from('property-images').upload(filePath, file, { cacheControl: '3600', upsert: false });
         if (error) {
-          console.warn(`[Storage 업로드 실패 경고] ${file.name}: ${error.message}`);
           const base64Url = await fileToBase64(file);
           uploadedUrls.push(base64Url);
         } else {
@@ -848,7 +859,6 @@ async function uploadFilesToSupabase(files) {
           uploadedUrls.push(publicUrlData.publicUrl);
         }
       } catch (err) {
-        console.error("Storage 예외 발생:", err);
         const base64Url = await fileToBase64(file);
         uploadedUrls.push(base64Url);
       }
@@ -874,7 +884,6 @@ function fileToBase64(file) {
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
 
-  // 검색창 입력
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       state.searchQuery = e.target.value;
@@ -882,7 +891,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 카테고리 태그
   if (categoryContainer) {
     categoryContainer.addEventListener("click", (e) => {
       if (e.target.classList.contains("btn-tag")) {
@@ -894,13 +902,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 모든 모달 닫기 이벤트 연결
   if (btnCloseDetailModal) btnCloseDetailModal.addEventListener("click", closeDetailModal);
   if (btnCloseSignupModal) btnCloseSignupModal.addEventListener("click", () => { signupModal.classList.remove("active"); document.body.style.overflow = ""; });
   if (btnCloseLoginModal) btnCloseLoginModal.addEventListener("click", () => { loginModal.classList.remove("active"); document.body.style.overflow = ""; });
   if (btnCloseUserAdminModal) btnCloseUserAdminModal.addEventListener("click", () => { userAdminModal.classList.remove("active"); document.body.style.overflow = ""; });
   
-  // 매물 등록/수정 모달 닫기 및 취소 버튼연결 (저장 없이 종료 보장)
   const btnCloseAdminModal = document.getElementById("btnCloseAdminModal");
   const btnCancelAdminModal = document.getElementById("btnCancelAdminModal");
 
@@ -918,7 +924,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnCloseAdminModal) btnCloseAdminModal.addEventListener("click", closeAdminModalSafe);
   if (btnCancelAdminModal) btnCancelAdminModal.addEventListener("click", closeAdminModalSafe);
 
-  // 문자 모달 닫기 버튼연결
   const btnCloseSmsModal = document.getElementById("btnCloseSmsModal");
   const smsModal = document.getElementById("smsModal");
   if (btnCloseSmsModal && smsModal) {
@@ -928,7 +933,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 모달 배경(Backdrop) 클릭 시 모달 닫기
   [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal].forEach(modal => {
     if (modal) {
       modal.addEventListener("click", (e) => {
@@ -940,7 +944,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ESC 키 눌렀을 때 활성화된 모든 모달 닫기
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal].forEach(modal => {
@@ -950,9 +953,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ---------------------------------------------------------------------------
-  // 신규 회원가입 폼 제출 이벤트
-  // ---------------------------------------------------------------------------
   if (signupForm) {
     signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -964,8 +964,8 @@ document.addEventListener("DOMContentLoaded", () => {
         name: document.getElementById("signupName").value.trim(),
         phone: document.getElementById("signupPhone").value.trim(),
         role: "member",
-        level: 1, // 최초가입 시 Level 1 (준회원/승인대기)
-        status: "pending", // 관리자 승인 대기중
+        level: 1,
+        status: "pending",
         can_create: false,
         can_edit: false,
         can_delete: false,
@@ -979,9 +979,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(`[회원가입 실패] ${error.message}`);
             return;
           }
-        } catch (err) {
-          console.warn("Supabase 프로필 가입 실패, 메모리에 등록합니다:", err);
-        }
+        } catch (err) {}
       }
 
       state.users.unshift(newMember);
@@ -991,9 +989,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // 로그인 폼 제출 이벤트
-  // ---------------------------------------------------------------------------
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1027,7 +1022,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // 승인 상태 체크
       if (targetUser.status === "pending") {
         alert("⏳ 현재 관리자의 가입 승인 대기 중입니다.\n관리자가 가입을 승인한 후 서비스 이용이 가능합니다.");
         return;
@@ -1038,7 +1032,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // 로그인 성공
       state.currentUser = targetUser;
       sessionStorage.setItem("buikbu_user", JSON.stringify(targetUser));
       alert(`🎉 반가워요, ${targetUser.name}님!\n(회원 등급: ${LEVEL_NAMES[targetUser.level] || targetUser.level + '단계'})`);
@@ -1069,19 +1062,36 @@ document.addEventListener("DOMContentLoaded", () => {
           finalImageUrls = await uploadFilesToSupabase(selectedFiles);
         }
 
+        const purchasePrice = parseFloat(document.getElementById("inputPurchasePrice").value) || 0;
+        const expectedCost = parseFloat(document.getElementById("inputExpectedCost").value) || 0;
+        const expectedSellingPrice = parseFloat(document.getElementById("inputExpectedSellingPrice").value) || 0;
+        const expectedProfit = expectedSellingPrice - purchasePrice - expectedCost;
+
         if (isEditMode && editingPropertyId) {
+          const currentTarget = state.properties.find(p => p.id === editingPropertyId);
+          const existingImages = (currentTarget && currentTarget.images) ? currentTarget.images : [];
+          const updatedImages = (finalImageUrls.length > 0) ? [...existingImages, ...finalImageUrls] : existingImages;
+
           const updatePayload = {
             title: document.getElementById("inputTitle").value,
             property_type: document.getElementById("inputType").value,
             trade_status: document.getElementById("inputTradeStatus").value,
+            rooms: parseInt(document.getElementById("inputRooms").value, 10) || 0,
+            bathrooms: parseInt(document.getElementById("inputBathrooms").value, 10) || 0,
             location: document.getElementById("inputLocation").value,
+            floor_info: document.getElementById("inputFloorInfo").value,
             price: document.getElementById("inputPrice").value,
             area_size: document.getElementById("inputArea").value,
             zoning_info: document.getElementById("inputZoning").value,
+            purchase_price: purchasePrice,
+            expected_cost: expectedCost,
+            expected_selling_price: expectedSellingPrice,
+            expected_profit: expectedProfit,
+            participant_members: document.getElementById("inputParticipants").value,
             youtube_url: document.getElementById("inputYoutubeUrl").value.trim(),
             description: document.getElementById("inputDescription").value,
+            images: updatedImages
           };
-          if (finalImageUrls.length > 0) updatePayload.images = finalImageUrls;
 
           if (supabaseClient) {
             const { error } = await supabaseClient.from("properties").update(updatePayload).eq("id", editingPropertyId);
@@ -1109,10 +1119,18 @@ document.addEventListener("DOMContentLoaded", () => {
             title: document.getElementById("inputTitle").value,
             property_type: document.getElementById("inputType").value,
             trade_status: document.getElementById("inputTradeStatus").value,
+            rooms: parseInt(document.getElementById("inputRooms").value, 10) || 0,
+            bathrooms: parseInt(document.getElementById("inputBathrooms").value, 10) || 0,
             location: document.getElementById("inputLocation").value,
+            floor_info: document.getElementById("inputFloorInfo").value,
             price: document.getElementById("inputPrice").value,
             area_size: document.getElementById("inputArea").value,
             zoning_info: document.getElementById("inputZoning").value,
+            purchase_price: purchasePrice,
+            expected_cost: expectedCost,
+            expected_selling_price: expectedSellingPrice,
+            expected_profit: expectedProfit,
+            participant_members: document.getElementById("inputParticipants").value,
             youtube_url: document.getElementById("inputYoutubeUrl").value.trim(),
             description: document.getElementById("inputDescription").value,
             images: finalImageUrls,
