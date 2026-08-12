@@ -292,6 +292,18 @@ function updateNavUI() {
   if (window.lucide) lucide.createIcons();
 }
 
+function resetSubmitButton() {
+  const submitBtn = propertyForm?.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = `
+      <i data-lucide="check-circle" style="width:18px; height:18px;"></i>
+      <span>매물 정보 저장하기</span>
+    `;
+    if (window.lucide) lucide.createIcons();
+  }
+}
+
 function handleRegisterClick() {
   const user = state.currentUser;
 
@@ -317,6 +329,7 @@ function handleRegisterClick() {
   if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록 (관리자)";
   if (propertyForm) propertyForm.reset();
   
+  resetSubmitButton();
   toggleVillaSpec();
   calculateProfit();
   adminModal.classList.add("active");
@@ -573,6 +586,7 @@ function openDetailModal(property) {
       document.getElementById("inputYoutubeUrl").value = property.youtube_url || "";
       document.getElementById("inputDescription").value = property.description || "";
 
+      resetSubmitButton();
       toggleVillaSpec();
       calculateProfit();
 
@@ -1160,8 +1174,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (err) {
         alert(`처리 중 오류: ${err.message}`);
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
+        resetSubmitButton();
       }
     });
   }
