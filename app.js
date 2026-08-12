@@ -268,6 +268,15 @@ function openDetailModal(property) {
   modalCreatedAt.textContent = new Date(property.created_at).toLocaleDateString("ko-KR");
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
 
+  // 010-8917-8383 번호로 매물 정보 자동 완성 SMS 문자 링크 생성
+  const btnContactSms = document.getElementById("btnContactSms");
+  if (btnContactSms) {
+    const message = `안녕하세요! 아래 매물에 대해 문의드립니다.\n- 매물명: ${property.title}\n- 가격: ${property.price}\n- 위치: ${property.location}`;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const separator = isIOS ? '&' : '?';
+    btnContactSms.href = `sms:010-8917-8383${separator}body=${encodeURIComponent(message)}`;
+  }
+
   // 갤러리 이미지 업데이트
   updateGallery();
 
