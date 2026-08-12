@@ -103,6 +103,10 @@ let state = {
   currentImageIndex: 0
 };
 
+// 매물 수정 모드 상태 변수
+let isEditMode = false;
+let editingPropertyId = null;
+
 // -----------------------------------------------------------------------------
 // 3. DOM 요소 참조
 // -----------------------------------------------------------------------------
@@ -273,6 +277,40 @@ function openDetailModal(property) {
   const smsModal = document.getElementById("smsModal");
   const smsContentInput = document.getElementById("smsContentInput");
   const btnSendSmsApp = document.getElementById("btnSendSmsApp");
+  const btnEditProperty = document.getElementById("btnEditProperty");
+
+  // 상세 모달에서 [수정] 버튼 클릭 시
+  if (btnEditProperty) {
+    btnEditProperty.onclick = () => {
+      // 1. 일반 회원 권한 차단
+      if (!isUserAdmin()) {
+        alert("🔒 관리자만 수정할 수 있습니다.");
+        return; // 모달 진입 완전 차단
+      }
+
+      // 2. 관리자 인증된 경우 수정 모드 전환
+      isEditMode = true;
+      editingPropertyId = property.id;
+      
+      const adminModalTitle = document.getElementById("adminModalTitle");
+      if (adminModalTitle) adminModalTitle.textContent = "매물 정보 수정 (관리자)";
+
+      document.getElementById("inputTitle").value = property.title || "";
+      document.getElementById("inputType").value = property.property_type || "상가";
+      document.getElementById("inputLocation").value = property.location || "";
+      document.getElementById("inputPrice").value = property.price || "";
+      document.getElementById("inputArea").value = property.area_size || "";
+      document.getElementById("inputZoning").value = property.zoning_info || "";
+      document.getElementById("inputDescription").value = property.description || "";
+
+      // 상세보기 모달 닫고 수정 모달 열기
+      closeDetailModal();
+      if (adminModal) {
+        adminModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+    };
+  }
 
   if (btnContactSms && smsModal) {
     btnContactSms.onclick = (e) => {
@@ -442,20 +480,44 @@ document.addEventListener("DOMContentLoaded", () => {
     return sessionStorage.getItem("buikbu_admin_auth") === "true";
   }
 
-  // 매물 등록 버튼 클릭 시 인증 여부 체크
-  if (btnOpenAdminModal) {
-    btnOpenAdminModal.addEventListener("click", () => {
-      if (isUserAdmin()) {
-        // 이미 인증된 회원인 경우 바로 매물 등록 모달 오픈
-        adminModal.classList.add("active");
+  // 브랜드 로고 클릭 시 관리자 로그인/로그아웃 팝업 제공
+  const brandLogo = document.querySelector(".brand-logo");
+  if (brandLogo) {
+    brandLogo.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!isUserAdmin() && authModal) {
+        authModal.classList.add("active");
         document.body.style.overflow = "hidden";
-      } else {
-        // 미인증 상태인 경우 관리자 비밀번호 입력 모달 팝업
-        if (authModal) {
-          authModal.classList.add("active");
-          document.body.style.overflow = "hidden";
+      } else if (isUserAdmin()) {
+        if (confirm("현재 관리자로 인증되어 있습니다. 로그아웃 하시겠습니까?")) {
+          sessionStorage.removeItem("buikbu_admin_auth");
+          alert("로그아웃 되었습니다.");
+          location.reload();
         }
       }
+    });
+  }
+
+  // 매물 등록 버튼 클릭 시 권한 체크 및 차단
+  if (btnOpenAdminModal) {
+    btnOpenAdminModal.addEventListener("click", () => {
+      // 1. 일반 회원이 누른 경우 차단 안내 팝업 후 완전 중단
+      if (!isUserAdmin()) {
+        alert("🔒 관리자만 등록할 수 있습니다.");
+        return;
+      }
+
+      // 2. 관리자인 경우에만 매물 등록 폼 모달 오픈
+      isEditMode = false;
+      editingPropertyId = null;
+      const adminModalTitle = document.getElementById("adminModalTitle");
+      if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록 (관리자)";
+      if (propertyForm) propertyForm.reset();
+      selectedFiles = [];
+      renderImagePreviews();
+
+      adminModal.classList.add("active");
+      document.body.style.overflow = "hidden";
     });
   }
 
@@ -611,7 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 매물 등록 폼 제출 이벤트
+  // 매물 등록 및 수정 폼 제출 이벤트
   if (propertyForm) {
     propertyForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -620,74 +682,110 @@ document.addEventListener("DOMContentLoaded", () => {
       const submitBtn = propertyForm.querySelector('button[type="submit"]');
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span>이미지 업로드 및 저장 중...</span>`;
+      submitBtn.innerHTML = `<span>처리 중입니다...</span>`;
 
       try {
-        // 1. 선택한 사진이 있으면 Supabase Storage 또는 Base64로 처리
+        // 1. 첨부된 파일이 있으면 업로드 처리
         let finalImageUrls = [];
         if (selectedFiles.length > 0) {
           finalImageUrls = await uploadFilesToSupabase(selectedFiles);
-        } else {
-          // 사진을 선택하지 않은 경우 기본 샘플 이미지 적용
-          finalImageUrls = ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
         }
 
-        // 2. PostgreSQL UUID 규칙에 부합하는 고유 식별자 생성
-        const generatedId = (typeof crypto !== "undefined" && crypto.randomUUID) 
-          ? crypto.randomUUID() 
-          : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
-              (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
-            );
-
-        const newProperty = {
-          id: generatedId,
-          title: document.getElementById("inputTitle").value,
-          property_type: document.getElementById("inputType").value,
-          location: document.getElementById("inputLocation").value,
-          price: document.getElementById("inputPrice").value,
-          area_size: document.getElementById("inputArea").value,
-          zoning_info: document.getElementById("inputZoning").value,
-          description: document.getElementById("inputDescription").value,
-          images: finalImageUrls, // 업로드된 이미지 URL 목록 배열 저장!
-          created_at: new Date().toISOString()
-        };
-
-        if (supabaseClient) {
-          console.log("Supabase DB 전송 데이터:", newProperty);
-          const { data, error } = await supabaseClient
-            .from("properties")
-            .insert([newProperty])
-            .select();
-
-          if (error) {
-            console.error("Supabase DB 저장 에러 상세:", error);
-            alert(`[Supabase DB 저장 실패]\n오류 원인: ${error.message}`);
-            return;
+        // 2. 수정(UPDATE) 모드 처리
+        if (isEditMode && editingPropertyId) {
+          const updatePayload = {
+            title: document.getElementById("inputTitle").value,
+            property_type: document.getElementById("inputType").value,
+            location: document.getElementById("inputLocation").value,
+            price: document.getElementById("inputPrice").value,
+            area_size: document.getElementById("inputArea").value,
+            zoning_info: document.getElementById("inputZoning").value,
+            description: document.getElementById("inputDescription").value,
+          };
+          // 새 사진이 첨부된 경우만 이미지 배열 업데이트
+          if (finalImageUrls.length > 0) {
+            updatePayload.images = finalImageUrls;
           }
 
-          console.log("Supabase DB 저장 결과:", data);
-          if (!data || data.length === 0) {
-            alert("⚠️ 데이터베이스에 저장은 되었으나 반환된 데이터가 없습니다. Supabase Table Editor를 확인해 보세요.");
+          if (supabaseClient) {
+            const { error } = await supabaseClient
+              .from("properties")
+              .update(updatePayload)
+              .eq("id", editingPropertyId);
+
+            if (error) {
+              console.error("Supabase DB 수정 에러:", error);
+              alert(`[Supabase DB 수정 실패]\n오류 원인: ${error.message}`);
+              return;
+            }
+
+            alert("🎉 매물 정보가 성공적으로 수정 반영되었습니다!");
+            await fetchProperties();
           } else {
-            alert(`🎉 Supabase 데이터베이스 (Table Editor)에 데이터가 성공적으로 등록되었습니다!\n(등록된 매물 ID: ${data[0].id})`);
+            const targetIdx = state.properties.findIndex(p => p.id === editingPropertyId);
+            if (targetIdx !== -1) {
+              state.properties[targetIdx] = { ...state.properties[targetIdx], ...updatePayload };
+              render();
+            }
+            alert("매물 정보가 수정되었습니다 (데모 모드).");
+          }
+        } 
+        // 3. 신규 등록(INSERT) 모드 처리
+        else {
+          if (finalImageUrls.length === 0) {
+            finalImageUrls = ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
           }
 
-          await fetchProperties();
-        } else {
-          alert("⚠️ Supabase 클라이언트 연결이 되지 않아 로컬 모드로 등록되었습니다. 페이지를 새로고침(F5) 후 다시 시도해 주세요.");
-          state.properties.unshift(newProperty);
-          render();
+          const generatedId = (typeof crypto !== "undefined" && crypto.randomUUID) 
+            ? crypto.randomUUID() 
+            : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+                (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+              );
+
+          const newProperty = {
+            id: generatedId,
+            title: document.getElementById("inputTitle").value,
+            property_type: document.getElementById("inputType").value,
+            location: document.getElementById("inputLocation").value,
+            price: document.getElementById("inputPrice").value,
+            area_size: document.getElementById("inputArea").value,
+            zoning_info: document.getElementById("inputZoning").value,
+            description: document.getElementById("inputDescription").value,
+            images: finalImageUrls,
+            created_at: new Date().toISOString()
+          };
+
+          if (supabaseClient) {
+            const { data, error } = await supabaseClient
+              .from("properties")
+              .insert([newProperty])
+              .select();
+
+            if (error) {
+              console.error("Supabase DB 저장 에러 상세:", error);
+              alert(`[Supabase DB 저장 실패]\n오류 원인: ${error.message}`);
+              return;
+            }
+
+            alert(`🎉 Supabase 데이터베이스에 신규 매물이 등록되었습니다!`);
+            await fetchProperties();
+          } else {
+            state.properties.unshift(newProperty);
+            render();
+          }
         }
 
-        // 폼 및 미리보기 상태 초기화
+        // 폼 및 모달 상태 리셋
         propertyForm.reset();
         selectedFiles = [];
         renderImagePreviews();
+        isEditMode = false;
+        editingPropertyId = null;
         adminModal.classList.remove("active");
         document.body.style.overflow = "";
       } catch (err) {
-        console.error("등록 예외 발생:", err);
-        alert(`매물 등록 중 오류가 발생했습니다: ${err.message}`);
+        console.error("처리 중 예외 발생:", err);
+        alert(`처리 중 오류가 발생했습니다: ${err.message}`);
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;

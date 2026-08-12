@@ -120,9 +120,16 @@
                     <span id="modalTypeBadge" class="card-badge-type" style="position:static;">상가</span>
                     <span id="modalCreatedAt" style="font-size:0.75rem; color:#94a3b8;">등록일: -</span>
                 </div>
-                <button id="btnCloseDetailModal" class="btn-close-modal">
-                    <i data-lucide="x" style="width:20px; height:20px;"></i>
-                </button>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button id="btnEditProperty"
+                        style="display:flex; align-items:center; gap:4px; font-size:0.8rem; font-weight:600; background:#f1f5f9; color:#0f172a; padding:6px 12px; border-radius:8px; transition:all 0.2s;">
+                        <i data-lucide="edit-3" style="width:14px; height:14px;"></i>
+                        <span>수정</span>
+                    </button>
+                    <button id="btnCloseDetailModal" class="btn-close-modal">
+                        <i data-lucide="x" style="width:20px; height:20px;"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- 모달 스크롤 본문 -->
@@ -261,9 +268,11 @@
                 <form id="authForm">
                     <div class="form-group">
                         <label class="form-label" for="inputAuthPassword">관리자 비밀번호</label>
-                        <input type="password" id="inputAuthPassword" class="form-control" placeholder="비밀번호 입력 (기본: admin1234)" required />
+                        <input type="password" id="inputAuthPassword" class="form-control"
+                            placeholder="비밀번호 입력 (기본: admin1234)" required />
                     </div>
-                    <button type="submit" class="btn-admin" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                    <button type="submit" class="btn-admin"
+                        style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
                         <i data-lucide="key" style="width:16px; height:16px;"></i>
                         <span>인증 및 매물 등록하기</span>
                     </button>
@@ -272,11 +281,11 @@
         </div>
     </div>
 
-    <!-- 모달 4: 관리자 매물 등록 팝업 모달 (Admin Only) -->
+    <!-- 모달 4: 관리자 매물 등록/수정 팝업 모달 (Admin Only) -->
     <div id="adminModal" class="modal-overlay">
         <div class="modal-container" style="max-width: 600px;">
             <div class="modal-header">
-                <h3 style="font-size: 1.125rem; font-weight: 700;">신규 매물 등록 (관리자)</h3>
+                <h3 id="adminModalTitle" style="font-size: 1.125rem; font-weight: 700;">신규 매물 등록 (관리자)</h3>
                 <button id="btnCloseAdminModal" class="btn-close-modal">
                     <i data-lucide="x" style="width:20px; height:20px;"></i>
                 </button>
