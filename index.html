@@ -125,6 +125,7 @@
             <div class="modal-header">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span id="modalTypeBadge" class="card-badge-type" style="position:static;">상가</span>
+                    <span id="modalStatusBadge" class="badge-status-progress" style="position:static;">매매진행중</span>
                     <span id="modalCreatedAt" style="font-size:0.75rem; color:#94a3b8;">등록일: -</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
@@ -378,9 +379,20 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="inputPrice">가격 조건</label>
-                            <input type="text" id="inputPrice" class="form-control" placeholder="예: 매매 45억원 / 월 500만" required />
+                            <label class="form-label" for="inputTradeStatus">현재 진행 상태</label>
+                            <select id="inputTradeStatus" class="form-control" required>
+                                <option value="매입준비중">매입준비중</option>
+                                <option value="계약">계약</option>
+                                <option value="인테리어중">인테리어중</option>
+                                <option value="매매진행중" selected>매매진행중</option>
+                                <option value="매매완료">매매완료</option>
+                            </select>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="inputPrice">가격 조건</label>
+                        <input type="text" id="inputPrice" class="form-control" placeholder="예: 매매 45억원 / 월 500만" required />
                     </div>
 
                     <div class="form-group">

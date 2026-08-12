@@ -371,6 +371,20 @@ function handleRegisterClick() {
 // -----------------------------------------------------------------------------
 // 5. 매물 그리드 렌더링 및 모달
 // -----------------------------------------------------------------------------
+/**
+ * 진행 상태별 CSS 뱃지 클래스명을 반환하는 유틸리티
+ */
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case "매입준비중": return "badge-status-ready";
+    case "계약": return "badge-status-contract";
+    case "인테리어중": return "badge-status-interior";
+    case "매매완료": return "badge-status-completed";
+    case "매매진행중":
+    default: return "badge-status-progress";
+  }
+}
+
 function render() {
   const filtered = state.properties.filter(item => {
     const matchesCategory = state.selectedCategory === "전체" || item.property_type === state.selectedCategory;
@@ -404,11 +418,15 @@ function render() {
         ? property.images[0]
         : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
 
+      const tradeStatus = property.trade_status || "매매진행중";
+      const statusClass = getStatusBadgeClass(tradeStatus);
+
       return `
         <div class="property-card" data-id="${property.id}">
           <div class="card-image-wrap">
             <img src="${mainImg}" alt="${property.title}" class="card-image" />
             <div class="card-badge-type">${property.property_type}</div>
+            <div class="badge-status ${statusClass}">${tradeStatus}</div>
           </div>
           <div class="card-content">
             <div>
@@ -471,6 +489,15 @@ function openDetailModal(property) {
   modalCreatedAt.textContent = new Date(property.created_at).toLocaleDateString("ko-KR");
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
 
+  // 매물 진행 상태 뱃지 렌더링
+  const modalStatusBadge = document.getElementById("modalStatusBadge");
+  if (modalStatusBadge) {
+    const status = property.trade_status || "매매진행중";
+    modalStatusBadge.textContent = status;
+    modalStatusBadge.className = getStatusBadgeClass(status);
+    modalStatusBadge.style.cssText = "position:static; padding:4px 10px; border-radius:9999px; font-size:0.75rem; font-weight:700; color:#fff;";
+  }
+
   // 유튜브 비디오 임베드 처리
   const modalYoutubeWrap = document.getElementById("modalYoutubeWrap");
   const youtubeId = extractYoutubeId(property.youtube_url);
@@ -512,6 +539,7 @@ function openDetailModal(property) {
 
       document.getElementById("inputTitle").value = property.title || "";
       document.getElementById("inputType").value = property.property_type || "상가";
+      document.getElementById("inputTradeStatus").value = property.trade_status || "매매진행중";
       document.getElementById("inputLocation").value = property.location || "";
       document.getElementById("inputPrice").value = property.price || "";
       document.getElementById("inputArea").value = property.area_size || "";
@@ -1045,6 +1073,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const updatePayload = {
             title: document.getElementById("inputTitle").value,
             property_type: document.getElementById("inputType").value,
+            trade_status: document.getElementById("inputTradeStatus").value,
             location: document.getElementById("inputLocation").value,
             price: document.getElementById("inputPrice").value,
             area_size: document.getElementById("inputArea").value,
@@ -1079,6 +1108,7 @@ document.addEventListener("DOMContentLoaded", () => {
             id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
             title: document.getElementById("inputTitle").value,
             property_type: document.getElementById("inputType").value,
+            trade_status: document.getElementById("inputTradeStatus").value,
             location: document.getElementById("inputLocation").value,
             price: document.getElementById("inputPrice").value,
             area_size: document.getElementById("inputArea").value,

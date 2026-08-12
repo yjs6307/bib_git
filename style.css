@@ -858,6 +858,51 @@ input, textarea, select {
   border: none;
 }
 
+/* 12. 매물 진행 상태 전용 뱃지 스타일 */
+.badge-status {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+/* 1) 매입준비중 */
+.badge-status-ready {
+  background-color: #8b5cf6; /* 퍼플 */
+  color: #ffffff;
+}
+
+/* 2) 계약 */
+.badge-status-contract {
+  background-color: #f59e0b; /* 앰버/오렌지 */
+  color: #ffffff;
+}
+
+/* 3) 인테리어중 */
+.badge-status-interior {
+  background-color: #0284c7; /* 스카이블루/인디고 */
+  color: #ffffff;
+}
+
+/* 4) 매매진행중 */
+.badge-status-progress {
+  background-color: #10b981; /* 에메랄드 그린 */
+  color: #ffffff;
+}
+
+/* 5) 매매완료 */
+.badge-status-completed {
+  background-color: #64748b; /* 슬레이트 다크 */
+  color: #ffffff;
+}
+
 /* 반응형 모바일 & 태블릿 스마트폰 폭 자동 조절 대응 */
 @media (max-width: 768px) {
   .navbar-container {
