@@ -352,17 +352,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 카테고리 태그 클릭 이벤트
-  if (categoryContainer) {
-    categoryContainer.addEventListener("click", (e) => {
-      if (e.target.classList.contains("btn-tag")) {
-        document.querySelectorAll(".btn-tag").forEach(b => b.classList.remove("active"));
-        e.target.classList.add("active");
-        state.selectedCategory = e.target.getAttribute("data-category");
-        render();
-      }
+  // 상세보기 모달(detailModal) 닫기 이벤트 연결
+  const btnCloseDetailModal = document.getElementById("btnCloseDetailModal");
+  if (btnCloseDetailModal) {
+    btnCloseDetailModal.addEventListener("click", closeDetailModal);
+  }
+  if (detailModal) {
+    detailModal.addEventListener("click", (e) => {
+      if (e.target === detailModal) closeDetailModal();
     });
   }
+
+  // ESC 키 누름 감지하여 모든 열린 모달 닫기
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeDetailModal();
+      if (smsModal) smsModal.classList.remove("active");
+      if (adminModal) adminModal.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+  });
 
   // 문자 문의 팝업 모달 제어 및 복사 기능
   const btnCloseSmsModal = document.getElementById("btnCloseSmsModal");
