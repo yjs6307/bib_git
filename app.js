@@ -282,9 +282,8 @@ function openDetailModal(property) {
   // 상세 모달에서 [수정] 버튼 클릭 시
   if (btnEditProperty) {
     btnEditProperty.onclick = () => {
-      // 1. 관리자 인증 여부 확인
+      // 1. 미인증 시 비밀번호 입력 메세지 박스 모달 바로 팝업
       if (!isUserAdmin()) {
-        alert("🔒 매물 수정은 관리자만 가능합니다. 비밀번호를 입력해 주세요.");
         if (authModal) {
           authModal.classList.add("active");
           document.body.style.overflow = "hidden";
@@ -292,7 +291,7 @@ function openDetailModal(property) {
         return;
       }
 
-      // 2. 관리자 인증된 경우 수정 모드 전환
+      // 2. 이미 관리자 인증이 완료된 경우 수정 모드 전환
       isEditMode = true;
       editingPropertyId = property.id;
       
@@ -502,10 +501,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 매물 등록 버튼 클릭 시 권한 체크 및 비밀번호 인증 모달 연결
+  // 매물 등록 버튼 클릭 시 관리자 인증 체크 및 비밀번호 팝업 박스 오픈
   if (btnOpenAdminModal) {
     btnOpenAdminModal.addEventListener("click", () => {
-      // 1. 신규 등록 모드로 리셋
+      // 1. 신규 등록 모드로 상태 설정
       isEditMode = false;
       editingPropertyId = null;
       const adminModalTitle = document.getElementById("adminModalTitle");
@@ -514,9 +513,8 @@ document.addEventListener("DOMContentLoaded", () => {
       selectedFiles = [];
       renderImagePreviews();
 
-      // 2. 미인증 상태인 경우 안내와 함께 비밀번호 입력 팝업창 활성화
+      // 2. 미인증 상태인 경우 비밀번호 입력 메세지 박스 모달 바로 팝업!
       if (!isUserAdmin()) {
-        alert("🔒 매물 등록은 관리자만 가능합니다. 비밀번호를 입력해 주세요.");
         if (authModal) {
           authModal.classList.add("active");
           document.body.style.overflow = "hidden";
@@ -524,7 +522,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // 3. 인증된 경우 매물 등록 모달 바로 오픈
+      // 3. 인증 완료 상태인 경우 바로 매물 등록 모달 오픈
       adminModal.classList.add("active");
       document.body.style.overflow = "hidden";
     });
