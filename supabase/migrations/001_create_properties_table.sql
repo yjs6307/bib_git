@@ -34,21 +34,21 @@ COMMENT ON COLUMN public.properties.created_at IS '등록일시';
 ALTER TABLE public.properties ENABLE ROW LEVEL SECURITY;
 
 -- 3. RLS 정책 정의
--- [정책 1] 누구나(일반 사용자 포함) 매물 리스트 조회 가능 (SELECT)
+-- [정책 1] 누구나 매물 리스트 조회 가능 (SELECT)
 CREATE POLICY "Public Read Access"
 ON public.properties FOR SELECT TO public USING (true);
 
--- [정책 2] 인증된 관리자(Admin)만 매물 등록 가능 (INSERT)
-CREATE POLICY "Admin Insert Access"
-ON public.properties FOR INSERT TO authenticated WITH CHECK (true);
+-- [정책 2] 누구나 매물 등록 테스트 가능 (INSERT)
+CREATE POLICY "Public Insert Access"
+ON public.properties FOR INSERT TO public WITH CHECK (true);
 
--- [정책 3] 인증된 관리자(Admin)만 매물 정보 수정 가능 (UPDATE)
-CREATE POLICY "Admin Update Access"
-ON public.properties FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+-- [정책 3] 누구나 매물 수정 가능 (UPDATE)
+CREATE POLICY "Public Update Access"
+ON public.properties FOR UPDATE TO public USING (true) WITH CHECK (true);
 
--- [정책 4] 인증된 관리자(Admin)만 매물 삭제 가능 (DELETE)
-CREATE POLICY "Admin Delete Access"
-ON public.properties FOR DELETE TO authenticated USING (true);
+-- [정책 4] 누구나 매물 삭제 가능 (DELETE)
+CREATE POLICY "Public Delete Access"
+ON public.properties FOR DELETE TO public USING (true);
 
 -- 4. Supabase Storage 버킷 생성 및 RLS 설정 (이미지 저장 전용)
 INSERT INTO storage.buckets (id, name, public)

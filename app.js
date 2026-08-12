@@ -379,42 +379,184 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // -----------------------------------------------------------------------------
+  // 7. 로컬 다중 이미지 선택 & 미리보기 및 Supabase Storage 업로드
+  // -----------------------------------------------------------------------------
+  const inputImageFiles = document.getElementById("inputImageFiles");
+  const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+  let selectedFiles = []; // 사용자가 선택한 File 객체 리스트
+
+  if (inputImageFiles) {
+    inputImageFiles.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files);
+      selectedFiles = [...selectedFiles, ...files];
+      renderImagePreviews();
+      inputImageFiles.value = ""; // 동일 파일 다시 선택 가능하도록 초기화
+    });
+  }
+
+  function renderImagePreviews() {
+    if (!imagePreviewContainer) return;
+    imagePreviewContainer.innerHTML = "";
+
+    selectedFiles.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const previewItem = document.createElement("div");
+        previewItem.className = "preview-item";
+        previewItem.innerHTML = `
+          <img src="${e.target.result}" alt="미리보기 ${index + 1}" />
+          ${index === 0 ? '<span class="preview-badge-main">대표</span>' : ''}
+          <button type="button" class="preview-remove-btn" data-index="${index}">&times;</button>
+        `;
+        imagePreviewContainer.appendChild(previewItem);
+
+        // 미리보기 개별 삭제 이벤트
+        previewItem.querySelector(".preview-remove-btn").addEventListener("click", (evt) => {
+          evt.stopPropagation();
+          const removeIdx = parseInt(evt.target.getAttribute("data-index"), 10);
+          selectedFiles.splice(removeIdx, 1);
+          renderImagePreviews();
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * 선택된 파일들을 Supabase Storage 'property-images' 버킷에 업로드하고 Public URL 배열 반환
+   */
+  async function uploadFilesToSupabase(files) {
+    const uploadedUrls = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      // 파일 확장자 추출 및 유니크한 경로 생성
+      const fileExt = file.name.split('.').pop();
+      const filePath = `property_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+
+      if (supabaseClient) {
+        try {
+          // Supabase Storage 업로드 시도
+          const { data, error } = await supabaseClient
+            .storage
+            .from('property-images')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (error) {
+            console.warn(`[Storage 업로드 경고] ${file.name} 업로드 실패:`, error.message);
+            // Storage 업로드 실패 시 Base64 로컬 이미지 URL 사용
+            const base64Url = await fileToBase64(file);
+            uploadedUrls.push(base64Url);
+          } else {
+            // 업로드 성공 시 Public URL 획득
+            const { data: publicUrlData } = supabaseClient
+              .storage
+              .from('property-images')
+              .getPublicUrl(filePath);
+
+            uploadedUrls.push(publicUrlData.publicUrl);
+          }
+        } catch (err) {
+          console.error("Storage 업로드 예외 발생:", err);
+          const base64Url = await fileToBase64(file);
+          uploadedUrls.push(base64Url);
+        }
+      } else {
+        // Supabase 비연동 시 Base64 Data URL로 변환하여 시연
+        const base64Url = await fileToBase64(file);
+        uploadedUrls.push(base64Url);
+      }
+    }
+
+    return uploadedUrls;
+  }
+
+  // File 객체를 Base64 Data URL로 변환하는 유틸리티
+  function fileToBase64(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
   // 매물 등록 폼 제출 이벤트
   if (propertyForm) {
     propertyForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const newProperty = {
-        id: String(Date.now()),
-        title: document.getElementById("inputTitle").value,
-        property_type: document.getElementById("inputType").value,
-        location: document.getElementById("inputLocation").value,
-        price: document.getElementById("inputPrice").value,
-        area_size: document.getElementById("inputArea").value,
-        zoning_info: document.getElementById("inputZoning").value,
-        description: document.getElementById("inputDescription").value,
-        images: [
-          document.getElementById("inputImage").value ||
-          "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"
-        ],
-        created_at: new Date().toISOString()
-      };
+      // 버튼 로딩 상태 표시
+      const submitBtn = propertyForm.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>이미지 업로드 및 저장 중...</span>`;
 
-      if (supabaseClient) {
-        try {
-          const { error } = await supabaseClient.from("properties").insert([newProperty]);
-          if (error) throw error;
-        } catch (err) {
-          console.warn("Supabase 저장 중 오류가 발생하여 메모리에 추가합니다:", err);
+      try {
+        // 1. 선택한 사진이 있으면 Supabase Storage 또는 Base64로 처리
+        let finalImageUrls = [];
+        if (selectedFiles.length > 0) {
+          finalImageUrls = await uploadFilesToSupabase(selectedFiles);
+        } else {
+          // 사진을 선택하지 않은 경우 기본 샘플 이미지 적용
+          finalImageUrls = ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
         }
-      }
 
-      state.properties.unshift(newProperty);
-      render();
-      alert("새 매물이 등록되었습니다!");
-      propertyForm.reset();
-      adminModal.classList.remove("active");
-      document.body.style.overflow = "";
+        // 2. PostgreSQL UUID 규칙에 부합하는 고유 식별자 생성
+        const generatedId = (typeof crypto !== "undefined" && crypto.randomUUID) 
+          ? crypto.randomUUID() 
+          : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+              (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+            );
+
+        const newProperty = {
+          id: generatedId,
+          title: document.getElementById("inputTitle").value,
+          property_type: document.getElementById("inputType").value,
+          location: document.getElementById("inputLocation").value,
+          price: document.getElementById("inputPrice").value,
+          area_size: document.getElementById("inputArea").value,
+          zoning_info: document.getElementById("inputZoning").value,
+          description: document.getElementById("inputDescription").value,
+          images: finalImageUrls, // 업로드된 이미지 URL 목록 배열 저장!
+          created_at: new Date().toISOString()
+        };
+
+        if (supabaseClient) {
+          const { error } = await supabaseClient
+            .from("properties")
+            .insert([newProperty]);
+
+          if (error) {
+            console.error("Supabase DB 저장 에러 상세:", error);
+            alert(`[Supabase DB 저장 실패]\n오류 원인: ${error.message}`);
+            return;
+          }
+
+          alert("🎉 사진 업로드 및 신규 매물 등록이 완료되었습니다!");
+          await fetchProperties();
+        } else {
+          state.properties.unshift(newProperty);
+          render();
+          alert("새 매물이 등록되었습니다 (데모 모드).");
+        }
+
+        // 폼 및 미리보기 상태 초기화
+        propertyForm.reset();
+        selectedFiles = [];
+        renderImagePreviews();
+        adminModal.classList.remove("active");
+        document.body.style.overflow = "";
+      } catch (err) {
+        console.error("등록 예외 발생:", err);
+        alert(`매물 등록 중 오류가 발생했습니다: ${err.message}`);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
     });
   }
 });
