@@ -8,12 +8,12 @@
 // -----------------------------------------------------------------------------
 // 1. Supabase 클라이언트 초기화 및 데모 데이터 설정
 // -----------------------------------------------------------------------------
-// Supabase 프로젝트 URL과 Anon Key를 입력하면 실제 Supabase DB와 연동됩니다.
-const SUPABASE_URL = "https://your-supabase-project-id.supabase.co";
-const SUPABASE_ANON_KEY = "your-supabase-anon-key";
+// 사용자님이 제공해주신 Supabase 프로젝트 URL과 Anon Key가 적용되었습니다.
+const SUPABASE_URL = "https://cpixraohpjuozlzjvxoy.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwaXhyYW9ocGp1b3psemp2eG95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1MzE3MDEsImV4cCI6MjEwMjEwNzcwMX0.uqjG5F1wXyIxCZ1BrwlfsyWzgByB3LccgxDYFcS_uss";
 
 let supabaseClient = null;
-if (window.supabase && SUPABASE_URL !== "https://your-supabase-project-id.supabase.co") {
+if (window.supabase) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
