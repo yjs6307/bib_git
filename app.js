@@ -325,11 +325,14 @@ function handleRegisterClick() {
 
   isEditMode = false;
   editingPropertyId = null;
+  currentPropertyImages = [];
+  selectedFiles = [];
   const adminModalTitle = document.getElementById("adminModalTitle");
   if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록 (관리자)";
   if (propertyForm) propertyForm.reset();
   
   resetSubmitButton();
+  renderImagePreviews();
   toggleVillaSpec();
   calculateProfit();
   adminModal.classList.add("active");
@@ -565,6 +568,9 @@ function openDetailModal(property) {
 
       isEditMode = true;
       editingPropertyId = property.id;
+      currentPropertyImages = (property.images && property.images.length > 0) ? [...property.images] : [];
+      selectedFiles = [];
+
       document.getElementById("adminModalTitle").textContent = "매물 정보 수정";
 
       document.getElementById("inputTitle").value = property.title || "";
@@ -587,6 +593,7 @@ function openDetailModal(property) {
       document.getElementById("inputDescription").value = property.description || "";
 
       resetSubmitButton();
+      renderImagePreviews();
       toggleVillaSpec();
       calculateProfit();
 
@@ -758,13 +765,13 @@ async function updateUserProfile(id, updateData) {
 }
 
 // -----------------------------------------------------------------------------
-// 6.5. 이미지 파일 미리보기 & Supabase Storage 업로드
+// 6.5. 이미지 파일 미리보기 & Supabase Storage 업로드 (기존 이미지 유지 및 삭제/추가)
 // -----------------------------------------------------------------------------
-let selectedFiles = [];
+let currentPropertyImages = []; // 수정 모드 시 기존 등록된 이미지 URL 배열
+let selectedFiles = []; // 새로 추가 선택한 File 객체 배열
 
 function setupImageUploadHandlers() {
   const inputImageFiles = document.getElementById("inputImageFiles");
-  const imagePreviewContainer = document.getElementById("imagePreviewContainer");
 
   if (inputImageFiles) {
     inputImageFiles.addEventListener("change", (e) => {
@@ -774,33 +781,56 @@ function setupImageUploadHandlers() {
       inputImageFiles.value = "";
     });
   }
+}
 
-  function renderImagePreviews() {
-    if (!imagePreviewContainer) return;
-    imagePreviewContainer.innerHTML = "";
+function renderImagePreviews() {
+  const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+  if (!imagePreviewContainer) return;
+  imagePreviewContainer.innerHTML = "";
 
-    selectedFiles.forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const previewItem = document.createElement("div");
-        previewItem.className = "preview-item";
-        previewItem.innerHTML = `
-          <img src="${e.target.result}" alt="미리보기 ${index + 1}" />
-          ${index === 0 ? '<span class="preview-badge-main">대표</span>' : ''}
-          <button type="button" class="preview-remove-btn" data-index="${index}">&times;</button>
-        `;
-        imagePreviewContainer.appendChild(previewItem);
+  let totalCount = 0;
 
-        previewItem.querySelector(".preview-remove-btn").addEventListener("click", (evt) => {
-          evt.stopPropagation();
-          const removeIdx = parseInt(evt.target.getAttribute("data-index"), 10);
-          selectedFiles.splice(removeIdx, 1);
-          renderImagePreviews();
-        });
-      };
-      reader.readAsDataURL(file);
+  // 1. 기존에 등록되어 있던 이미지 렌더링
+  currentPropertyImages.forEach((imgUrl, index) => {
+    totalCount++;
+    const previewItem = document.createElement("div");
+    previewItem.className = "preview-item";
+    previewItem.innerHTML = `
+      <img src="${imgUrl}" alt="기존 이미지 ${index + 1}" />
+      ${totalCount === 1 ? '<span class="preview-badge-main">대표</span>' : '<span style="position:absolute; top:4px; left:4px; background:#475569; color:#fff; font-size:0.65rem; padding:2px 6px; border-radius:4px; font-weight:700;">기존</span>'}
+      <button type="button" class="preview-remove-btn" data-type="existing" data-index="${index}">&times;</button>
+    `;
+    imagePreviewContainer.appendChild(previewItem);
+
+    previewItem.querySelector(".preview-remove-btn").addEventListener("click", (evt) => {
+      evt.stopPropagation();
+      currentPropertyImages.splice(index, 1);
+      renderImagePreviews();
     });
-  }
+  });
+
+  // 2. 새로 추가 선택한 로컬 파일 미리보기 렌더링
+  selectedFiles.forEach((file, index) => {
+    totalCount++;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const previewItem = document.createElement("div");
+      previewItem.className = "preview-item";
+      previewItem.innerHTML = `
+        <img src="${e.target.result}" alt="새 이미지 ${index + 1}" />
+        ${totalCount === 1 ? '<span class="preview-badge-main">대표</span>' : '<span style="position:absolute; top:4px; left:4px; background:#10b981; color:#fff; font-size:0.65rem; padding:2px 6px; border-radius:4px; font-weight:700;">신규</span>'}
+        <button type="button" class="preview-remove-btn" data-type="new" data-index="${index}">&times;</button>
+      `;
+      imagePreviewContainer.appendChild(previewItem);
+
+      previewItem.querySelector(".preview-remove-btn").addEventListener("click", (evt) => {
+        evt.stopPropagation();
+        selectedFiles.splice(index, 1);
+        renderImagePreviews();
+      });
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function compressImage(file, maxWidth = 1200, quality = 0.75) {
@@ -1071,9 +1101,15 @@ document.addEventListener("DOMContentLoaded", () => {
       submitBtn.innerHTML = `<span>처리 중입니다...</span>`;
 
       try {
-        let finalImageUrls = [];
+        let newUploadedUrls = [];
         if (selectedFiles.length > 0) {
-          finalImageUrls = await uploadFilesToSupabase(selectedFiles);
+          newUploadedUrls = await uploadFilesToSupabase(selectedFiles);
+        }
+
+        // 기존 유지된 이미지와 새로 업로드된 이미지를 최종 합성!
+        let finalImageUrls = [...currentPropertyImages, ...newUploadedUrls];
+        if (finalImageUrls.length === 0) {
+          finalImageUrls = ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
         }
 
         const purchasePrice = parseFloat(document.getElementById("inputPurchasePrice").value) || 0;
@@ -1082,10 +1118,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const expectedProfit = expectedSellingPrice - purchasePrice - expectedCost;
 
         if (isEditMode && editingPropertyId) {
-          const currentTarget = state.properties.find(p => p.id === editingPropertyId);
-          const existingImages = (currentTarget && currentTarget.images) ? currentTarget.images : [];
-          const updatedImages = (finalImageUrls.length > 0) ? [...existingImages, ...finalImageUrls] : existingImages;
-
           const updatePayload = {
             title: document.getElementById("inputTitle").value,
             property_type: document.getElementById("inputType").value,
@@ -1104,7 +1136,7 @@ document.addEventListener("DOMContentLoaded", () => {
             participant_members: document.getElementById("inputParticipants").value,
             youtube_url: document.getElementById("inputYoutubeUrl").value.trim(),
             description: document.getElementById("inputDescription").value,
-            images: updatedImages
+            images: finalImageUrls
           };
 
           if (supabaseClient) {
@@ -1113,7 +1145,7 @@ document.addEventListener("DOMContentLoaded", () => {
               alert(`[DB 수정 실패] ${error.message}`);
               return;
             }
-            alert("🎉 매물 정보가 성공적으로 수정되었습니다!");
+            alert("🎉 매물 정보 및 사진이 성공적으로 수정 반영되었습니다!");
             await fetchProperties();
           } else {
             const idx = state.properties.findIndex(p => p.id === editingPropertyId);
