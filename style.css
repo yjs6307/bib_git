@@ -308,8 +308,8 @@ input, textarea, select {
 /* 6. 매물 카드리스트 그리드 */
 .property-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
 }
 
 .property-card {
@@ -1060,6 +1060,13 @@ input, textarea, select {
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 28px;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .property-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 
