@@ -747,6 +747,40 @@ function openDetailModal(property) {
     };
   }
 
+  // 최고 관리자 전용 매물 삭제 버튼 바인딩 및 권한 분기
+  const btnDeleteProperty = document.getElementById("btnDeleteProperty");
+  if (btnDeleteProperty) {
+    const user = state.currentUser;
+    const canDelete = user && (user.role === 'admin' || user.level === 10 || user.can_delete);
+    
+    if (canDelete) {
+      btnDeleteProperty.style.display = "flex";
+      btnDeleteProperty.onclick = async () => {
+        const confirmDelete = confirm(
+          `⚠️ [매물 삭제 경고]\n\n정말로 이 매물을 삭제하시겠습니까?\n\n- 매물번호: ${propNo}\n- 매물명: ${property.title}\n\n※ 삭제된 매물 데이터는 복구할 수 없습니다.`
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+          if (supabaseClient) {
+            const { error } = await supabaseClient.from("properties").delete().eq("id", property.id);
+            if (error) console.warn("Supabase 삭제 오류 경고:", error.message);
+          }
+
+          state.properties = state.properties.filter(p => p.id !== property.id);
+          closeDetailModal();
+          render();
+          alert(`🗑️ 매물(No. ${propNo})이 성공적으로 삭제되었습니다.`);
+        } catch (err) {
+          alert(`삭제 처리 중 오류: ${err.message}`);
+        }
+      };
+    } else {
+      btnDeleteProperty.style.display = "none";
+    }
+  }
+
   const btnContactSms = document.getElementById("btnContactSms");
   if (btnContactSms) {
     btnContactSms.onclick = (e) => {
