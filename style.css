@@ -307,9 +307,9 @@ input, textarea, select {
 
 /* 6. 매물 카드리스트 그리드 */
 .property-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 20px !important;
 }
 
 .property-card {
@@ -1052,24 +1052,14 @@ input, textarea, select {
     max-width: 100%;
   }
 
-/* PC 데스크톱 전체 (가로 960px 이상): 무조건 한 줄에 4개씩 강제 보장 */
-@media screen and (min-width: 960px) {
-  .property-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 20px !important;
-  }
-}
-
-/* 태블릿 및 가로 모바일 (600px ~ 959px): 한 줄에 2개씩 */
-@media screen and (max-width: 959px) and (min-width: 600px) {
   .property-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
+    gap: 14px !important;
   }
 }
 
-/* 세로 모바일 (599px 이하): 한 줄에 1개씩 */
-@media screen and (max-width: 599px) {
+/* 초소형 세로 모바일 (480px 이하) */
+@media screen and (max-width: 480px) {
   .property-grid {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
