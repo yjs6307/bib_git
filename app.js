@@ -53,7 +53,7 @@ const MOCK_USERS = [
 const MOCK_PROPERTIES = [
   {
     id: "1",
-    property_number: "BU-20260813-01",
+    property_number: "2608001",
     registration_date: "2026-08-13",
     title: "역삼동 고급 올리모델링 신축급 빌라 (투룸/화1)",
     property_type: "빌라",
@@ -81,7 +81,7 @@ const MOCK_PROPERTIES = [
   },
   {
     id: "2",
-    property_number: "BU-20260813-02",
+    property_number: "2608002",
     registration_date: "2026-08-13",
     title: "성수동 메인 상권 1층 메디컬/카페 코너 상가",
     property_type: "상가",
@@ -182,15 +182,29 @@ const btnCloseAdminModal = document.getElementById("btnCloseAdminModal");
 const propertyForm = document.getElementById("propertyForm");
 
 // -----------------------------------------------------------------------------
-// 4. 유틸리티 함수: 오늘 날짜 기반 매물번호 자동 생성 (예: BU-20260813-01)
+// 4. 유틸리티 함수: 연도(YY) + 월(MM) + 3자리 누적 순번 자동 생성 (예: 2608001, 2608002...)
 // -----------------------------------------------------------------------------
 function generatePropertyNumber() {
   const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
-  const randomSeq = String(Math.floor(Math.random() * 90) + 10);
-  return `BU-${yyyy}${mm}${dd}-${randomSeq}`;
+  const yy = String(now.getFullYear()).slice(-2); // "26"
+  const mm = String(now.getMonth() + 1).padStart(2, '0'); // "08"
+  const prefix = `${yy}${mm}`; // "2608"
+
+  let maxSeq = 0;
+  if (state.properties && state.properties.length > 0) {
+    state.properties.forEach(p => {
+      if (p.property_number && String(p.property_number).startsWith(prefix)) {
+        const seqStr = String(p.property_number).substring(prefix.length);
+        const seqNum = parseInt(seqStr, 10);
+        if (!isNaN(seqNum) && seqNum > maxSeq) {
+          maxSeq = seqNum;
+        }
+      }
+    });
+  }
+
+  const nextSeq = String(maxSeq + 1).padStart(3, '0');
+  return `${prefix}${nextSeq}`; // 예: "2608001"
 }
 
 // -----------------------------------------------------------------------------
@@ -550,7 +564,7 @@ function render() {
 
       const tradeStatus = property.trade_status || "매매진행중";
       const statusClass = getStatusBadgeClass(tradeStatus);
-      const propNo = property.property_number || `BU-${property.id}`;
+      const propNo = property.property_number || '2608001';
       const regDate = property.registration_date || (property.created_at ? property.created_at.split('T')[0] : '-');
 
       return `
@@ -610,7 +624,7 @@ function openDetailModal(property) {
   state.selectedProperty = property;
   state.currentImageIndex = 0;
 
-  const propNo = property.property_number || `BU-${property.id}`;
+  const propNo = property.property_number || '2608001';
   const regDate = property.registration_date || (property.created_at ? property.created_at.split('T')[0] : '-');
 
   modalTypeBadge.textContent = property.property_type;
