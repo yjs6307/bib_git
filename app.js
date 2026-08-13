@@ -2,7 +2,7 @@
  * =============================================================================
  * 파일명: app.js
  * 설명: 부동산 매물 관리 웹 애플리케이션 프론트엔드 비즈니스 로직 및 
- *       빌라/상가/기타 매물 관리 & 투자 수익 자동 계산 기능 (단위: 만원 & 면적(㎡))
+ *       매물 번호 & 등록 일자 관리 / 투자 수익 자동 계산 기능
  * =============================================================================
  */
 
@@ -49,10 +49,12 @@ const MOCK_USERS = [
   }
 ];
 
-// 데모 매물 데이터 ("빌라", "상가", "기타", 단위: 만원)
+// 데모 매물 데이터 ("빌라", "상가", "기타", 매물번호 및 등록일자 탑재)
 const MOCK_PROPERTIES = [
   {
     id: "1",
+    property_number: "BU-20260813-01",
+    registration_date: "2026-08-13",
     title: "역삼동 고급 올리모델링 신축급 빌라 (투룸/화1)",
     property_type: "빌라",
     trade_status: "매매진행중",
@@ -60,7 +62,7 @@ const MOCK_PROPERTIES = [
     floor_info: "3층 / 5층",
     rooms: 2,
     bathrooms: 1,
-    price: "매매 3억 8천만원",
+    price: "매매 38000 (3억 8천만원)",
     area_size: "공급 65.5㎡ / 전용 48.8㎡",
     zoning_info: "제2종일반주거지역",
     purchase_price: 30000,
@@ -79,6 +81,8 @@ const MOCK_PROPERTIES = [
   },
   {
     id: "2",
+    property_number: "BU-20260813-02",
+    registration_date: "2026-08-13",
     title: "성수동 메인 상권 1층 메디컬/카페 코너 상가",
     property_type: "상가",
     trade_status: "인테리어중",
@@ -86,7 +90,7 @@ const MOCK_PROPERTIES = [
     floor_info: "1층 / 4층",
     rooms: 0,
     bathrooms: 0,
-    price: "매매 25억원",
+    price: "매매 250000 (25억원)",
     area_size: "공급 198.5㎡ / 전용 132.2㎡",
     zoning_info: "준공업지역",
     purchase_price: 200000,
@@ -138,15 +142,17 @@ const galleryCounter = document.getElementById("galleryCounter");
 
 const modalTypeBadge = document.getElementById("modalTypeBadge");
 const modalStatusBadge = document.getElementById("modalStatusBadge");
+const modalPropertyNumberBadge = document.getElementById("modalPropertyNumberBadge");
 const modalPrice = document.getElementById("modalPrice");
 const modalTitle = document.getElementById("modalTitle");
 const modalLocation = document.getElementById("modalLocation");
+const modalRegistrationDate = document.getElementById("modalRegistrationDate");
+const modalPropertyNumber = document.getElementById("modalPropertyNumber");
 const modalAreaSize = document.getElementById("modalAreaSize");
 const modalFloorInfo = document.getElementById("modalFloorInfo");
 const modalVillaSpecBox = document.getElementById("modalVillaSpecBox");
 const modalVillaRooms = document.getElementById("modalVillaRooms");
 const modalZoningInfo = document.getElementById("modalZoningInfo");
-const modalCreatedAt = document.getElementById("modalCreatedAt");
 const modalDescription = document.getElementById("modalDescription");
 
 const modalPurchasePrice = document.getElementById("modalPurchasePrice");
@@ -176,7 +182,19 @@ const btnCloseAdminModal = document.getElementById("btnCloseAdminModal");
 const propertyForm = document.getElementById("propertyForm");
 
 // -----------------------------------------------------------------------------
-// 4. 데이터 로딩 & 인증 상태 초기화
+// 4. 유틸리티 함수: 오늘 날짜 기반 매물번호 자동 생성 (예: BU-20260813-01)
+// -----------------------------------------------------------------------------
+function generatePropertyNumber() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const randomSeq = String(Math.floor(Math.random() * 90) + 10);
+  return `BU-${yyyy}${mm}${dd}-${randomSeq}`;
+}
+
+// -----------------------------------------------------------------------------
+// 5. 데이터 로딩 & 인증 상태 초기화
 // -----------------------------------------------------------------------------
 async function initApp() {
   const savedUser = sessionStorage.getItem("buikbu_user");
@@ -416,6 +434,10 @@ function handleRegisterClick() {
   if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록 (관리자)";
   if (propertyForm) propertyForm.reset();
   
+  // 매물번호 및 오늘 날짜 자동 채우기
+  document.getElementById("inputPropertyNumber").value = generatePropertyNumber();
+  document.getElementById("inputRegistrationDate").value = new Date().toISOString().split('T')[0];
+
   resetSubmitButton();
   renderImagePreviews();
   toggleVillaSpec();
@@ -425,7 +447,7 @@ function handleRegisterClick() {
 }
 
 // -----------------------------------------------------------------------------
-// 4.5. 자동 예상 수익 실시간 계산 (단위: 만원) 및 빌라 전용 필드 토글
+// 5.5. 자동 예상 수익 실시간 계산 (단위: 만원) 및 빌라 전용 필드 토글
 // -----------------------------------------------------------------------------
 function setupCalculationEvents() {
   const inputType = document.getElementById("inputType");
@@ -478,7 +500,7 @@ function calculateProfit() {
 }
 
 // -----------------------------------------------------------------------------
-// 5. 매물 그리드 렌더링 및 모달
+// 6. 매물 그리드 렌더링 및 모달
 // -----------------------------------------------------------------------------
 function getStatusBadgeClass(status) {
   switch (status) {
@@ -495,8 +517,10 @@ function render() {
   const filtered = state.properties.filter(item => {
     const matchesCategory = state.selectedCategory === "전체" || item.property_type === state.selectedCategory;
     const query = state.searchQuery.toLowerCase();
+    const propNum = (item.property_number || "").toLowerCase();
     const matchesSearch =
       item.title.toLowerCase().includes(query) ||
+      propNum.includes(query) ||
       item.location.toLowerCase().includes(query) ||
       item.price.toLowerCase().includes(query);
     return matchesCategory && matchesSearch;
@@ -526,6 +550,8 @@ function render() {
 
       const tradeStatus = property.trade_status || "매매진행중";
       const statusClass = getStatusBadgeClass(tradeStatus);
+      const propNo = property.property_number || `BU-${property.id}`;
+      const regDate = property.registration_date || (property.created_at ? property.created_at.split('T')[0] : '-');
 
       return `
         <div class="property-card" data-id="${property.id}">
@@ -533,27 +559,28 @@ function render() {
             <img src="${mainImg}" alt="${property.title}" class="card-image" />
             <div class="card-badge-type">${property.property_type}</div>
             <div class="badge-status ${statusClass}">${tradeStatus}</div>
+            <div style="position:absolute; bottom:8px; left:8px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:4px;">
+              No. ${propNo}
+            </div>
           </div>
           <div class="card-content">
             <div>
               <div class="card-price">${property.price}</div>
               <h3 class="card-title">${property.title}</h3>
               <div class="card-location">
-                <i data-lucide="map-pin" style="width:16px; height:16px; color:#94a3b8;"></i>
+                <i data-lucide="map-pin" style="width:14px; height:14px; color:#94a3b8;"></i>
                 <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${property.location}</span>
               </div>
             </div>
             <div class="card-footer">
               <div class="card-footer-item">
-                <i data-lucide="maximize-2" style="width:14px; height:14px; color:#94a3b8;"></i>
+                <i data-lucide="maximize-2" style="width:13px; height:13px; color:#94a3b8;"></i>
                 <span>${property.area_size}</span>
               </div>
-              ${property.floor_info ? `
-                <div class="card-footer-item">
-                  <i data-lucide="layers" style="width:14px; height:14px; color:#94a3b8;"></i>
-                  <span>${property.floor_info}</span>
-                </div>
-              ` : ''}
+              <div class="card-footer-item">
+                <i data-lucide="calendar" style="width:13px; height:13px; color:#10b981;"></i>
+                <span>${regDate}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -583,14 +610,20 @@ function openDetailModal(property) {
   state.selectedProperty = property;
   state.currentImageIndex = 0;
 
+  const propNo = property.property_number || `BU-${property.id}`;
+  const regDate = property.registration_date || (property.created_at ? property.created_at.split('T')[0] : '-');
+
   modalTypeBadge.textContent = property.property_type;
+  modalPropertyNumberBadge.textContent = `No. ${propNo}`;
+  modalPropertyNumber.textContent = propNo;
+  modalRegistrationDate.textContent = regDate;
+
   modalPrice.textContent = property.price;
   modalTitle.textContent = property.title;
   modalLocation.textContent = property.location;
   modalAreaSize.textContent = property.area_size;
   modalFloorInfo.textContent = property.floor_info || "정보 없음";
   modalZoningInfo.textContent = property.zoning_info || "정보 없음";
-  modalCreatedAt.textContent = new Date(property.created_at).toLocaleDateString("ko-KR");
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
 
   // 빌라 전용 사양 표시
@@ -658,6 +691,9 @@ function openDetailModal(property) {
 
       document.getElementById("adminModalTitle").textContent = "매물 정보 수정";
 
+      document.getElementById("inputPropertyNumber").value = property.property_number || generatePropertyNumber();
+      document.getElementById("inputRegistrationDate").value = property.registration_date || new Date().toISOString().split('T')[0];
+
       document.getElementById("inputTitle").value = property.title || "";
       document.getElementById("inputType").value = property.property_type || "빌라";
       document.getElementById("inputTradeStatus").value = property.trade_status || "매매진행중";
@@ -692,7 +728,7 @@ function openDetailModal(property) {
   if (btnContactSms) {
     btnContactSms.onclick = (e) => {
       e.preventDefault();
-      const message = `안녕하세요! [${property.title}] 매물에 대해 문의드립니다.\n\n- 매물명: ${property.title}\n- 가격: ${property.price}\n- 위치: ${property.location}`;
+      const message = `안녕하세요! [${property.title}] (매물번호: ${propNo}) 매물에 대해 문의드립니다.\n\n- 매물번호: ${propNo}\n- 매물명: ${property.title}\n- 가격: ${property.price}\n- 위치: ${property.location}`;
       document.getElementById("smsContentInput").value = message;
       
       const btnSendSmsApp = document.getElementById("btnSendSmsApp");
@@ -743,7 +779,7 @@ function updateGallery() {
 }
 
 // -----------------------------------------------------------------------------
-// 6. 최고 관리자 전용: 회원 승인 & 10단계 등급/권한 제어 렌더링
+// 7. 최고 관리자 전용: 회원 승인 & 10단계 등급/권한 제어 렌더링
 // -----------------------------------------------------------------------------
 function renderUserAdminTable() {
   if (!userAdminTableBody) return;
@@ -850,10 +886,10 @@ async function updateUserProfile(id, updateData) {
 }
 
 // -----------------------------------------------------------------------------
-// 6.5. 이미지 파일 미리보기 & Supabase Storage 업로드 (기존 이미지 유지 및 삭제/추가)
+// 7.5. 이미지 파일 미리보기 & Supabase Storage 업로드 (기존 이미지 유지 및 삭제/추가)
 // -----------------------------------------------------------------------------
-let currentPropertyImages = []; // 수정 모드 시 기존 등록된 이미지 URL 배열
-let selectedFiles = []; // 새로 추가 선택한 File 객체 배열
+let currentPropertyImages = [];
+let selectedFiles = [];
 
 function setupImageUploadHandlers() {
   const inputImageFiles = document.getElementById("inputImageFiles");
@@ -875,7 +911,6 @@ function renderImagePreviews() {
 
   let totalCount = 0;
 
-  // 1. 기존에 등록되어 있던 이미지 렌더링
   currentPropertyImages.forEach((imgUrl, index) => {
     totalCount++;
     const previewItem = document.createElement("div");
@@ -894,7 +929,6 @@ function renderImagePreviews() {
     });
   });
 
-  // 2. 새로 추가 선택한 로컬 파일 미리보기 렌더링
   selectedFiles.forEach((file, index) => {
     totalCount++;
     const reader = new FileReader();
@@ -1008,7 +1042,7 @@ function fileToBase64(file) {
 }
 
 // -----------------------------------------------------------------------------
-// 7. 이벤트 바인딩 (DOM Loaded)
+// 8. 이벤트 바인딩 (DOM Loaded)
 // -----------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
@@ -1210,7 +1244,6 @@ document.addEventListener("DOMContentLoaded", () => {
           newUploadedUrls = await uploadFilesToSupabase(selectedFiles);
         }
 
-        // 기존 유지된 이미지와 새로 업로드된 이미지를 최종 합성!
         let finalImageUrls = [...currentPropertyImages, ...newUploadedUrls];
         if (finalImageUrls.length === 0) {
           finalImageUrls = ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
@@ -1221,8 +1254,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const expectedSellingPrice = parseFloat(document.getElementById("inputExpectedSellingPrice").value) || 0;
         const expectedProfit = expectedSellingPrice - purchasePrice - expectedCost;
 
+        const propertyNumber = document.getElementById("inputPropertyNumber").value.trim() || generatePropertyNumber();
+        const registrationDate = document.getElementById("inputRegistrationDate").value || new Date().toISOString().split('T')[0];
+
         if (isEditMode && editingPropertyId) {
           const updatePayload = {
+            property_number: propertyNumber,
+            registration_date: registrationDate,
             title: document.getElementById("inputTitle").value,
             property_type: document.getElementById("inputType").value,
             trade_status: document.getElementById("inputTradeStatus").value,
@@ -1260,12 +1298,10 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("매물 정보가 수정되었습니다 (데모 모드).");
           }
         } else {
-          if (finalImageUrls.length === 0) {
-            finalImageUrls = ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
-          }
-
           const newProperty = {
             id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+            property_number: propertyNumber,
+            registration_date: registrationDate,
             title: document.getElementById("inputTitle").value,
             property_type: document.getElementById("inputType").value,
             trade_status: document.getElementById("inputTradeStatus").value,

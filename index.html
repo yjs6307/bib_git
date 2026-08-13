@@ -92,7 +92,7 @@
             <div class="filter-top-row">
                 <div class="search-box">
                     <i data-lucide="search" class="search-icon"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="매물명, 위치, 가격 검색..." />
+                    <input type="text" id="searchInput" class="search-input" placeholder="매물명, 매물번호, 위치, 가격 검색..." />
                 </div>
                 <div id="propertyCount" class="property-count">
                     총 <strong>0</strong>개 매물
@@ -138,7 +138,7 @@
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span id="modalTypeBadge" class="card-badge-type" style="position:static;">빌라</span>
                     <span id="modalStatusBadge" class="badge-status-progress" style="position:static;">매매진행중</span>
-                    <span id="modalCreatedAt" style="font-size:0.75rem; color:#94a3b8;">등록일: -</span>
+                    <span id="modalPropertyNumberBadge" style="font-size:0.8rem; font-weight:700; background:#0f172a; color:#fff; padding:4px 10px; border-radius:6px;">No. -</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <button type="button" id="btnEditProperty" style="display:flex; align-items:center; gap:4px; font-size:0.8rem; font-weight:600; background:#f1f5f9; color:#0f172a; padding:6px 12px; border-radius:8px; transition:all 0.2s;">
@@ -171,13 +171,24 @@
                 <div style="margin-bottom: 20px;">
                     <div id="modalPrice" style="font-size: 1.75rem; font-weight: 800; color: #0f172a;">-</div>
                     <h2 id="modalTitle" style="font-size: 1.35rem; font-weight: 700; margin-top: 4px; color: #1e293b;">-</h2>
-                    <div style="display:flex; align-items:center; gap:6px; color:#64748b; font-size:0.9rem; margin-top:8px;">
-                        <i data-lucide="map-pin" style="width:16px; height:16px;"></i>
-                        <span id="modalLocation">-</span>
+                    <div style="display:flex; align-items:center; gap:12px; color:#64748b; font-size:0.85rem; margin-top:8px; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <i data-lucide="map-pin" style="width:16px; height:16px;"></i>
+                            <span id="modalLocation">-</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:4px; color:#475569; font-weight:600;">
+                            <i data-lucide="calendar" style="width:15px; height:15px; color:#10b981;"></i>
+                            <span>등록일자: </span>
+                            <span id="modalRegistrationDate">-</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="spec-grid">
+                    <div class="spec-box">
+                        <div class="spec-label">매물 번호</div>
+                        <div id="modalPropertyNumber" class="spec-value" style="color:#0f172a; font-weight:800;">-</div>
+                    </div>
                     <div class="spec-box">
                         <div class="spec-label">면적(㎡) 공급/전용</div>
                         <div id="modalAreaSize" class="spec-value">-</div>
@@ -407,7 +418,7 @@
         </div>
     </div>
 
-    <!-- 모달 6: 신규 매물 등록/수정 팝업 모달 ("면적(㎡) 공급/전용" & "표시가격조건(요약) (만원)") -->
+    <!-- 모달 6: 신규 매물 등록/수정 팝업 모달 ("매물 번호" & "등록 일자" 추가) -->
     <div id="adminModal" class="modal-overlay">
         <div class="modal-container" style="max-width: 650px;">
             <div class="modal-header">
@@ -418,6 +429,19 @@
             </div>
             <div class="modal-body">
                 <form id="propertyForm">
+
+                    <!-- 매물 번호 & 등록 일자 입력 영역 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="inputPropertyNumber">매물 번호 (자동생성 / 수정가능)</label>
+                            <input type="text" id="inputPropertyNumber" class="form-control" placeholder="예: BU-20260813-01" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="inputRegistrationDate">등록 일자</label>
+                            <input type="date" id="inputRegistrationDate" class="form-control" required />
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label class="form-label" for="inputTitle">매물 제목</label>
                         <input type="text" id="inputTitle" class="form-control" placeholder="예: 역삼동 신축 빌라 / 상가 매매" required />
@@ -543,7 +567,7 @@
                     </div>
 
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top: 16px;">
-                        <button type="button" id="btnCancelAdminModal" class="btn-admin" style="background-color:#64748b; justify-content: center; padding: 14px;">
+                        <button type="button" id="btnCancelAdminModal" class="btn-admin" style="background-color:#64748b; justify- content: center; padding: 14px;">
                             <i data-lucide="x-circle" style="width:18px; height:18px;"></i>
                             <span>취소 (저장안함)</span>
                         </button>
