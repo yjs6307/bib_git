@@ -224,69 +224,154 @@ async function fetchProperties() {
 }
 
 function updateNavUI() {
-  if (!navActions) return;
-
   const user = state.currentUser;
+  const mobileNavActions = document.getElementById("mobileNavActions");
+  const mobileMenuDrawer = document.getElementById("mobileMenuDrawer");
 
-  if (user) {
-    const isAdmin = user.role === 'admin' || user.level === 10;
+  function closeMobileDrawer() {
+    if (mobileMenuDrawer) {
+      mobileMenuDrawer.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+  }
 
-    navActions.innerHTML = `
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:0.8rem; background:#f1f5f9; color:#0f172a; padding:6px 12px; border-radius:9999px; font-weight:700;">
-          👤 ${user.name} (${user.level}단계)
-        </span>
-        ${isAdmin ? `
-          <button type="button" id="btnOpenUserAdmin" class="btn-admin" style="background-color:#10b981;">
-            <i data-lucide="shield-check" style="width:16px; height:16px;"></i>
-            <span>회원 승인/등급</span>
+  // 1. PC 데스크톱 버전 네비게이션 렌더링
+  if (navActions) {
+    if (user) {
+      const isAdmin = user.role === 'admin' || user.level === 10;
+      navActions.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:0.8rem; background:#f1f5f9; color:#0f172a; padding:6px 12px; border-radius:9999px; font-weight:700;">
+            👤 ${user.name} (${user.level}단계)
+          </span>
+          ${isAdmin ? `
+            <button type="button" id="btnOpenUserAdmin" class="btn-admin" style="background-color:#10b981;">
+              <i data-lucide="shield-check" style="width:16px; height:16px;"></i>
+              <span>회원 승인/등급</span>
+            </button>
+          ` : ''}
+          <button type="button" id="btnOpenAdminModal" class="btn-admin-add">
+            <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
+            <span>매물 등록</span>
           </button>
-        ` : ''}
+          <button type="button" id="btnLogout" class="btn-admin" style="background-color:#64748b;">
+            <i data-lucide="log-out" style="width:16px; height:16px;"></i>
+            <span>로그아웃</span>
+          </button>
+        </div>
+      `;
+
+      document.getElementById("btnLogout")?.addEventListener("click", () => {
+        sessionStorage.removeItem("buikbu_user");
+        state.currentUser = null;
+        alert("로그아웃 되었습니다.");
+        updateNavUI();
+      });
+
+      document.getElementById("btnOpenUserAdmin")?.addEventListener("click", () => {
+        renderUserAdminTable();
+        userAdminModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      });
+
+      document.getElementById("btnOpenAdminModal")?.addEventListener("click", handleRegisterClick);
+
+    } else {
+      navActions.innerHTML = `
+        <button type="button" id="btnOpenLoginModal" class="btn-admin" style="background-color:#475569;">
+          <i data-lucide="log-in" style="width:16px; height:16px;"></i>
+          <span>로그인</span>
+        </button>
+        <button type="button" id="btnOpenSignupModal" class="btn-admin" style="background-color:#0f172a;">
+          <i data-lucide="user-plus" style="width:16px; height:16px;"></i>
+          <span>회원가입</span>
+        </button>
         <button type="button" id="btnOpenAdminModal" class="btn-admin-add">
           <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
           <span>매물 등록</span>
         </button>
-        <button type="button" id="btnLogout" class="btn-admin" style="background-color:#64748b;">
-          <i data-lucide="log-out" style="width:16px; height:16px;"></i>
+      `;
+
+      document.getElementById("btnOpenLoginModal")?.addEventListener("click", () => loginModal.classList.add("active"));
+      document.getElementById("btnOpenSignupModal")?.addEventListener("click", () => signupModal.classList.add("active"));
+      document.getElementById("btnOpenAdminModal")?.addEventListener("click", handleRegisterClick);
+    }
+  }
+
+  // 2. 모바일 3선 슬라이드 메뉴 드로어 렌더링
+  if (mobileNavActions) {
+    if (user) {
+      const isAdmin = user.role === 'admin' || user.level === 10;
+      mobileNavActions.innerHTML = `
+        <div style="background:#f1f5f9; padding:12px; border-radius:10px; margin-bottom:6px; text-align:center;">
+          <div style="font-size:0.75rem; color:#64748b;">로그인된 회원</div>
+          <strong style="font-size:0.95rem; color:#0f172a;">👤 ${user.name} (${user.level}단계)</strong>
+        </div>
+        ${isAdmin ? `
+          <button type="button" id="m_btnOpenUserAdmin" class="btn-admin" style="background-color:#10b981;">
+            <i data-lucide="shield-check" style="width:18px; height:18px;"></i>
+            <span>회원 승인/등급 관리</span>
+          </button>
+        ` : ''}
+        <button type="button" id="m_btnOpenAdminModal" class="btn-admin-add">
+          <i data-lucide="plus-circle" style="width:18px; height:18px;"></i>
+          <span>매물 등록</span>
+        </button>
+        <button type="button" id="m_btnLogout" class="btn-admin" style="background-color:#64748b; margin-top:10px;">
+          <i data-lucide="log-out" style="width:18px; height:18px;"></i>
           <span>로그아웃</span>
         </button>
-      </div>
-    `;
+      `;
 
-    document.getElementById("btnLogout")?.addEventListener("click", () => {
-      sessionStorage.removeItem("buikbu_user");
-      state.currentUser = null;
-      alert("로그아웃 되었습니다.");
-      updateNavUI();
-    });
+      document.getElementById("m_btnLogout")?.addEventListener("click", () => {
+        closeMobileDrawer();
+        sessionStorage.removeItem("buikbu_user");
+        state.currentUser = null;
+        alert("로그아웃 되었습니다.");
+        updateNavUI();
+      });
 
-    document.getElementById("btnOpenUserAdmin")?.addEventListener("click", () => {
-      renderUserAdminTable();
-      userAdminModal.classList.add("active");
-      document.body.style.overflow = "hidden";
-    });
+      document.getElementById("m_btnOpenUserAdmin")?.addEventListener("click", () => {
+        closeMobileDrawer();
+        renderUserAdminTable();
+        userAdminModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      });
 
-    document.getElementById("btnOpenAdminModal")?.addEventListener("click", handleRegisterClick);
+      document.getElementById("m_btnOpenAdminModal")?.addEventListener("click", () => {
+        closeMobileDrawer();
+        handleRegisterClick();
+      });
 
-  } else {
-    navActions.innerHTML = `
-      <button type="button" id="btnOpenLoginModal" class="btn-admin" style="background-color:#475569;">
-        <i data-lucide="log-in" style="width:16px; height:16px;"></i>
-        <span>로그인</span>
-      </button>
-      <button type="button" id="btnOpenSignupModal" class="btn-admin" style="background-color:#0f172a;">
-        <i data-lucide="user-plus" style="width:16px; height:16px;"></i>
-        <span>회원가입</span>
-      </button>
-      <button type="button" id="btnOpenAdminModal" class="btn-admin-add">
-        <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
-        <span>매물 등록</span>
-      </button>
-    `;
+    } else {
+      mobileNavActions.innerHTML = `
+        <button type="button" id="m_btnOpenLoginModal" class="btn-admin" style="background-color:#475569;">
+          <i data-lucide="log-in" style="width:18px; height:18px;"></i>
+          <span>로그인</span>
+        </button>
+        <button type="button" id="m_btnOpenSignupModal" class="btn-admin" style="background-color:#0f172a;">
+          <i data-lucide="user-plus" style="width:18px; height:18px;"></i>
+          <span>회원가입</span>
+        </button>
+        <button type="button" id="m_btnOpenAdminModal" class="btn-admin-add" style="margin-top:6px;">
+          <i data-lucide="plus-circle" style="width:18px; height:18px;"></i>
+          <span>매물 등록</span>
+        </button>
+      `;
 
-    document.getElementById("btnOpenLoginModal")?.addEventListener("click", () => loginModal.classList.add("active"));
-    document.getElementById("btnOpenSignupModal")?.addEventListener("click", () => signupModal.classList.add("active"));
-    document.getElementById("btnOpenAdminModal")?.addEventListener("click", handleRegisterClick);
+      document.getElementById("m_btnOpenLoginModal")?.addEventListener("click", () => {
+        closeMobileDrawer();
+        loginModal.classList.add("active");
+      });
+      document.getElementById("m_btnOpenSignupModal")?.addEventListener("click", () => {
+        closeMobileDrawer();
+        signupModal.classList.add("active");
+      });
+      document.getElementById("m_btnOpenAdminModal")?.addEventListener("click", () => {
+        closeMobileDrawer();
+        handleRegisterClick();
+      });
+    }
   }
 
   if (window.lucide) lucide.createIcons();
@@ -977,7 +1062,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal].forEach(modal => {
+  // 모바일 3선(햄버거) 토글 및 닫기 이벤트 바인딩
+  const btnMobileMenuToggle = document.getElementById("btnMobileMenuToggle");
+  const btnCloseMobileDrawer = document.getElementById("btnCloseMobileDrawer");
+  const mobileMenuDrawer = document.getElementById("mobileMenuDrawer");
+
+  if (btnMobileMenuToggle && mobileMenuDrawer) {
+    btnMobileMenuToggle.addEventListener("click", () => {
+      mobileMenuDrawer.classList.add("active");
+      document.body.style.overflow = "hidden";
+    });
+  }
+
+  if (btnCloseMobileDrawer && mobileMenuDrawer) {
+    btnCloseMobileDrawer.addEventListener("click", () => {
+      mobileMenuDrawer.classList.remove("active");
+      document.body.style.overflow = "";
+    });
+  }
+
+  [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer].forEach(modal => {
     if (modal) {
       modal.addEventListener("click", (e) => {
         if (e.target === modal) {
@@ -990,7 +1094,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal].forEach(modal => {
+      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer].forEach(modal => {
         if (modal) modal.classList.remove("active");
       });
       document.body.style.overflow = "";

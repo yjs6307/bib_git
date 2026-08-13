@@ -35,24 +35,37 @@
                 </div>
             </a>
 
-            <!-- 우측 로그인 및 회원 관리 액션 버튼들 -->
+            <!-- PC 데스크톱 버전 우측 버튼 영역 -->
             <div id="navActions" class="nav-actions">
                 <!-- JavaScript(app.js)에 의해 동적 전환됩니다 -->
-                <button type="button" id="btnOpenLoginModal" class="btn-admin" style="background-color:#475569;">
-                    <i data-lucide="log-in" style="width:16px; height:16px;"></i>
-                    <span>로그인</span>
-                </button>
-                <button type="button" id="btnOpenSignupModal" class="btn-admin" style="background-color:#0f172a;">
-                    <i data-lucide="user-plus" style="width:16px; height:16px;"></i>
-                    <span>회원가입</span>
-                </button>
-                <button type="button" id="btnOpenAdminModal" class="btn-admin-add">
-                    <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
-                    <span>매물 등록</span>
-                </button>
             </div>
+
+            <!-- 모바일 전용 3선(햄버거) 토글 버튼 -->
+            <button type="button" id="btnMobileMenuToggle" class="btn-mobile-hamburger" aria-label="메뉴 열기">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
         </div>
     </header>
+
+    <!-- 모바일 전용 3선 슬라이드 메뉴 드로어 -->
+    <div id="mobileMenuDrawer" class="mobile-drawer-overlay">
+        <div class="mobile-drawer-container">
+            <div class="mobile-drawer-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="building" style="width:20px; height:20px; color:#0f172a;"></i>
+                    <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a;">부익부 메뉴</h3>
+                </div>
+                <button type="button" id="btnCloseMobileDrawer" class="btn-close-modal">
+                    <i data-lucide="x" style="width:22px; height:22px;"></i>
+                </button>
+            </div>
+            <div id="mobileNavActions" class="mobile-drawer-body">
+                <!-- app.js에서 모바일용 세로 버튼 목록이 동적으로 렌더링됩니다 -->
+            </div>
+        </div>
+    </div>
 
     <!-- 2. 히어로 안내 섹션 -->
     <section class="hero-section">

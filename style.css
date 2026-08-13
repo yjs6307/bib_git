@@ -903,8 +903,110 @@ input, textarea, select {
   color: #ffffff;
 }
 
-/* 반응형 모바일 & 태블릿 스마트폰 폭 자동 조절 대응 */
-@media (max-width: 768px) {
+/* 13. 모바일 전용 3선(햄버거) 버튼 및 드로어 메뉴 스타일 */
+.btn-mobile-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 40px;
+  height: 40px;
+  padding: 9px 8px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.btn-mobile-hamburger:hover {
+  background: #1e293b;
+}
+
+.hamburger-line {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background-color: #ffffff;
+  border-radius: 2px;
+}
+
+.mobile-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mobile-drawer-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-drawer-container {
+  width: 280px;
+  max-width: 80vw;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-drawer-overlay.active .mobile-drawer-container {
+  transform: translateX(0);
+}
+
+.mobile-drawer-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-drawer-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.mobile-drawer-body .btn-admin,
+.mobile-drawer-body .btn-admin-add {
+  width: 100%;
+  justify-content: center;
+  padding: 12px;
+  font-size: 0.9rem;
+}
+
+/* 반응형 모바일 & 태블릿 스마트폰 폭 자동 조절 대응 (화면 가로 768px 이하) */
+@media screen and (max-width: 768px) {
+  /* PC 버전 우측 3개 버튼 숨기기 */
+  header .nav-actions,
+  #navActions {
+    display: none !important;
+  }
+
+  /* 모바일 3선 햄버거 버튼 보이기 */
+  header .btn-mobile-hamburger,
+  #btnMobileMenuToggle {
+    display: flex !important;
+  }
+
   .navbar-container {
     padding: 12px 16px;
   }
