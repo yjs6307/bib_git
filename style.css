@@ -308,7 +308,7 @@ input, textarea, select {
 /* 6. 매물 카드리스트 그리드 */
 .property-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
 }
 
@@ -1053,7 +1053,7 @@ input, textarea, select {
   }
 
   .property-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
 
@@ -1063,10 +1063,11 @@ input, textarea, select {
   }
 }
 
-@media screen and (max-width: 640px) {
+/* 초소형 모바일 세로모드(420px 이하)에서만 1열로 표시 */
+@media screen and (max-width: 420px) {
   .property-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
   }
 }
 
