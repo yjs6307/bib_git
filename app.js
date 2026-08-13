@@ -2,7 +2,7 @@
  * =============================================================================
  * 파일명: app.js
  * 설명: 부동산 매물 관리 웹 애플리케이션 프론트엔드 비즈니스 로직 및 
- *       매물 번호 & 등록 일자 관리 / 투자 수익 자동 계산 기능
+ *       매물 실시간 댓글/문의 작성 & 관리자 삭제 기능
  * =============================================================================
  */
 
@@ -49,7 +49,7 @@ const MOCK_USERS = [
   }
 ];
 
-// 데모 매물 데이터 ("빌라", "상가", "기타", 매물번호 및 등록일자 탑재)
+// 데모 매물 데이터 ("빌라", "상가", "기타")
 const MOCK_PROPERTIES = [
   {
     id: "1",
@@ -102,6 +102,19 @@ const MOCK_PROPERTIES = [
     images: [
       "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80"
     ],
+    created_at: new Date().toISOString()
+  }
+];
+
+// 데모 댓글 데이터
+let MOCK_COMMENTS = [
+  {
+    id: "comment-1",
+    property_id: "1",
+    user_id: "user-admin",
+    user_name: "최고 관리자",
+    user_level: 10,
+    content: "해당 빌라 매물은 최근 주차장 리모델링까지 완료되어 투자가치가 매우 뛰어납니다.",
     created_at: new Date().toISOString()
   }
 ];
@@ -161,6 +174,15 @@ const modalExpectedSellingPrice = document.getElementById("modalExpectedSellingP
 const modalExpectedProfit = document.getElementById("modalExpectedProfit");
 const modalParticipants = document.getElementById("modalParticipants");
 
+// 댓글 요소 참조
+const modalCommentsCount = document.getElementById("modalCommentsCount");
+const commentsListContainer = document.getElementById("commentsListContainer");
+const commentForm = document.getElementById("commentForm");
+const commentFormWrap = document.getElementById("commentFormWrap");
+const commentAuthorNotice = document.getElementById("commentAuthorNotice");
+const commentLoginNotice = document.getElementById("commentLoginNotice");
+const inputCommentText = document.getElementById("inputCommentText");
+
 // 모달 팝업 참조
 const signupModal = document.getElementById("signupModal");
 const btnOpenSignupModal = document.getElementById("btnOpenSignupModal");
@@ -186,9 +208,9 @@ const propertyForm = document.getElementById("propertyForm");
 // -----------------------------------------------------------------------------
 function generatePropertyNumber() {
   const now = new Date();
-  const yy = String(now.getFullYear()).slice(-2); // 예: "26"
-  const mm = String(now.getMonth() + 1).padStart(2, '0'); // 예: "08"
-  const prefix = `${yy}${mm}`; // "2608"
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const prefix = `${yy}${mm}`;
 
   const existingNumbers = new Set(
     (state.properties || [])
@@ -199,13 +221,12 @@ function generatePropertyNumber() {
   let seq = 1;
   let candidate = `${prefix}${String(seq).padStart(3, '0')}`;
 
-  // 이미 존재하는 번호일 경우 1씩 증가시켜 100% 중복 방지
   while (existingNumbers.has(candidate)) {
     seq++;
     candidate = `${prefix}${String(seq).padStart(3, '0')}`;
   }
 
-  return candidate; // 정확히 7자리 (예: 2608001)
+  return candidate;
 }
 
 // -----------------------------------------------------------------------------
@@ -625,6 +646,102 @@ function extractYoutubeId(url) {
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
+// -----------------------------------------------------------------------------
+// 6.5. 실시간 댓글 로딩 및 렌더링 기능
+// -----------------------------------------------------------------------------
+async function fetchComments(propertyId) {
+  let comments = [];
+
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from("property_comments")
+        .select("*")
+        .eq("property_id", propertyId)
+        .order("created_at", { ascending: true });
+
+      if (!error && data) {
+        comments = data;
+      } else {
+        comments = MOCK_COMMENTS.filter(c => c.property_id === propertyId);
+      }
+    } catch (err) {
+      comments = MOCK_COMMENTS.filter(c => c.property_id === propertyId);
+    }
+  } else {
+    comments = MOCK_COMMENTS.filter(c => c.property_id === propertyId);
+  }
+
+  renderComments(comments);
+}
+
+function renderComments(comments) {
+  if (!commentsListContainer || !modalCommentsCount) return;
+
+  modalCommentsCount.textContent = comments.length;
+
+  if (comments.length === 0) {
+    commentsListContainer.innerHTML = `
+      <div style="text-align:center; padding:20px; background:#f8fafc; border-radius:10px; color:#94a3b8; font-size:0.85rem;">
+        작성된 댓글이 없습니다. 첫번째 댓글을 남겨보세요!
+      </div>
+    `;
+    return;
+  }
+
+  const currentUser = state.currentUser;
+
+  commentsListContainer.innerHTML = comments.map(c => {
+    const isOwner = currentUser && (currentUser.id === c.user_id || currentUser.email === c.user_id);
+    const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.level === 10);
+    const canDelete = isOwner || isAdmin;
+
+    const dateStr = new Date(c.created_at).toLocaleString("ko-KR", {
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+    });
+
+    return `
+      <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; position:relative;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <strong style="font-size:0.88rem; color:#0f172a;">${c.user_name}</strong>
+            <span style="font-size:0.7rem; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-weight:700;">
+              ${LEVEL_NAMES[c.user_level] || c.user_level + '단계'}
+            </span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:0.75rem; color:#94a3b8;">${dateStr}</span>
+            ${canDelete ? `
+              <button type="button" class="btn-delete-comment" data-id="${c.id}" style="background:none; border:none; color:#ef4444; font-size:0.75rem; font-weight:700; cursor:pointer; padding:0;">
+                삭제
+              </button>
+            ` : ''}
+          </div>
+        </div>
+        <div style="font-size:0.85rem; color:#334155; line-height:1.5; white-space:pre-line;">${c.content}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll(".btn-delete-comment").forEach(btn => {
+    btn.onclick = async () => {
+      const commentId = btn.getAttribute("data-id");
+      if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from("property_comments").delete().eq("id", commentId);
+        } catch (e) {}
+      }
+
+      MOCK_COMMENTS = MOCK_COMMENTS.filter(c => c.id !== commentId);
+      if (state.selectedProperty) {
+        await fetchComments(state.selectedProperty.id);
+      }
+    };
+  });
+}
+
 function openDetailModal(property) {
   state.selectedProperty = property;
   state.currentImageIndex = 0;
@@ -796,6 +913,28 @@ function openDetailModal(property) {
       document.getElementById("smsModal").classList.add("active");
     };
   }
+
+  // 댓글 작성 UI 분기 (로그인 회원 전용)
+  const currentUser = state.currentUser;
+  if (currentUser) {
+    if (commentForm) commentForm.style.display = "flex";
+    if (commentLoginNotice) commentLoginNotice.style.display = "none";
+    if (commentAuthorNotice) commentAuthorNotice.textContent = `✍️ 댓글 작성 (${currentUser.name} / ${LEVEL_NAMES[currentUser.level] || currentUser.level + '단계'})`;
+  } else {
+    if (commentForm) commentForm.style.display = "none";
+    if (commentLoginNotice) commentLoginNotice.style.display = "block";
+    const linkOpenLoginInComment = document.getElementById("linkOpenLoginInComment");
+    if (linkOpenLoginInComment) {
+      linkOpenLoginInComment.onclick = (e) => {
+        e.preventDefault();
+        closeDetailModal();
+        loginModal.classList.add("active");
+      };
+    }
+  }
+
+  // 댓글 실시간 로딩
+  fetchComments(property.id);
 
   updateGallery();
   detailModal.classList.add("active");
@@ -1153,6 +1292,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // 댓글 작성 폼 제출 처리
+  if (commentForm) {
+    commentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const user = state.currentUser;
+      if (!user) {
+        alert("🔒 댓글 작성을 위해 먼저 로그인해 주세요.");
+        loginModal.classList.add("active");
+        return;
+      }
+
+      if (!state.selectedProperty) return;
+
+      const content = inputCommentText.value.trim();
+      if (!content) return;
+
+      const newComment = {
+        id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : `comment-${Date.now()}`,
+        property_id: state.selectedProperty.id,
+        user_id: user.id || user.email,
+        user_name: user.name,
+        user_level: user.level || 1,
+        content: content,
+        created_at: new Date().toISOString()
+      };
+
+      if (supabaseClient) {
+        try {
+          const { error } = await supabaseClient.from("property_comments").insert([newComment]);
+          if (error) console.warn("Supabase 댓글 insert 경고:", error.message);
+        } catch (err) {}
+      }
+
+      MOCK_COMMENTS.unshift(newComment);
+      inputCommentText.value = "";
+      await fetchComments(state.selectedProperty.id);
+    });
+  }
+
   // 모바일 3선(햄버거) 토글 및 닫기 이벤트 바인딩
   const btnMobileMenuToggle = document.getElementById("btnMobileMenuToggle");
   const btnCloseMobileDrawer = document.getElementById("btnCloseMobileDrawer");
@@ -1349,7 +1528,6 @@ document.addEventListener("DOMContentLoaded", () => {
               const { error } = await supabaseClient.from("properties").update(updatePayload).eq("id", editingPropertyId);
               if (error) {
                 console.warn("Supabase DB 수정 경고 (컬럼 미생성 가능성):", error.message);
-                // property_number 컬럼이 없을 경우를 제외한 핵심 필드 2차 시도
                 const fallbackPayload = { ...updatePayload };
                 delete fallbackPayload.property_number;
                 delete fallbackPayload.registration_date;

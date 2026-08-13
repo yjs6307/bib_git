@@ -251,6 +251,40 @@
                     <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 10px;">매물 상세 설명</h3>
                     <div id="modalDescription" class="modal-description-box"></div>
                 </div>
+
+                <!-- 실시간 회원 댓글 & 문의 섹션 -->
+                <div style="margin-top: 28px; border-top: 2px solid #f1f5f9; padding-top: 20px;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 14px; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="message-square" style="width:18px; height:18px; color:#10b981;"></i>
+                        <span>실시간 회원 댓글 및 문의</span>
+                        <span id="modalCommentsCount" style="font-size:0.8rem; background:#10b981; color:#fff; padding:2px 8px; border-radius:9999px; font-weight:700;">0</span>
+                    </h3>
+
+                    <!-- 댓글 목록 박스 -->
+                    <div id="commentsListContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                        <!-- app.js에서 댓글 목록이 동적 생성됩니다 -->
+                    </div>
+
+                    <!-- 댓글 작성 폼 (로그인 회원 전용) -->
+                    <div id="commentFormWrap" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:14px;">
+                        <form id="commentForm" style="display:flex; flex-direction:column; gap:10px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between;">
+                                <span id="commentAuthorNotice" style="font-size:0.85rem; font-weight:700; color:#0f172a;">✍️ 댓글 작성</span>
+                                <span style="font-size:0.75rem; color:#94a3b8;">* 매물 정보 및 문의사항을 남겨주세요.</span>
+                            </div>
+                            <textarea id="inputCommentText" class="form-control" rows="2" placeholder="댓글을 입력하세요..." style="resize:vertical; font-size:0.85rem;" required></textarea>
+                            <div style="display:flex; justify-content:flex-end;">
+                                <button type="submit" class="btn-admin" style="background-color:#0f172a; padding:8px 16px; font-size:0.85rem;">
+                                    <i data-lucide="send" style="width:14px; height:14px;"></i>
+                                    <span>댓글 등록</span>
+                                </button>
+                            </div>
+                        </form>
+                        <div id="commentLoginNotice" style="display:none; text-align:center; padding:12px; color:#64748b; font-size:0.85rem;">
+                            🔒 댓글 작성을 위해 먼저 <a href="#" id="linkOpenLoginInComment" style="color:#0f172a; font-weight:700; text-decoration:underline;">로그인</a>해 주세요.
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -422,7 +456,7 @@
         </div>
     </div>
 
-    <!-- 모달 6: 신규 매물 등록/수정 팝업 모달 ("매물 번호" & "등록 일자" 추가) -->
+    <!-- 모달 6: 신규 매물 등록/수정 팝업 모달 -->
     <div id="adminModal" class="modal-overlay">
         <div class="modal-container" style="max-width: 650px;">
             <div class="modal-header">
@@ -571,7 +605,7 @@
                     </div>
 
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top: 16px;">
-                        <button type="button" id="btnCancelAdminModal" class="btn-admin" style="background-color:#64748b; justify- content: center; padding: 14px;">
+                        <button type="button" id="btnCancelAdminModal" class="btn-admin" style="background-color:#64748b; justify-content: center; padding: 14px;">
                             <i data-lucide="x-circle" style="width:18px; height:18px;"></i>
                             <span>취소 (저장안함)</span>
                         </button>
