@@ -18,10 +18,10 @@
   --accent-emerald: #10b981;
   --border-light: #e2e8f0;
   
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-full: 9999px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-full: 0px;
   
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -215,22 +215,23 @@ input, textarea, select {
 .badge-live {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: clamp(4px, 1.2vw, 8px);
   background-color: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #ffffff;
-  font-size: 0.75rem;
+  font-size: clamp(0.5rem, 1.5vw, 0.75rem);
   font-weight: 700;
-  padding: 6px 14px;
+  padding: clamp(4px, 1.2vw, 6px) clamp(8px, 2.5vw, 14px);
   border-radius: var(--radius-full);
   margin-bottom: 24px;
+  white-space: nowrap;
 }
 
 .dot-live {
-  width: 8px;
-  height: 8px;
+  width: clamp(5px, 1.2vw, 8px);
+  height: clamp(5px, 1.2vw, 8px);
   border-radius: 50%;
   background-color: var(--accent-emerald);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
@@ -502,7 +503,7 @@ input, textarea, select {
   width: 100%;
   max-width: 860px;
   max-height: 90vh;
-  border-radius: 28px;
+  border-radius: 0px;
   overflow: hidden;
   box-shadow: var(--shadow-modal);
   display: flex;
@@ -919,7 +920,7 @@ input, textarea, select {
   top: 14px;
   right: 14px;
   padding: 6px 12px;
-  border-radius: 9999px;
+  border-radius: 0px;
   font-size: 0.75rem;
   font-weight: 700;
   color: #ffffff;
@@ -968,7 +969,7 @@ input, textarea, select {
   padding: 9px 8px;
   background: #0f172a;
   border: 1px solid #334155;
-  border-radius: 8px;
+  border-radius: 0px;
   cursor: pointer;
   box-sizing: border-box;
   transition: all 0.2s ease;
@@ -984,7 +985,7 @@ input, textarea, select {
   width: 100%;
   height: 3px;
   background-color: #ffffff;
-  border-radius: 2px;
+  border-radius: 0px;
 }
 
 .mobile-drawer-overlay {
@@ -1130,7 +1131,7 @@ input, textarea, select {
     width: 100%;
     max-width: 100%;
     max-height: 92vh;
-    border-radius: 16px;
+    border-radius: 0px;
   }
 
   .modal-header {
