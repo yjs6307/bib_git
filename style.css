@@ -461,7 +461,7 @@ input, textarea, select {
 }
 
 .card-footer {
-  padding-top: 14px;
+  padding: 14px 16px;
   border-top: 1px solid var(--border-light);
   display: flex;
   align-items: center;
