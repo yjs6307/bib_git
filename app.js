@@ -951,7 +951,14 @@ function updateGallery() {
     ? state.selectedProperty.images
     : ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
 
-  modalGalleryMain.src = images[state.currentImageIndex];
+  const track = document.getElementById("modalGalleryTrack");
+  if (track) {
+    if (track.children.length !== images.length) {
+      track.innerHTML = images.map(img => `<img src="${img}" class="gallery-main-img" />`).join("");
+    }
+    track.style.transform = `translateX(-${state.currentImageIndex * 100}%)`;
+  }
+
   galleryCounter.textContent = `${state.currentImageIndex + 1} / ${images.length}`;
 
   btnPrevImage.style.display = images.length > 1 ? "flex" : "none";
