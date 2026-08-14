@@ -249,10 +249,11 @@ input, textarea, select {
 
 .hero-subtitle {
   color: #e2e8f0;
-  font-size: 1.1rem;
+  font-size: clamp(0.5rem, 1.6vw, 1.1rem);
   max-width: 650px;
   line-height: 1.5;
   text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  white-space: nowrap;
 }
 
 /* 5. 검색 및 필터 컨트롤 */
@@ -1087,7 +1088,7 @@ input, textarea, select {
   }
 
   .hero-subtitle {
-    font-size: 0.875rem;
+    /* 모바일에서도 clamp()가 동작하도록 고정 크기 제거 */
   }
 
   .main-container {
