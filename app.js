@@ -627,8 +627,7 @@ function render() {
             </div>
             <div class="card-footer">
               <div class="card-footer-item">
-                <i data-lucide="maximize-2" style="width:13px; height:13px; color:#94a3b8;"></i>
-                <span>${property.area_size}</span>
+                <span style="font-weight:600; color:#475569;">매물번호:${propNo}</span>
               </div>
               <div class="card-footer-item">
                 <i data-lucide="calendar" style="width:13px; height:13px; color:#10b981;"></i>
