@@ -605,6 +605,10 @@ function render() {
             <div style="position:absolute; bottom:8px; left:8px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:4px;">
               No. ${propNo}
             </div>
+            <div style="position:absolute; bottom:8px; right:8px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.7rem; font-weight:700; padding:4px 8px; border-radius:4px; display:flex; flex-direction:column; gap:2px; text-align:right;">
+              <span>방 ${property.rooms || 0} / 화장실 ${property.bathrooms || 0}</span>
+              <span style="font-size:0.65rem; color:#cbd5e1; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${property.area_size || '면적 정보 없음'}</span>
+            </div>
           </div>
           <div class="card-content">
             <div>
