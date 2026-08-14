@@ -605,19 +605,24 @@ function render() {
             <div style="position:absolute; bottom:8px; left:8px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:4px;">
               No. ${propNo}
             </div>
-            <div style="position:absolute; bottom:8px; right:8px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.7rem; font-weight:700; padding:4px 8px; border-radius:4px; display:flex; flex-direction:column; gap:2px; text-align:right;">
-              <span>방 ${property.rooms || 0} / 화장실 ${property.bathrooms || 0}</span>
-              <span style="font-size:0.65rem; color:#cbd5e1; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${property.area_size || '면적 정보 없음'}</span>
-            </div>
           </div>
           <div class="card-content">
-            <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div class="card-price">${property.price}</div>
-              <h3 class="card-title">${property.title}</h3>
-              <div class="card-location">
-                <i data-lucide="map-pin" style="width:14px; height:14px; color:#94a3b8;"></i>
-                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${property.location}</span>
+              <div style="font-size:0.75rem; color:#64748b; text-align:right; font-weight:600; line-height:1.4; background:#f1f5f9; padding:4px 8px; border-radius:6px;">
+                <div>방 ${property.rooms || 0} · 화장실 ${property.bathrooms || 0}</div>
+                <div>전용면적 ${
+                  (property.area_size && property.area_size.includes('/')) 
+                    ? property.area_size.split('/').pop().trim() 
+                    : (property.area_size || '-')
+                }</div>
               </div>
+            </div>
+            <h3 class="card-title">${property.title}</h3>
+            <div class="card-location">
+              <i data-lucide="map-pin" style="width:14px; height:14px; color:#94a3b8;"></i>
+              <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${property.location}</span>
+            </div>
             </div>
             <div class="card-footer">
               <div class="card-footer-item">
