@@ -120,8 +120,41 @@ let MOCK_COMMENTS = [
 ];
 
 // -----------------------------------------------------------------------------
-// 2. 애플리케이션 상태 (State Management)
+// 2. 히어로 슬라이더 데이터 및 애플리케이션 상태 (State Management)
 // -----------------------------------------------------------------------------
+const HERO_SLIDES = [
+  {
+    title: "공간을 재설계하고, 부의 크기를 키우다.",
+    subtitle: "빌라 리모델링과 LH/GH 사전매입으로 확실한 수익을 짓는 실전 투자 클럽, 부익부",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1600&q=80"
+  },
+  {
+    title: "낡은 공간을 깨워, 새로운 부를 기획하다.",
+    subtitle: "가치 상승부터 매각까지, 투자의 청사진을 완성하는 프라이빗 멤버십.",
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80"
+  },
+  {
+    title: "부동산으로 부를 짓는 사람들의 견고한 네트워크.",
+    subtitle: "전략적 리모델링과 LH/GH 사전매입으로 압도적인 부를 창출합니다.",
+    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1600&q=80"
+  },
+  {
+    title: "투자의 공식을 넘어, 부의 무한한 확장을 실현하다.",
+    subtitle: "빌라 밸류업을 통해 실물 자산의 가치를 극대화하는 투자자들의 모임, 부익부",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=80"
+  },
+  {
+    title: "가치를 짓고, 부를 누리다.",
+    subtitle: "빌라 리모델링 & LH/GH 매입 전문 투자 멤버십, 부익부",
+    image: "https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?w=1600&q=80"
+  },
+  {
+    title: "리모델링으로 가치를, 매각으로 부를.",
+    subtitle: "부동산으로 진정한 부를 창출하는 선택받은 투자자들.",
+    image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1600&q=80"
+  }
+];
+
 let state = {
   properties: [],
   users: [],
@@ -143,6 +176,12 @@ const propertyCount = document.getElementById("propertyCount");
 const searchInput = document.getElementById("searchInput");
 const categoryContainer = document.getElementById("categoryContainer");
 const navActions = document.getElementById("navActions");
+
+// 히어로 섹션 참조
+const heroSliderContainer = document.getElementById("heroSliderContainer");
+const heroTitle = document.getElementById("heroTitle");
+const heroSubtitle = document.getElementById("heroSubtitle");
+const heroDots = document.getElementById("heroDots");
 
 // 모달 참조
 const detailModal = document.getElementById("detailModal");
@@ -1599,5 +1638,71 @@ document.addEventListener("DOMContentLoaded", () => {
         resetSubmitButton();
       }
     });
+    });
   }
+
+  // ---------------------------------------------------------------------------
+  // 히어로 슬라이더 초기화 로직
+  // ---------------------------------------------------------------------------
+  function initHeroSlider() {
+    if (!heroSliderContainer || !heroTitle || !heroSubtitle || !heroDots || HERO_SLIDES.length === 0) return;
+
+    let currentSlideIndex = 0;
+    
+    // 슬라이드 요소 생성
+    HERO_SLIDES.forEach((slide, index) => {
+      // 배경 이미지 생성
+      const slideDiv = document.createElement("div");
+      slideDiv.className = `hero-slide ${index === 0 ? 'active' : ''}`;
+      slideDiv.style.backgroundImage = `url('${slide.image}')`;
+      heroSliderContainer.appendChild(slideDiv);
+
+      // 인디케이터 닷 생성
+      const dot = document.createElement("div");
+      dot.className = `hero-dot ${index === 0 ? 'active' : ''}`;
+      dot.addEventListener("click", () => {
+        goToSlide(index);
+      });
+      heroDots.appendChild(dot);
+    });
+
+    // 슬라이드 전환 함수
+    function goToSlide(index) {
+      const slides = heroSliderContainer.querySelectorAll(".hero-slide");
+      const dots = heroDots.querySelectorAll(".hero-dot");
+      
+      if (slides[currentSlideIndex]) slides[currentSlideIndex].classList.remove("active");
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.remove("active");
+
+      currentSlideIndex = index;
+
+      if (slides[currentSlideIndex]) slides[currentSlideIndex].classList.add("active");
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.add("active");
+
+      // 텍스트 업데이트 (페이드 효과를 위해 약간의 애니메이션 적용 가능)
+      heroTitle.style.opacity = '0';
+      heroSubtitle.style.opacity = '0';
+      
+      setTimeout(() => {
+        heroTitle.innerHTML = HERO_SLIDES[currentSlideIndex].title.replace(/, /g, ",<br/>"); 
+        // 텍스트 줄바꿈 처리를 원할 시 br 태그 적용
+        heroSubtitle.innerHTML = HERO_SLIDES[currentSlideIndex].subtitle;
+        heroTitle.style.transition = 'opacity 0.5s';
+        heroSubtitle.style.transition = 'opacity 0.5s';
+        heroTitle.style.opacity = '1';
+        heroSubtitle.style.opacity = '1';
+      }, 300);
+    }
+
+    // 자동 전환 (5초 간격)
+    setInterval(() => {
+      const nextIndex = (currentSlideIndex + 1) % HERO_SLIDES.length;
+      goToSlide(nextIndex);
+    }, 5000);
+    
+    // 초기 텍스트 설정
+    goToSlide(0);
+  }
+
+  initHeroSlider();
 });

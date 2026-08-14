@@ -67,20 +67,25 @@
         </div>
     </div>
 
-    <!-- 2. 히어로 안내 섹션 -->
+    <!-- 2. 히어로 안내 섹션 (슬라이더 영역) -->
     <section class="hero-section">
+        <!-- 슬라이더 배경 요소 컨테이너 -->
+        <div id="heroSliderContainer" class="hero-slider-container"></div>
+        <div class="hero-slider-overlay"></div>
+
         <div class="hero-container">
             <div class="badge-live">
                 <span class="dot-live"></span>
-                승인제 10단계 회원 전용 부동산 자산 플랫폼
+                승인제 회원 전용 부동산 자산 플랫폼
             </div>
-            <h2 class="hero-title">
+            <h2 id="heroTitle" class="hero-title">
                 가장 신뢰할 수 있는 <br />
                 부동산 매물 정보를 만나보세요.
             </h2>
-            <p class="hero-subtitle">
-                관리자의 가입 승인과 10단계 회원 등급 권한에 따라 검증된 매물 자산 정보를 안전하게 이용하실 수 있습니다.
+            <p id="heroSubtitle" class="hero-subtitle">
+                관리자의 가입 승인과 검증된 매물 자산 정보를 안전하게 이용하실 수 있습니다.
             </p>
+            <div id="heroDots" class="hero-dots"></div>
         </div>
     </section>
 
@@ -118,7 +123,8 @@
     <!-- 4. 심플 푸터 (Footer) 영역 -->
     <footer class="footer-site">
         <div class="footer-container" style="text-align: center; padding: 40px 24px;">
-            <div style="font-weight: 800; font-size: 1.25rem; color: #ffffff; letter-spacing: -0.02em; margin-bottom: 8px;">
+            <div
+                style="font-weight: 800; font-size: 1.25rem; color: #ffffff; letter-spacing: -0.02em; margin-bottom: 8px;">
                 부익부
             </div>
             <p style="font-size: 0.85rem; color: #94a3b8;">
@@ -138,14 +144,18 @@
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span id="modalTypeBadge" class="card-badge-type" style="position:static;">빌라</span>
                     <span id="modalStatusBadge" class="badge-status-progress" style="position:static;">매매진행중</span>
-                    <span id="modalPropertyNumberBadge" style="font-size:0.8rem; font-weight:700; background:#0f172a; color:#fff; padding:4px 10px; border-radius:6px;">No. -</span>
+                    <span id="modalPropertyNumberBadge"
+                        style="font-size:0.8rem; font-weight:700; background:#0f172a; color:#fff; padding:4px 10px; border-radius:6px;">No.
+                        -</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <button type="button" id="btnDeleteProperty" style="display:none; align-items:center; gap:4px; font-size:0.8rem; font-weight:600; background:#fee2e2; color:#ef4444; padding:6px 12px; border-radius:8px; border:1px solid #fca5a5; transition:all 0.2s;">
+                    <button type="button" id="btnDeleteProperty"
+                        style="display:none; align-items:center; gap:4px; font-size:0.8rem; font-weight:600; background:#fee2e2; color:#ef4444; padding:6px 12px; border-radius:8px; border:1px solid #fca5a5; transition:all 0.2s;">
                         <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
                         <span>삭제</span>
                     </button>
-                    <button type="button" id="btnEditProperty" style="display:flex; align-items:center; gap:4px; font-size:0.8rem; font-weight:600; background:#f1f5f9; color:#0f172a; padding:6px 12px; border-radius:8px; transition:all 0.2s;">
+                    <button type="button" id="btnEditProperty"
+                        style="display:flex; align-items:center; gap:4px; font-size:0.8rem; font-weight:600; background:#f1f5f9; color:#0f172a; padding:6px 12px; border-radius:8px; transition:all 0.2s;">
                         <i data-lucide="edit-3" style="width:14px; height:14px;"></i>
                         <span>수정</span>
                     </button>
@@ -174,8 +184,10 @@
 
                 <div style="margin-bottom: 20px;">
                     <div id="modalPrice" style="font-size: 1.75rem; font-weight: 800; color: #0f172a;">-</div>
-                    <h2 id="modalTitle" style="font-size: 1.35rem; font-weight: 700; margin-top: 4px; color: #1e293b;">-</h2>
-                    <div style="display:flex; align-items:center; gap:12px; color:#64748b; font-size:0.85rem; margin-top:8px; flex-wrap:wrap;">
+                    <h2 id="modalTitle" style="font-size: 1.35rem; font-weight: 700; margin-top: 4px; color: #1e293b;">-
+                    </h2>
+                    <div
+                        style="display:flex; align-items:center; gap:12px; color:#64748b; font-size:0.85rem; margin-top:8px; flex-wrap:wrap;">
                         <div style="display:flex; align-items:center; gap:4px;">
                             <i data-lucide="map-pin" style="width:16px; height:16px;"></i>
                             <span id="modalLocation">-</span>
@@ -213,12 +225,15 @@
                 </div>
 
                 <!-- 투자 & 수익 자동 계산표 박스 (단위: 만원) -->
-                <div id="modalInvestmentWrap" style="margin-top: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
-                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
+                <div id="modalInvestmentWrap"
+                    style="margin-top: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                    <h3
+                        style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
                         <i data-lucide="calculator" style="width:16px; height:16px; color:#10b981;"></i>
                         <span>부동산 투자 및 예상 수익 분석 (단위: 만원)</span>
                     </h3>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; font-size:0.85rem;">
+                    <div
+                        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; font-size:0.85rem;">
                         <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #f1f5f9;">
                             <span style="color:#64748b; font-size:0.75rem; display:block;">매입가 (만원)</span>
                             <strong id="modalPurchasePrice" style="font-size:1rem; color:#0f172a;">- 만원</strong>
@@ -231,20 +246,25 @@
                             <span style="color:#64748b; font-size:0.75rem; display:block;">예상매매가 (만원)</span>
                             <strong id="modalExpectedSellingPrice" style="font-size:1rem; color:#0f172a;">- 만원</strong>
                         </div>
-                        <div style="background:#ecfdf5; padding:10px; border-radius:8px; border:1px solid #a7f3d0; grid-column: 1 / -1;">
-                            <span style="color:#047857; font-size:0.75rem; font-weight:700; display:block;">예상 순수익 (예상매매가 - 매입가 - 예상비용)</span>
+                        <div
+                            style="background:#ecfdf5; padding:10px; border-radius:8px; border:1px solid #a7f3d0; grid-column: 1 / -1;">
+                            <span style="color:#047857; font-size:0.75rem; font-weight:700; display:block;">예상 순수익
+                                (예상매매가 - 매입가 - 예상비용)</span>
                             <strong id="modalExpectedProfit" style="font-size:1.15rem; color:#059669;">0 만원</strong>
                         </div>
                     </div>
                 </div>
 
                 <!-- 참여 회원 명단 박스 -->
-                <div id="modalParticipantsWrap" style="margin-top: 20px; background-color: #f1f5f9; border-radius: 12px; padding: 14px;">
-                    <h3 style="font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; display:flex; align-items:center; gap:6px;">
+                <div id="modalParticipantsWrap"
+                    style="margin-top: 20px; background-color: #f1f5f9; border-radius: 12px; padding: 14px;">
+                    <h3
+                        style="font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; display:flex; align-items:center; gap:6px;">
                         <i data-lucide="users" style="width:16px; height:16px; color:#475569;"></i>
                         <span>참여 회원 명단</span>
                     </h3>
-                    <div id="modalParticipants" style="font-size: 0.85rem; color: #334155; line-height: 1.5; white-space: pre-line;">-</div>
+                    <div id="modalParticipants"
+                        style="font-size: 0.85rem; color: #334155; line-height: 1.5; white-space: pre-line;">-</div>
                 </div>
 
                 <div style="margin-top: 24px;">
@@ -254,34 +274,43 @@
 
                 <!-- 실시간 회원 댓글 & 문의 섹션 -->
                 <div style="margin-top: 28px; border-top: 2px solid #f1f5f9; padding-top: 20px;">
-                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 14px; display:flex; align-items:center; gap:8px;">
+                    <h3
+                        style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 14px; display:flex; align-items:center; gap:8px;">
                         <i data-lucide="message-square" style="width:18px; height:18px; color:#10b981;"></i>
                         <span>실시간 회원 댓글 및 문의</span>
-                        <span id="modalCommentsCount" style="font-size:0.8rem; background:#10b981; color:#fff; padding:2px 8px; border-radius:9999px; font-weight:700;">0</span>
+                        <span id="modalCommentsCount"
+                            style="font-size:0.8rem; background:#10b981; color:#fff; padding:2px 8px; border-radius:9999px; font-weight:700;">0</span>
                     </h3>
 
                     <!-- 댓글 목록 박스 -->
-                    <div id="commentsListContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                    <div id="commentsListContainer"
+                        style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
                         <!-- app.js에서 댓글 목록이 동적 생성됩니다 -->
                     </div>
 
                     <!-- 댓글 작성 폼 (로그인 회원 전용) -->
-                    <div id="commentFormWrap" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:14px;">
+                    <div id="commentFormWrap"
+                        style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:14px;">
                         <form id="commentForm" style="display:flex; flex-direction:column; gap:10px;">
                             <div style="display:flex; align-items:center; justify-content:space-between;">
-                                <span id="commentAuthorNotice" style="font-size:0.85rem; font-weight:700; color:#0f172a;">✍️ 댓글 작성</span>
+                                <span id="commentAuthorNotice"
+                                    style="font-size:0.85rem; font-weight:700; color:#0f172a;">✍️ 댓글 작성</span>
                                 <span style="font-size:0.75rem; color:#94a3b8;">* 매물 정보 및 문의사항을 남겨주세요.</span>
                             </div>
-                            <textarea id="inputCommentText" class="form-control" rows="2" placeholder="댓글을 입력하세요..." style="resize:vertical; font-size:0.85rem;" required></textarea>
+                            <textarea id="inputCommentText" class="form-control" rows="2" placeholder="댓글을 입력하세요..."
+                                style="resize:vertical; font-size:0.85rem;" required></textarea>
                             <div style="display:flex; justify-content:flex-end;">
-                                <button type="submit" class="btn-admin" style="background-color:#0f172a; padding:8px 16px; font-size:0.85rem;">
+                                <button type="submit" class="btn-admin"
+                                    style="background-color:#0f172a; padding:8px 16px; font-size:0.85rem;">
                                     <i data-lucide="send" style="width:14px; height:14px;"></i>
                                     <span>댓글 등록</span>
                                 </button>
                             </div>
                         </form>
-                        <div id="commentLoginNotice" style="display:none; text-align:center; padding:12px; color:#64748b; font-size:0.85rem;">
-                            🔒 댓글 작성을 위해 먼저 <a href="#" id="linkOpenLoginInComment" style="color:#0f172a; font-weight:700; text-decoration:underline;">로그인</a>해 주세요.
+                        <div id="commentLoginNotice"
+                            style="display:none; text-align:center; padding:12px; color:#64748b; font-size:0.85rem;">
+                            🔒 댓글 작성을 위해 먼저 <a href="#" id="linkOpenLoginInComment"
+                                style="color:#0f172a; font-weight:700; text-decoration:underline;">로그인</a>해 주세요.
                         </div>
                     </div>
                 </div>
@@ -313,27 +342,32 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div style="background-color:#f1f5f9; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+                <div
+                    style="background-color:#f1f5f9; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <span style="font-size:0.75rem; color:#64748b; display:block;">수신 전문 상담원 번호</span>
                         <strong style="font-size:1.1rem; color:#0f172a;">010-8917-8383</strong>
                     </div>
-                    <button type="button" id="btnCopyPhone" style="font-size:0.75rem; background:#0f172a; color:#fff; padding:6px 12px; border-radius:8px; font-weight:600;">
+                    <button type="button" id="btnCopyPhone"
+                        style="font-size:0.75rem; background:#0f172a; color:#fff; padding:6px 12px; border-radius:8px; font-weight:600;">
                         번호 복사
                     </button>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="smsContentInput">문의 메시지 내용</label>
-                    <textarea id="smsContentInput" class="form-control" rows="5" style="line-height:1.6; font-size:0.9rem;"></textarea>
+                    <textarea id="smsContentInput" class="form-control" rows="5"
+                        style="line-height:1.6; font-size:0.9rem;"></textarea>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
-                    <button type="button" id="btnCopySmsText" class="btn-admin" style="background-color:#475569; justify-content:center; padding:12px;">
+                    <button type="button" id="btnCopySmsText" class="btn-admin"
+                        style="background-color:#475569; justify-content:center; padding:12px;">
                         <i data-lucide="copy" style="width:16px; height:16px;"></i>
                         <span>문자 내용 복사</span>
                     </button>
-                    <a id="btnSendSmsApp" href="#" class="btn-admin-add" style="justify-content:center; padding:12px; text-decoration:none;">
+                    <a id="btnSendSmsApp" href="#" class="btn-admin-add"
+                        style="justify-content:center; padding:12px; text-decoration:none;">
                         <i data-lucide="send" style="width:16px; height:16px;"></i>
                         <span>문자 앱으로 발송</span>
                     </a>
@@ -362,21 +396,25 @@
                 <form id="signupForm">
                     <div class="form-group">
                         <label class="form-label" for="signupEmail">이메일 (아이디)</label>
-                        <input type="email" id="signupEmail" class="form-control" placeholder="example@email.com" required />
+                        <input type="email" id="signupEmail" class="form-control" placeholder="example@email.com"
+                            required />
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="signupPassword">비밀번호</label>
-                        <input type="password" id="signupPassword" class="form-control" placeholder="비밀번호 입력" required />
+                        <input type="password" id="signupPassword" class="form-control" placeholder="비밀번호 입력"
+                            required />
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="signupName">이름 / 상호명</label>
-                        <input type="text" id="signupName" class="form-control" placeholder="홍길동 (또는 부익부 공인중개사)" required />
+                        <input type="text" id="signupName" class="form-control" placeholder="홍길동 (또는 부익부 공인중개사)"
+                            required />
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="signupPhone">연락처 (핸드폰 번호)</label>
                         <input type="tel" id="signupPhone" class="form-control" placeholder="010-1234-5678" required />
                     </div>
-                    <button type="submit" class="btn-admin" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                    <button type="submit" class="btn-admin"
+                        style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
                         <i data-lucide="check" style="width:16px; height:16px;"></i>
                         <span>가입 신청하기</span>
                     </button>
@@ -401,13 +439,16 @@
                 <form id="loginForm">
                     <div class="form-group">
                         <label class="form-label" for="loginEmail">이메일 (아이디)</label>
-                        <input type="email" id="loginEmail" class="form-control" placeholder="admin@buikbu.com" required />
+                        <input type="email" id="loginEmail" class="form-control" placeholder="admin@buikbu.com"
+                            required />
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="loginPassword">비밀번호</label>
-                        <input type="password" id="loginPassword" class="form-control" placeholder="admin1234" required />
+                        <input type="password" id="loginPassword" class="form-control" placeholder="admin1234"
+                            required />
                     </div>
-                    <button type="submit" class="btn-admin" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                    <button type="submit" class="btn-admin"
+                        style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
                         <i data-lucide="log-in" style="width:16px; height:16px;"></i>
                         <span>로그인</span>
                     </button>
@@ -433,7 +474,8 @@
             </div>
             <div class="modal-body" style="padding: 20px;">
                 <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px;">
-                    신규 가입한 회원을 <strong>[승인]</strong>하고 <strong>10단계 등급(Level 1~10)</strong> 및 <strong>매물 등록/수정/삭제 권한</strong>을 설정할 수 있습니다.
+                    신규 가입한 회원을 <strong>[승인]</strong>하고 <strong>10단계 등급(Level 1~10)</strong> 및 <strong>매물 등록/수정/삭제
+                        권한</strong>을 설정할 수 있습니다.
                 </p>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
@@ -472,7 +514,10 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="inputPropertyNumber">매물 번호 (7자리 고유 번호 / 수정 불가)</label>
-                            <input type="text" id="inputPropertyNumber" class="form-control" placeholder="2608001" readonly style="background-color: #f1f5f9; color: #0f172a; font-weight: 700; cursor: not-allowed;" required />
+                            <input type="text" id="inputPropertyNumber" class="form-control" placeholder="2608001"
+                                readonly
+                                style="background-color: #f1f5f9; color: #0f172a; font-weight: 700; cursor: not-allowed;"
+                                required />
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="inputRegistrationDate">등록 일자</label>
@@ -482,7 +527,8 @@
 
                     <div class="form-group">
                         <label class="form-label" for="inputTitle">매물 제목</label>
-                        <input type="text" id="inputTitle" class="form-control" placeholder="예: 역삼동 신축 빌라 / 상가 매매" required />
+                        <input type="text" id="inputTitle" class="form-control" placeholder="예: 역삼동 신축 빌라 / 상가 매매"
+                            required />
                     </div>
 
                     <div class="form-row">
@@ -512,35 +558,41 @@
                     <div id="villaSpecRow" class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="inputRooms">방 수</label>
-                            <input type="number" id="inputRooms" class="form-control" placeholder="예: 3 (개)" min="0" value="3" />
+                            <input type="number" id="inputRooms" class="form-control" placeholder="예: 3 (개)" min="0"
+                                value="3" />
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="inputBathrooms">화장실 수</label>
-                            <input type="number" id="inputBathrooms" class="form-control" placeholder="예: 2 (개)" min="0" value="2" />
+                            <input type="number" id="inputBathrooms" class="form-control" placeholder="예: 2 (개)" min="0"
+                                value="2" />
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="inputLocation">소재지 / 위치</label>
-                        <input type="text" id="inputLocation" class="form-control" placeholder="예: 서울시 강남구 역삼동 123-4" required />
+                        <input type="text" id="inputLocation" class="form-control" placeholder="예: 서울시 강남구 역삼동 123-4"
+                            required />
                     </div>
 
                     <!-- 소재지/위치 아래 층수 및 면적(㎡) 공급/전용 입력란 -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="inputFloorInfo">층수 / 총층수</label>
-                            <input type="text" id="inputFloorInfo" class="form-control" placeholder="예: 3층 / 5층" required />
+                            <input type="text" id="inputFloorInfo" class="form-control" placeholder="예: 3층 / 5층"
+                                required />
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="inputArea">면적(㎡) 공급/전용</label>
-                            <input type="text" id="inputArea" class="form-control" placeholder="예: 공급 85㎡ / 전용 59㎡" required />
+                            <input type="text" id="inputArea" class="form-control" placeholder="예: 공급 85㎡ / 전용 59㎡"
+                                required />
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="inputPrice">표시가격조건(요약) (만원)</label>
-                            <input type="text" id="inputPrice" class="form-control" placeholder="예: 매매 38000 (3억 8천만원)" required />
+                            <input type="text" id="inputPrice" class="form-control" placeholder="예: 매매 38000 (3억 8천만원)"
+                                required />
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="inputZoning">용도지역 / 지구</label>
@@ -549,29 +601,36 @@
                     </div>
 
                     <!-- 부동산 투자 및 자동 수익 계산 영역 (단위: 만원) -->
-                    <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                        <h4 style="font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; display:flex; align-items:center; gap:6px;">
+                    <div
+                        style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                        <h4
+                            style="font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; display:flex; align-items:center; gap:6px;">
                             <i data-lucide="calculator" style="width:16px; height:16px; color:#10b981;"></i>
                             <span>부동산 투자 금액 및 예상 수익 산출 (단위: 만원)</span>
                         </h4>
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="inputPurchasePrice">매입가 (만원)</label>
-                                <input type="number" id="inputPurchasePrice" class="form-control" placeholder="예: 30000 (3억원)" min="0" step="100" />
+                                <input type="number" id="inputPurchasePrice" class="form-control"
+                                    placeholder="예: 30000 (3억원)" min="0" step="100" />
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="inputExpectedCost">예상비용 (만원)</label>
-                                <input type="number" id="inputExpectedCost" class="form-control" placeholder="예: 2000 (2천만원)" min="0" step="100" />
+                                <input type="number" id="inputExpectedCost" class="form-control"
+                                    placeholder="예: 2000 (2천만원)" min="0" step="100" />
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="inputExpectedSellingPrice">예상매매가 (만원)</label>
-                            <input type="number" id="inputExpectedSellingPrice" class="form-control" placeholder="예: 38000 (3억8천만원)" min="0" step="100" />
+                            <input type="number" id="inputExpectedSellingPrice" class="form-control"
+                                placeholder="예: 38000 (3억8천만원)" min="0" step="100" />
                         </div>
 
                         <!-- 실시간 예상 수익 자동 계산 출력 박스 (단위: 만원) -->
-                        <div id="calcProfitBox" style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:12px; margin-top:8px;">
-                            <span style="font-size:0.75rem; color:#047857; font-weight:700; display:block;">자동 계산된 예상 순수익 (예상매매가 - 매입가 - 예상비용):</span>
+                        <div id="calcProfitBox"
+                            style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:12px; margin-top:8px;">
+                            <span style="font-size:0.75rem; color:#047857; font-weight:700; display:block;">자동 계산된 예상
+                                순수익 (예상매매가 - 매입가 - 예상비용):</span>
                             <strong id="calcProfitText" style="font-size:1.1rem; color:#059669;">0 만원</strong>
                         </div>
                     </div>
@@ -579,13 +638,15 @@
                     <!-- 하단 참여 회원 명단 박스 -->
                     <div class="form-group">
                         <label class="form-label" for="inputParticipants">참여 회원 명단 (투자/파트너 회원)</label>
-                        <textarea id="inputParticipants" class="form-control" rows="2" placeholder="예: 홍길동(50%), 김에이전트(30%), 박투자(20%)"></textarea>
+                        <textarea id="inputParticipants" class="form-control" rows="2"
+                            placeholder="예: 홍길동(50%), 김에이전트(30%), 박투자(20%)"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="inputImageFiles">매물 이미지 첨부 (로컬 사진 다중 선택 가능)</label>
                         <input type="file" id="inputImageFiles" class="form-control" accept="image/*" multiple />
-                        <div id="imagePreviewContainer" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
+                        <div id="imagePreviewContainer"
+                            style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
                         <div style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">
                             * 첫 번째 이미지가 대표 이미지로 등록됩니다. (여러 장의 사진을 한 번에 선택 가능)
                         </div>
@@ -593,7 +654,8 @@
 
                     <div class="form-group">
                         <label class="form-label" for="inputYoutubeUrl">유튜브 영상 링크 (선택 사항)</label>
-                        <input type="url" id="inputYoutubeUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=... 또는 https://youtu.be/..." />
+                        <input type="url" id="inputYoutubeUrl" class="form-control"
+                            placeholder="https://www.youtube.com/watch?v=... 또는 https://youtu.be/..." />
                         <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">
                             * 유튜브 매물 영상 주소를 넣으시면 매물 상세보기 모달에 임베드 플레이어가 자동 생성됩니다.
                         </div>
@@ -601,11 +663,13 @@
 
                     <div class="form-group">
                         <label class="form-label" for="inputDescription">매물 상세 설명</label>
-                        <textarea id="inputDescription" class="form-control" rows="4" placeholder="매물의 주요 특장점 및 입지 조건을 기재하세요."></textarea>
+                        <textarea id="inputDescription" class="form-control" rows="4"
+                            placeholder="매물의 주요 특장점 및 입지 조건을 기재하세요."></textarea>
                     </div>
 
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top: 16px;">
-                        <button type="button" id="btnCancelAdminModal" class="btn-admin" style="background-color:#64748b; justify-content: center; padding: 14px;">
+                        <button type="button" id="btnCancelAdminModal" class="btn-admin"
+                            style="background-color:#64748b; justify-content: center; padding: 14px;">
                             <i data-lucide="x-circle" style="width:18px; height:18px;"></i>
                             <span>취소 (저장안함)</span>
                         </button>
