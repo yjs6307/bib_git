@@ -162,27 +162,38 @@ input, textarea, select {
 
 /* 4. 히어로 섹션 */
 .hero-section {
-  background-color: #ffffff;
+  position: relative;
+  background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   border-bottom: 1px solid var(--border-light);
-  padding: 48px 24px;
+  padding: 80px 24px;
+  text-align: center;
 }
 
 .hero-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .badge-live {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: var(--bg-secondary);
-  color: var(--text-secondary);
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 6px 14px;
   border-radius: var(--radius-full);
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .dot-live {
@@ -190,21 +201,25 @@ input, textarea, select {
   height: 8px;
   border-radius: 50%;
   background-color: var(--accent-emerald);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
 }
 
 .hero-title {
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   font-weight: 800;
-  line-height: 1.25;
+  color: #ffffff;
+  line-height: 1.3;
   letter-spacing: -0.03em;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .hero-subtitle {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  max-width: 600px;
+  color: #e2e8f0;
+  font-size: 1.1rem;
+  max-width: 650px;
+  line-height: 1.5;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
 /* 5. 검색 및 필터 컨트롤 */
