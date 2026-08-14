@@ -499,7 +499,8 @@ function setupCalculationEvents() {
     inputType.addEventListener("change", toggleVillaSpec);
   }
 
-  [inputPurchasePrice, inputExpectedCost, inputExpectedSellingPrice].forEach(input => {
+  const inputPrice = document.getElementById("inputPrice");
+  [inputPrice, inputPurchasePrice, inputExpectedCost, inputExpectedSellingPrice].forEach(input => {
     if (input) {
       input.addEventListener("input", calculateProfit);
     }
@@ -522,11 +523,11 @@ function toggleVillaSpec() {
 }
 
 function calculateProfit() {
-  const purchasePrice = parseFloat(document.getElementById("inputPurchasePrice")?.value) || 0;
+  const contractPrice = parseFloat(document.getElementById("inputPrice")?.value) || 0;
   const expectedCost = parseFloat(document.getElementById("inputExpectedCost")?.value) || 0;
   const expectedSellingPrice = parseFloat(document.getElementById("inputExpectedSellingPrice")?.value) || 0;
 
-  const profit = expectedSellingPrice - purchasePrice - expectedCost;
+  const profit = expectedSellingPrice - contractPrice - expectedCost;
   const calcProfitText = document.getElementById("calcProfitText");
 
   if (calcProfitText) {
@@ -1576,11 +1577,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const checkedConditions = Array.from(document.querySelectorAll('input[name="conditions"]:checked')).map(cb => cb.value);
         const checkedOptions = Array.from(document.querySelectorAll('input[name="options"]:checked')).map(cb => cb.value);
 
+        const contractPrice = parseFloat(document.getElementById("inputPrice").value) || 0;
         const purchasePrice = parseFloat(document.getElementById("inputPurchasePrice").value) || 0;
         const costDetails = document.getElementById("inputCostDetails") ? document.getElementById("inputCostDetails").value.trim() : "";
         const expectedCost = parseFloat(document.getElementById("inputExpectedCost").value) || 0;
         const expectedSellingPrice = parseFloat(document.getElementById("inputExpectedSellingPrice").value) || 0;
-        const expectedProfit = expectedSellingPrice - purchasePrice - expectedCost;
+        const expectedProfit = expectedSellingPrice - contractPrice - expectedCost;
 
         const propertyNumber = document.getElementById("inputPropertyNumber").value.trim() || generatePropertyNumber();
         const registrationDate = document.getElementById("inputRegistrationDate").value || new Date().toISOString().split('T')[0];
