@@ -771,7 +771,7 @@ function openDetailModal(property) {
   modalLocation.textContent = property.location;
   modalAreaSize.textContent = property.area_size;
   modalFloorInfo.textContent = property.floor_info || "정보 없음";
-  modalZoningInfo.textContent = property.zoning_info || "정보 없음";
+  modalBuildYear.textContent = property.build_year || "정보 없음";
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
 
   // 빌라 전용 사양 표시
@@ -880,7 +880,7 @@ function openDetailModal(property) {
       document.getElementById("inputFloorInfo").value = property.floor_info || "";
       document.getElementById("inputArea").value = property.area_size || "";
       document.getElementById("inputPrice").value = property.price || "";
-      document.getElementById("inputZoning").value = property.zoning_info || "";
+      document.getElementById("inputBuildYear").value = property.build_year || "";
 
       // 조건 및 옵션 체크 복원
       const editConditions = property.conditions || [];
@@ -1585,7 +1585,7 @@ document.addEventListener("DOMContentLoaded", () => {
             floor_info: document.getElementById("inputFloorInfo").value,
             price: document.getElementById("inputPrice").value,
             area_size: document.getElementById("inputArea").value,
-            zoning_info: document.getElementById("inputZoning").value,
+            build_year: document.getElementById("inputBuildYear").value,
             purchase_price: purchasePrice,
             expected_cost: expectedCost,
             expected_selling_price: expectedSellingPrice,
@@ -1635,7 +1635,7 @@ document.addEventListener("DOMContentLoaded", () => {
             floor_info: document.getElementById("inputFloorInfo").value,
             price: document.getElementById("inputPrice").value,
             area_size: document.getElementById("inputArea").value,
-            zoning_info: document.getElementById("inputZoning").value,
+            build_year: document.getElementById("inputBuildYear").value,
             purchase_price: purchasePrice,
             expected_cost: expectedCost,
             expected_selling_price: expectedSellingPrice,

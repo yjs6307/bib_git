@@ -238,8 +238,8 @@
                         <div id="modalVillaRooms" class="spec-value">-</div>
                     </div>
                     <div class="spec-box">
-                        <div class="spec-label">용도지역 / 지구</div>
-                        <div id="modalZoningInfo" class="spec-value">-</div>
+                        <div class="spec-label">준공년도</div>
+                        <div id="modalBuildYear" class="spec-value">-</div>
                     </div>
                 </div>
                 <!-- 매물 조건 및 옵션 표시 영역 -->
@@ -658,14 +658,20 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="inputPrice">표시가격조건(요약) (만원)</label>
+                            <label class="form-label" for="inputPrice">계약가격</label>
                             <input type="text" id="inputPrice" class="form-control" placeholder="예: 매매 38000 (3억 8천만원)"
                                 required />
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="inputZoning">용도지역 / 지구</label>
-                            <input type="text" id="inputZoning" class="form-control" placeholder="예: 제2종일반주거지역" />
+                            <label class="form-label" for="inputExpectedSellingPrice">예상매매가(만원)</label>
+                            <input type="number" id="inputExpectedSellingPrice" class="form-control"
+                                placeholder="예: 38000 (3억8천만원)" min="0" step="100" />
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="inputBuildYear">준공년도</label>
+                        <input type="text" id="inputBuildYear" class="form-control" placeholder="예: 2015년" />
                     </div>
 
                     <!-- 부동산 투자 및 자동 수익 계산 영역 (단위: 만원) -->
@@ -687,11 +693,6 @@
                                 <input type="number" id="inputExpectedCost" class="form-control"
                                     placeholder="예: 2000 (2천만원)" min="0" step="100" />
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="inputExpectedSellingPrice">예상매매가 (만원)</label>
-                            <input type="number" id="inputExpectedSellingPrice" class="form-control"
-                                placeholder="예: 38000 (3억8천만원)" min="0" step="100" />
                         </div>
 
                         <!-- 실시간 예상 수익 자동 계산 출력 박스 (단위: 만원) -->
