@@ -183,7 +183,7 @@ input, textarea, select {
   display: flex;
   width: 500%; /* 5개의 슬라이드 */
   height: 100%;
-  animation: heroBgSlide 40s linear infinite;
+  animation: heroBgSlide 25s ease-in-out infinite;
 }
 
 .slide-item {
@@ -193,9 +193,13 @@ input, textarea, select {
   background-position: center;
 }
 
+/* এক 장씩 멈췄다가 넘어가는 슬라이드 애니메이션 효과 */
 @keyframes heroBgSlide {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-80%); }
+  0%, 15%   { transform: translateX(0); }
+  20%, 40%  { transform: translateX(-20%); }
+  45%, 65%  { transform: translateX(-40%); }
+  70%, 90%  { transform: translateX(-60%); }
+  95%, 100% { transform: translateX(-80%); }
 }
 
 .hero-container {
