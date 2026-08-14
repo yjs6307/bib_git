@@ -1262,6 +1262,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (btnCloseDetailModal) btnCloseDetailModal.addEventListener("click", closeDetailModal);
+
+  if (btnPrevImage) {
+    btnPrevImage.addEventListener("click", () => {
+      const images = state.selectedProperty?.images || [];
+      if (images.length > 1) {
+        state.currentImageIndex = (state.currentImageIndex - 1 + images.length) % images.length;
+        updateGallery();
+      }
+    });
+  }
+
+  if (btnNextImage) {
+    btnNextImage.addEventListener("click", () => {
+      const images = state.selectedProperty?.images || [];
+      if (images.length > 1) {
+        state.currentImageIndex = (state.currentImageIndex + 1) % images.length;
+        updateGallery();
+      }
+    });
+  }
   if (btnCloseSignupModal) btnCloseSignupModal.addEventListener("click", () => { signupModal.classList.remove("active"); document.body.style.overflow = ""; });
   if (btnCloseLoginModal) btnCloseLoginModal.addEventListener("click", () => { loginModal.classList.remove("active"); document.body.style.overflow = ""; });
   if (btnCloseUserAdminModal) btnCloseUserAdminModal.addEventListener("click", () => { userAdminModal.classList.remove("active"); document.body.style.overflow = ""; });

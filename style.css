@@ -169,7 +169,6 @@ input, textarea, select {
   background-attachment: fixed;
   border-bottom: 1px solid var(--border-light);
   padding: 80px 24px;
-  text-align: center;
 }
 
 .hero-container {
@@ -177,7 +176,7 @@ input, textarea, select {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .badge-live {
