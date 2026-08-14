@@ -509,11 +509,14 @@ function setupCalculationEvents() {
 function toggleVillaSpec() {
   const inputType = document.getElementById("inputType");
   const villaSpecRow = document.getElementById("villaSpecRow");
+  const villaExtraRow = document.getElementById("villaExtraRow");
   if (inputType && villaSpecRow) {
     if (inputType.value === "빌라") {
       villaSpecRow.style.display = "flex";
+      if (villaExtraRow) villaExtraRow.style.display = "flex";
     } else {
       villaSpecRow.style.display = "none";
+      if (villaExtraRow) villaExtraRow.style.display = "none";
     }
   }
 }
@@ -770,6 +773,31 @@ function openDetailModal(property) {
     modalVillaSpecBox.style.display = "none";
   }
 
+  // 매물 조건 및 옵션 렌더링
+  const conditions = property.conditions || [];
+  const options = property.options || [];
+  const modalExtraSpecBox = document.getElementById("modalExtraSpecBox");
+  const modalConditionsWrap = document.getElementById("modalConditionsWrap");
+  const modalOptionsWrap = document.getElementById("modalOptionsWrap");
+  
+  if (modalExtraSpecBox) {
+    if (conditions.length > 0 || options.length > 0) {
+      modalExtraSpecBox.style.display = "flex";
+      if (modalConditionsWrap) {
+        modalConditionsWrap.innerHTML = conditions.length > 0 
+          ? conditions.map(c => `<span style="background-color: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">${c}</span>`).join("")
+          : '<span style="font-size: 0.8rem; color: #94a3b8;">선택된 조건 없음</span>';
+      }
+      if (modalOptionsWrap) {
+        modalOptionsWrap.innerHTML = options.length > 0 
+          ? options.map(o => `<span style="background-color: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">${o}</span>`).join("")
+          : '<span style="font-size: 0.8rem; color: #94a3b8;">선택된 옵션 없음</span>';
+      }
+    } else {
+      modalExtraSpecBox.style.display = "none";
+    }
+  }
+
   // 투자 & 수익 산출표 표시 (단위: 만원)
   modalPurchasePrice.textContent = Number(property.purchase_price || 0).toLocaleString('ko-KR') + " 만원";
   modalExpectedCost.textContent = Number(property.expected_cost || 0).toLocaleString('ko-KR') + " 만원";
@@ -844,6 +872,16 @@ function openDetailModal(property) {
       document.getElementById("inputArea").value = property.area_size || "";
       document.getElementById("inputPrice").value = property.price || "";
       document.getElementById("inputZoning").value = property.zoning_info || "";
+
+      // 조건 및 옵션 체크 복원
+      const editConditions = property.conditions || [];
+      const editOptions = property.options || [];
+      document.querySelectorAll('input[name="conditions"]').forEach(cb => {
+        cb.checked = editConditions.includes(cb.value);
+      });
+      document.querySelectorAll('input[name="options"]').forEach(cb => {
+        cb.checked = editOptions.includes(cb.value);
+      });
 
       document.getElementById("inputPurchasePrice").value = property.purchase_price || "";
       document.getElementById("inputExpectedCost").value = property.expected_cost || "";
@@ -1514,6 +1552,9 @@ document.addEventListener("DOMContentLoaded", () => {
           finalImageUrls = ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
         }
 
+        const checkedConditions = Array.from(document.querySelectorAll('input[name="conditions"]:checked')).map(cb => cb.value);
+        const checkedOptions = Array.from(document.querySelectorAll('input[name="options"]:checked')).map(cb => cb.value);
+
         const purchasePrice = parseFloat(document.getElementById("inputPurchasePrice").value) || 0;
         const expectedCost = parseFloat(document.getElementById("inputExpectedCost").value) || 0;
         const expectedSellingPrice = parseFloat(document.getElementById("inputExpectedSellingPrice").value) || 0;
@@ -1543,7 +1584,9 @@ document.addEventListener("DOMContentLoaded", () => {
             participant_members: document.getElementById("inputParticipants").value,
             youtube_url: document.getElementById("inputYoutubeUrl").value.trim(),
             description: document.getElementById("inputDescription").value,
-            images: finalImageUrls
+            images: finalImageUrls,
+            conditions: checkedConditions,
+            options: checkedOptions
           };
 
           // 메모리 상의 state 배열 즉시 동기화 보장
@@ -1592,6 +1635,8 @@ document.addEventListener("DOMContentLoaded", () => {
             youtube_url: document.getElementById("inputYoutubeUrl").value.trim(),
             description: document.getElementById("inputDescription").value,
             images: finalImageUrls,
+            conditions: checkedConditions,
+            options: checkedOptions,
             created_at: new Date().toISOString()
           };
 

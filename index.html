@@ -242,6 +242,17 @@
                         <div id="modalZoningInfo" class="spec-value">-</div>
                     </div>
                 </div>
+                <!-- 매물 조건 및 옵션 표시 영역 -->
+                <div id="modalExtraSpecBox" style="margin-top: 16px; padding: 16px; background-color: #f1f5f9; border-radius: 8px; border: 1px solid #e2e8f0; display: none; flex-direction: column; gap: 12px;">
+                    <div>
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 6px;">매물조건</h4>
+                        <div id="modalConditionsWrap" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+                    </div>
+                    <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px;">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 6px;">옵션</h4>
+                        <div id="modalOptionsWrap" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+                    </div>
+                </div>
 
                 <!-- 투자 & 수익 자동 계산표 박스 (단위: 만원) -->
                 <div id="modalInvestmentWrap"
@@ -584,6 +595,44 @@
                             <label class="form-label" for="inputBathrooms">화장실 수</label>
                             <input type="number" id="inputBathrooms" class="form-control" placeholder="예: 2 (개)" min="0"
                                 value="2" />
+                        </div>
+                    </div>
+
+                    <!-- 매물 조건 및 옵션 (빌라 전용, toggleVillaSpec 로직에서 함께 제어) -->
+                    <div id="villaExtraRow" class="form-group" style="display: flex; flex-direction: column; gap: 16px; padding: 16px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                        <div>
+                            <label class="form-label" style="margin-bottom: 8px;">매물조건</label>
+                            <div class="checkbox-group" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;">
+                                    <input type="checkbox" name="conditions" value="즉시입주" style="accent-color: #0f172a;"> 즉시입주
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;">
+                                    <input type="checkbox" name="conditions" value="엘리베이터" style="accent-color: #0f172a;"> 엘리베이터
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;">
+                                    <input type="checkbox" name="conditions" value="주차가능" style="accent-color: #0f172a;"> 주차가능
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;">
+                                    <input type="checkbox" name="conditions" value="남향" style="accent-color: #0f172a;"> 남향
+                                </label>
+                            </div>
+                        </div>
+                        <div style="border-top: 1px solid #cbd5e1; padding-top: 12px;">
+                            <label class="form-label" style="margin-bottom: 8px;">옵션</label>
+                            <div class="checkbox-group" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="에어컨" style="accent-color: #0f172a;"> 에어컨</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="세탁기" style="accent-color: #0f172a;"> 세탁기</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="냉장고" style="accent-color: #0f172a;"> 냉장고</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="책장" style="accent-color: #0f172a;"> 책장</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="침대" style="accent-color: #0f172a;"> 침대</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="가스레인지" style="accent-color: #0f172a;"> 가스레인지</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="인덕션" style="accent-color: #0f172a;"> 인덕션</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="신발장" style="accent-color: #0f172a;"> 신발장</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="전자레인지" style="accent-color: #0f172a;"> 전자레인지</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="싱크대" style="accent-color: #0f172a;"> 싱크대</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="옷장" style="accent-color: #0f172a;"> 옷장</label>
+                                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input type="checkbox" name="options" value="번호키" style="accent-color: #0f172a;"> 번호키</label>
+                            </div>
                         </div>
                     </div>
 
