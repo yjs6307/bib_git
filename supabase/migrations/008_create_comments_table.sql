@@ -16,11 +16,6 @@ CREATE TABLE IF NOT EXISTS public.property_comments (
 -- RLS (Row Level Security) 및 접근 정책 설정
 ALTER TABLE public.property_comments ENABLE ROW LEVEL SECURITY;
 
--- 기존 정책이 있다면 삭제하여 중복 에러(42710) 방지
-DROP POLICY IF EXISTS "Allow read for all users" ON public.property_comments;
-DROP POLICY IF EXISTS "Allow insert for all users" ON public.property_comments;
-DROP POLICY IF EXISTS "Allow delete for all users" ON public.property_comments;
-
 CREATE POLICY "Allow read for all users" ON public.property_comments
     FOR SELECT USING (true);
 
