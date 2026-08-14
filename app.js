@@ -809,6 +809,16 @@ function openDetailModal(property) {
 
   // 투자 & 수익 산출표 표시 (단위: 만원)
   modalPurchasePrice.textContent = Number(property.purchase_price || 0).toLocaleString('ko-KR') + " 만원";
+  const modalCostDetailsWrap = document.getElementById("modalCostDetailsWrap");
+  const modalCostDetails = document.getElementById("modalCostDetails");
+  if (modalCostDetailsWrap && modalCostDetails) {
+    if (property.cost_details) {
+      modalCostDetailsWrap.style.display = "block";
+      modalCostDetails.textContent = property.cost_details;
+    } else {
+      modalCostDetailsWrap.style.display = "none";
+    }
+  }
   modalExpectedCost.textContent = Number(property.expected_cost || 0).toLocaleString('ko-KR') + " 만원";
   modalExpectedSellingPrice.textContent = Number(property.expected_selling_price || 0).toLocaleString('ko-KR') + " 만원";
   modalExpectedProfit.textContent = Number(property.expected_profit || 0).toLocaleString('ko-KR') + " 만원";
@@ -893,6 +903,8 @@ function openDetailModal(property) {
       });
 
       document.getElementById("inputPurchasePrice").value = property.purchase_price || "";
+      const inputCostDetails = document.getElementById("inputCostDetails");
+      if (inputCostDetails) inputCostDetails.value = property.cost_details || "";
       document.getElementById("inputExpectedCost").value = property.expected_cost || "";
       document.getElementById("inputExpectedSellingPrice").value = property.expected_selling_price || "";
       document.getElementById("inputParticipants").value = property.participant_members || "";
@@ -1565,6 +1577,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const checkedOptions = Array.from(document.querySelectorAll('input[name="options"]:checked')).map(cb => cb.value);
 
         const purchasePrice = parseFloat(document.getElementById("inputPurchasePrice").value) || 0;
+        const costDetails = document.getElementById("inputCostDetails") ? document.getElementById("inputCostDetails").value.trim() : "";
         const expectedCost = parseFloat(document.getElementById("inputExpectedCost").value) || 0;
         const expectedSellingPrice = parseFloat(document.getElementById("inputExpectedSellingPrice").value) || 0;
         const expectedProfit = expectedSellingPrice - purchasePrice - expectedCost;
@@ -1587,6 +1600,7 @@ document.addEventListener("DOMContentLoaded", () => {
             area_size: document.getElementById("inputArea").value,
             build_year: document.getElementById("inputBuildYear").value,
             purchase_price: purchasePrice,
+            cost_details: costDetails,
             expected_cost: expectedCost,
             expected_selling_price: expectedSellingPrice,
             expected_profit: expectedProfit,
@@ -1637,6 +1651,7 @@ document.addEventListener("DOMContentLoaded", () => {
             area_size: document.getElementById("inputArea").value,
             build_year: document.getElementById("inputBuildYear").value,
             purchase_price: purchasePrice,
+            cost_details: costDetails,
             expected_cost: expectedCost,
             expected_selling_price: expectedSellingPrice,
             expected_profit: expectedProfit,
