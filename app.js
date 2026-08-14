@@ -603,9 +603,6 @@ function render() {
             <img src="${mainImg}" alt="${property.title}" class="card-image" />
             <div class="card-badge-type">${property.property_type}</div>
             <div class="badge-status ${statusClass}">${tradeStatus}</div>
-            <div style="position:absolute; bottom:8px; left:8px; background:rgba(15,23,42,0.85); color:#fff; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:4px;">
-              No. ${propNo}
-            </div>
           </div>
           <div class="card-content">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
