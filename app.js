@@ -953,8 +953,10 @@ function updateGallery() {
 
   const track = document.getElementById("modalGalleryTrack");
   if (track) {
-    if (track.children.length !== images.length) {
+    const currentPropId = state.selectedProperty.id || 'default';
+    if (track.getAttribute("data-property-id") !== currentPropId) {
       track.innerHTML = images.map(img => `<img src="${img}" class="gallery-main-img" />`).join("");
+      track.setAttribute("data-property-id", currentPropId);
     }
     track.style.transform = `translateX(-${state.currentImageIndex * 100}%)`;
   }
