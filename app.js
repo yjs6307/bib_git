@@ -270,10 +270,8 @@ async function initApp() {
     }
   }
 
-  await Promise.all([
-    fetchUsers(),
-    fetchProperties()
-  ]);
+  await fetchUsers();
+  await fetchProperties();
   updateNavUI();
   setupCalculationEvents();
 }
