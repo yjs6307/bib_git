@@ -300,11 +300,11 @@ async function fetchProperties() {
     try {
       const { data, error } = await supabaseClient.from("properties").select("*").order("created_at", { ascending: false });
       if (error) throw error;
-      if (data && data.length > 0) {
-        // 기존 데모 데이터(MOCK_PROPERTIES)와 DB에서 불러온 데이터를 합쳐서 모두 보여줌
-        state.properties = [...data, ...MOCK_PROPERTIES];
+      if (data) {
+        // 회원님이 등록하신 실제 DB 데이터만 보여줍니다 (예제 데이터 제외)
+        state.properties = data;
       } else {
-        state.properties = MOCK_PROPERTIES;
+        state.properties = [];
       }
     } catch (err) {
       state.properties = MOCK_PROPERTIES;
