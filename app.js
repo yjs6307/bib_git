@@ -628,7 +628,7 @@ function render() {
     .map(property => {
       const mainImg = (property.images && property.images.length > 0)
         ? property.images[0]
-        : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+        : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=70";
 
       const tradeStatus = property.trade_status || "매매진행중";
       const statusClass = getStatusBadgeClass(tradeStatus);
@@ -638,7 +638,7 @@ function render() {
       return `
         <div class="property-card" data-id="${property.id}">
           <div class="card-image-wrap">
-            <img src="${mainImg}" alt="${property.title}" class="card-image" loading="lazy" />
+            <img src="${mainImg}" alt="${property.title}" class="card-image" loading="lazy" decoding="async" />
             <div class="card-badge-type">${property.property_type}</div>
             <div class="badge-status ${statusClass}">${tradeStatus}</div>
           </div>
