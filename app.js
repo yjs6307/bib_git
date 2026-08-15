@@ -270,8 +270,10 @@ async function initApp() {
     }
   }
 
-  await fetchUsers();
-  await fetchProperties();
+  await Promise.all([
+    fetchUsers(),
+    fetchProperties()
+  ]);
   updateNavUI();
   setupCalculationEvents();
 }
@@ -633,7 +635,7 @@ function render() {
       return `
         <div class="property-card" data-id="${property.id}">
           <div class="card-image-wrap">
-            <img src="${mainImg}" alt="${property.title}" class="card-image" />
+            <img src="${mainImg}" alt="${property.title}" class="card-image" loading="lazy" />
             <div class="card-badge-type">${property.property_type}</div>
             <div class="badge-status ${statusClass}">${tradeStatus}</div>
           </div>
@@ -1082,7 +1084,7 @@ function updateGallery() {
   if (images.length > 1) {
     modalGalleryThumbs.style.display = "flex";
     modalGalleryThumbs.innerHTML = images.map((img, idx) => `
-      <img src="${img}" class="thumb-img ${idx === state.currentImageIndex ? 'active' : ''}" data-index="${idx}" />
+      <img src="${img}" class="thumb-img ${idx === state.currentImageIndex ? 'active' : ''}" data-index="${idx}" loading="lazy" />
     `).join("");
 
     document.querySelectorAll(".thumb-img").forEach(thumb => {
