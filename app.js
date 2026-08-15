@@ -147,6 +147,9 @@ const navActions = document.getElementById("navActions");
 // 모달 참조
 const detailModal = document.getElementById("detailModal");
 const btnCloseDetailModal = document.getElementById("btnCloseDetailModal");
+const mapModal = document.getElementById("mapModal");
+const btnMapModalClose = document.getElementById("btnMapModalClose");
+const linkKakaoMap = document.getElementById("linkKakaoMap");
 const modalGalleryMain = document.getElementById("modalGalleryMain");
 const modalGalleryThumbs = document.getElementById("modalGalleryThumbs");
 const btnPrevImage = document.getElementById("btnPrevImage");
@@ -617,16 +620,21 @@ function render() {
               </div>
             </div>
             <h3 class="card-title">${property.title}</h3>
-            <div class="card-location">
-              <i data-lucide="map-pin" style="width:14px; height:14px; color:#94a3b8;"></i>
-              <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${property.location}</span>
+            <div class="card-location" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+              <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
+                <i data-lucide="map-pin" style="width:14px; height:14px; color:#94a3b8; flex-shrink:0;"></i>
+                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${property.location}</span>
+              </div>
+              <button class="btn-map-view" data-location="${property.location}" style="display:flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:700; padding:4px 8px; border-radius:4px; background:#f1f5f9; border:1px solid #cbd5e1; color:#0f172a; flex-shrink:0; cursor:pointer;">
+                <i data-lucide="map" style="width:12px; height:12px; color:#3b82f6;"></i>지도
+              </button>
             </div>
             </div>
             <div class="card-footer">
               <div class="card-footer-item">
                 <span style="font-weight:600; color:#475569;">매물번호:${propNo}</span>
               </div>
-              <div class="card-footer-item">
+              <div class="card-footer-item" style="margin-left: auto; justify-content: flex-end;">
                 <i data-lucide="calendar" style="width:13px; height:13px; color:#10b981;"></i>
                 <span>${regDate}</span>
               </div>
@@ -644,6 +652,14 @@ function render() {
       const id = card.getAttribute("data-id");
       const target = state.properties.find(p => p.id === id);
       if (target) openDetailModal(target);
+    });
+  });
+
+  document.querySelectorAll(".btn-map-view").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const locationStr = btn.getAttribute("data-location");
+      openMapModal(locationStr);
     });
   });
 }
@@ -1000,6 +1016,27 @@ function openDetailModal(property) {
 function closeDetailModal() {
   detailModal.classList.remove("active");
   document.body.style.overflow = "";
+}
+
+function openMapModal(locationStr) {
+  if (!mapModal || !locationStr) return;
+  const mapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(locationStr)}`;
+  if (linkKakaoMap) {
+    linkKakaoMap.href = mapUrl;
+  }
+  mapModal.classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+function closeMapModal() {
+  if (mapModal) {
+    mapModal.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+}
+
+if (btnMapModalClose) {
+  btnMapModalClose.addEventListener("click", closeMapModal);
 }
 
 function updateGallery() {
@@ -1436,7 +1473,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer].forEach(modal => {
+  [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer, mapModal].forEach(modal => {
     if (modal) {
       modal.addEventListener("click", (e) => {
         if (e.target === modal) {
@@ -1449,7 +1486,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer].forEach(modal => {
+      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer, mapModal].forEach(modal => {
         if (modal) modal.classList.remove("active");
       });
       document.body.style.overflow = "";
