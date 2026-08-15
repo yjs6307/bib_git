@@ -818,7 +818,7 @@ function openDetailModal(property) {
   modalPrice.innerHTML = `
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
       <span style="font-size:0.85rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:4px 8px; border-radius:6px; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">계약가</span>
-      <span style="font-size:1.55rem; font-weight:800; color:#0f172a; line-height:1;">${formatKoreanCurrency(property.price)}</span>
+      <span style="font-size:1.3rem; font-weight:800; color:#0f172a; line-height:1;">${formatKoreanCurrency(property.price)}</span>
     </div>
   `;
   modalTitle.textContent = property.title;
