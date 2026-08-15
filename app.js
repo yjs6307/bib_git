@@ -205,6 +205,33 @@ const btnCloseAdminModal = document.getElementById("btnCloseAdminModal");
 const propertyForm = document.getElementById("propertyForm");
 
 // -----------------------------------------------------------------------------
+// 4-1. 유틸리티 함수: 만원 단위 금액을 한국어(억, 만원) 표기로 변환
+// -----------------------------------------------------------------------------
+function formatKoreanCurrency(priceVal) {
+  if (!priceVal) return "가격 미상";
+  // 이미 '억', '만', '원' 등의 문자가 들어있다면 기존 텍스트 그대로 반환
+  if (typeof priceVal === 'string' && (priceVal.includes('억') || priceVal.includes('만') || priceVal.includes('원'))) {
+    return priceVal;
+  }
+  
+  const num = parseInt(priceVal.toString().replace(/,/g, ''), 10);
+  if (isNaN(num)) return priceVal; 
+  if (num === 0) return "0원";
+
+  const uk = Math.floor(num / 10000);
+  const rest = num % 10000;
+  
+  let result = "";
+  if (uk > 0) result += `${uk}억`;
+  if (rest > 0) {
+    if (result.length > 0) result += " ";
+    result += `${rest.toLocaleString('ko-KR')}만`;
+  }
+  
+  return result.trim() + "원";
+}
+
+// -----------------------------------------------------------------------------
 // 4. 유틸리티 함수: 7자리 무중복 자동 생성 (연도 2자 + 월 2자 + 3자 순번, 예: 2608001)
 // -----------------------------------------------------------------------------
 function generatePropertyNumber() {
@@ -612,7 +639,10 @@ function render() {
           </div>
           <div class="card-content">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div class="card-price">${property.price}</div>
+              <div class="card-price" style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+                <span style="font-size:0.75rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px; border:1px solid #e2e8f0;">계약가</span>
+                <span style="font-size:1.4rem;">${formatKoreanCurrency(property.price)}</span>
+              </div>
               <div style="font-size:0.75rem; color:#64748b; text-align:right; font-weight:600; line-height:1.4; background:#f1f5f9; padding:4px 8px; border-radius:6px;">
                 <div>방 ${property.rooms || 0} · 화장실 ${property.bathrooms || 0}</div>
                 <div>전용면적 ${
