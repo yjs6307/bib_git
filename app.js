@@ -641,7 +641,7 @@ function render() {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div class="card-price" style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
                 <span style="font-size:0.75rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px; border:1px solid #e2e8f0;">계약가</span>
-                <span style="font-size:1.4rem;">${formatKoreanCurrency(property.price)}</span>
+                <span style="font-size:0.95rem; font-weight:700; color:#1e293b;">${formatKoreanCurrency(property.price)}</span>
               </div>
               <div style="font-size:0.75rem; color:#64748b; text-align:right; font-weight:600; line-height:1.4; background:#f1f5f9; padding:4px 8px; border-radius:6px;">
                 <div>방 ${property.rooms || 0} · 화장실 ${property.bathrooms || 0}</div>
