@@ -163,6 +163,7 @@ const modalRegistrationDate = document.getElementById("modalRegistrationDate");
 const modalPropertyNumber = document.getElementById("modalPropertyNumber");
 const modalAreaSize = document.getElementById("modalAreaSize");
 const modalFloorInfo = document.getElementById("modalFloorInfo");
+const btnModalMapView = document.getElementById("btnModalMapView");
 const modalVillaSpecBox = document.getElementById("modalVillaSpecBox");
 const modalVillaRooms = document.getElementById("modalVillaRooms");
 const modalZoningInfo = document.getElementById("modalZoningInfo");
@@ -1454,6 +1455,17 @@ document.addEventListener("DOMContentLoaded", () => {
     btnCloseMobileDrawer.addEventListener("click", () => {
       mobileMenuDrawer.classList.remove("active");
       document.body.style.overflow = "";
+    });
+  }
+
+  if (btnModalMapView) {
+    btnModalMapView.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const locationStr = modalLocation ? modalLocation.textContent.trim() : "";
+      if (locationStr && locationStr !== "-") {
+        const mapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(locationStr)}`;
+        window.open(mapUrl, "_blank");
+      }
     });
   }
 
