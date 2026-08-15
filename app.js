@@ -147,9 +147,6 @@ const navActions = document.getElementById("navActions");
 // 모달 참조
 const detailModal = document.getElementById("detailModal");
 const btnCloseDetailModal = document.getElementById("btnCloseDetailModal");
-const mapModal = document.getElementById("mapModal");
-const btnMapModalClose = document.getElementById("btnMapModalClose");
-const linkKakaoMap = document.getElementById("linkKakaoMap");
 const modalGalleryMain = document.getElementById("modalGalleryMain");
 const modalGalleryThumbs = document.getElementById("modalGalleryThumbs");
 const btnPrevImage = document.getElementById("btnPrevImage");
@@ -659,7 +656,10 @@ function render() {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const locationStr = btn.getAttribute("data-location");
-      openMapModal(locationStr);
+      if(locationStr) {
+        const mapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(locationStr)}`;
+        window.open(mapUrl, "_blank");
+      }
     });
   });
 }
@@ -1016,27 +1016,6 @@ function openDetailModal(property) {
 function closeDetailModal() {
   detailModal.classList.remove("active");
   document.body.style.overflow = "";
-}
-
-function openMapModal(locationStr) {
-  if (!mapModal || !locationStr) return;
-  const mapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(locationStr)}`;
-  if (linkKakaoMap) {
-    linkKakaoMap.href = mapUrl;
-  }
-  mapModal.classList.add("active");
-  document.body.style.overflow = "hidden";
-}
-
-function closeMapModal() {
-  if (mapModal) {
-    mapModal.classList.remove("active");
-    document.body.style.overflow = "";
-  }
-}
-
-if (btnMapModalClose) {
-  btnMapModalClose.addEventListener("click", closeMapModal);
 }
 
 function updateGallery() {
@@ -1486,7 +1465,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer, mapModal].forEach(modal => {
+      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer].forEach(modal => {
         if (modal) modal.classList.remove("active");
       });
       document.body.style.overflow = "";
