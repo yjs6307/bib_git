@@ -1457,7 +1457,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer, mapModal].forEach(modal => {
+  [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer].forEach(modal => {
     if (modal) {
       modal.addEventListener("click", (e) => {
         if (e.target === modal) {
