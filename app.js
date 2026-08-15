@@ -260,6 +260,11 @@ async function fetchUsers() {
   } else {
     state.users = MOCK_USERS;
   }
+  
+  // DB 연동 후에도 관리자 계정이 테이블에 없는 경우(초기화 누락 등) 무조건 MOCK_ADMIN을 배열에 포함시켜 앱이 멈추지 않게 함
+  if (!state.users.find(u => u.role === "admin" && u.email === "admin@buikbu.com")) {
+    state.users.push(MOCK_USERS[0]);
+  }
 }
 
 async function fetchProperties() {
@@ -1534,6 +1539,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!targetUser) {
         targetUser = state.users.find(u => u.email === email && u.password === password);
+      }
+
+      // 3. 최후의 보루: DB나 state.users 어디에도 없지만 마스터 어드민 정보와 일치할 경우
+      if (!targetUser && email === "admin@buikbu.com" && password === "admin1234") {
+        targetUser = MOCK_USERS[0];
       }
 
       if (!targetUser) {
