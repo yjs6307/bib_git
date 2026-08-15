@@ -1710,7 +1710,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           render();
-          alert("🎉 매물 번호 및 정보가 성공적으로 수정되었습니다!");
+          Swal.fire({
+            title: "BUIKBU 확인내용",
+            text: "🎉 매물 번호 및 정보가 성공적으로 수정되었습니다!",
+            icon: "success",
+            confirmButtonText: "확인"
+          });
         } else {
           const newProperty = {
             id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
@@ -1758,7 +1763,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           render();
-          alert("🎉 신규 매물이 등록되었습니다!");
+          Swal.fire({
+            title: "BUIKBU 확인내용",
+            text: "🎉 신규 매물이 등록되었습니다!",
+            icon: "success",
+            confirmButtonText: "확인"
+          });
         }
 
         propertyForm.reset();
