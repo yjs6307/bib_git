@@ -1867,9 +1867,13 @@ async function fetchBoards() {
     try {
       const { data, error } = await supabaseClient.from("boards").select("*").order("created_at", { ascending: false });
       if (error) throw error;
-      if (data) MOCK_BOARDS = data;
+      if (data && data.length > 0) {
+        const dbIds = new Set(data.map(d => d.id));
+        const localOnly = MOCK_BOARDS.filter(b => !dbIds.has(b.id));
+        MOCK_BOARDS = [...localOnly, ...data];
+      }
     } catch (err) {
-      console.warn("게시판 DB 로드 실패, 빈 배열로 시작", err.message);
+      console.warn("게시판 DB 로드 실패, 로컬 메모리 유지", err.message);
     }
   }
   renderBoards();
