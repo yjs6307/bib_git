@@ -1836,7 +1836,6 @@ document.addEventListener("DOMContentLoaded", () => {
         resetSubmitButton();
       }
     });
-    });
   }
 });
 
