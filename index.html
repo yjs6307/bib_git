@@ -109,6 +109,41 @@
         </div>
     </section>
 
+    <!-- 게시판 섹션 (공지사항 / 정보마당) -->
+    <div class="main-container" style="margin-top: -40px; margin-bottom: 24px; position:relative; z-index:20;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            
+            <!-- 1. 정보마당 -->
+            <div style="background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;"><i data-lucide="book-open" style="width:18px; height:18px; color:#3b82f6;"></i> 정보마당</h3>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button type="button" id="btnWriteInfo" style="display:none; align-items:center; gap:4px; font-size:0.75rem; font-weight:600; background:#3b82f6; color:#fff; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;"><i data-lucide="edit-3" style="width:12px; height:12px;"></i> 글쓰기</button>
+                        <a href="#" style="font-size: 0.8rem; color: #64748b; text-decoration: none; font-weight:600;">더보기 +</a>
+                    </div>
+                </div>
+                <!-- JS 동적 렌더링 영역 -->
+                <ul id="boardInfoList" style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.5; min-height:150px;">
+                </ul>
+            </div>
+
+            <!-- 2. 공지사항 -->
+            <div style="background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;"><i data-lucide="bell" style="width:18px; height:18px; color:#ef4444;"></i> 공지사항</h3>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button type="button" id="btnWriteNotice" style="display:none; align-items:center; gap:4px; font-size:0.75rem; font-weight:600; background:#3b82f6; color:#fff; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;"><i data-lucide="edit-3" style="width:12px; height:12px;"></i> 글쓰기</button>
+                        <a href="#" style="font-size: 0.8rem; color: #64748b; text-decoration: none; font-weight:600;">더보기 +</a>
+                    </div>
+                </div>
+                <!-- JS 동적 렌더링 영역 -->
+                <ul id="boardNoticeList" style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.5; min-height:150px;">
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
     <!-- 3. 메인 콘텐츠 (검색 & 카테고리 필터 & 카드리스트 그리드) -->
     <main class="main-container">
 
@@ -821,8 +856,67 @@
             </div>
         </div>
     </div>
+    <!-- 모달: 게시판 글쓰기 팝업 -->
+    <div id="boardWriteModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">새 게시글 작성</h2>
+                <button type="button" class="btn-close-modal" id="btnBoardWriteClose"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <form id="boardWriteForm">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label">게시판 선택</label>
+                        <select id="boardWriteCategory" class="form-control" required>
+                            <option value="notice">공지사항</option>
+                            <option value="info">정보마당</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label">제목</label>
+                        <input type="text" id="boardWriteTitle" class="form-control" placeholder="게시글 제목을 입력하세요" required />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label">내용</label>
+                        <textarea id="boardWriteContent" class="form-control" rows="8" placeholder="게시글 내용을 입력하세요" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid #e2e8f0; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" id="btnBoardWriteCancel" style="padding: 8px 16px; border-radius: 6px; background: #f1f5f9; color: #475569; font-weight: 600; border: none; cursor: pointer;">취소</button>
+                <button type="button" id="btnBoardWriteSubmit" style="padding: 8px 20px; border-radius: 6px; background: #3b82f6; color: #fff; font-weight: 600; border: none; cursor: pointer;">등록하기</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- 메인 스크립트 연결 -->
+    <!-- 모달: 게시글 상세 보기 팝업 -->
+    <div id="boardDetailModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header" style="align-items:flex-start; border-bottom: 2px solid #f1f5f9; padding-bottom:16px;">
+                <div style="flex:1; padding-right:20px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                        <span id="boardDetailCategoryBadge" style="font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; background:#ef4444; color:#fff;">공지사항</span>
+                        <span id="boardDetailDate" style="font-size:0.8rem; color:#64748b;">2026-08-17</span>
+                    </div>
+                    <h2 id="boardDetailTitle" style="font-size: 1.3rem; font-weight: 700; color: #0f172a; line-height:1.4;">게시글 제목입니다.</h2>
+                    <div style="font-size:0.85rem; color:#475569; margin-top:8px;"><i data-lucide="user" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i><span id="boardDetailAuthor">관리자</span></div>
+                </div>
+                <button type="button" class="btn-close-modal" id="btnBoardDetailClose" style="margin-top:-4px;"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 24px 20px; min-height:200px;">
+                <div id="boardDetailContent" style="font-size: 0.95rem; color: #334155; line-height: 1.6; white-space: pre-wrap;">
+                    게시글 내용이 표시됩니다.
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <button type="button" id="btnBoardDelete" style="display:none; align-items:center; gap:4px; padding: 6px 12px; border-radius: 4px; background: #fee2e2; color: #ef4444; font-size:0.85rem; font-weight: 600; border: 1px solid #fca5a5; cursor: pointer;"><i data-lucide="trash-2" style="width:14px; height:14px;"></i> 삭제</button>
+                <div style="flex:1;"></div>
+                <button type="button" id="btnBoardDetailOk" style="padding: 8px 24px; border-radius: 6px; background: #0f172a; color: #fff; font-weight: 600; border: none; cursor: pointer;">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 스크립트 연결 -->
     <script src="app.js"></script>
 </body>
 

@@ -358,6 +358,28 @@ function updateNavUI() {
         state.currentUser = null;
         alert("로그아웃 되었습니다.");
         updateNavUI();
+        renderBoards(); // 로그아웃 시 권한 버튼 재렌더링
+      });
+    } else {
+      navActions.innerHTML = `
+        <button type="button" class="btn-primary" id="btnOpenLoginModal">로그인 / 회원가입</button>
+      `;
+      document.getElementById("btnOpenLoginModal")?.addEventListener("click", () => {
+        document.getElementById("loginModal").classList.add("active");
+      });
+    }
+  }
+
+  // 게시판 쓰기 버튼 권한 (레벨 4이상) 제어
+  const btnWriteNotice = document.getElementById("btnWriteNotice");
+  const btnWriteInfo = document.getElementById("btnWriteInfo");
+  if(user && user.level >= 4) {
+    if(btnWriteNotice) btnWriteNotice.style.display = "flex";
+    if(btnWriteInfo) btnWriteInfo.style.display = "flex";
+  } else {
+    if(btnWriteNotice) btnWriteNotice.style.display = "none";
+    if(btnWriteInfo) btnWriteInfo.style.display = "none";
+  }
       });
 
       document.getElementById("btnOpenUserAdmin")?.addEventListener("click", () => {
@@ -1824,5 +1846,195 @@ document.addEventListener("DOMContentLoaded", () => {
         resetSubmitButton();
       }
     });
+    });
   }
 });
+
+// =============================================================================
+// [게시판 기능 추가 로직]
+// =============================================================================
+let MOCK_BOARDS = [];
+
+const boardNoticeList = document.getElementById("boardNoticeList");
+const boardInfoList = document.getElementById("boardInfoList");
+const btnWriteNotice = document.getElementById("btnWriteNotice");
+const btnWriteInfo = document.getElementById("btnWriteInfo");
+
+const boardWriteModal = document.getElementById("boardWriteModal");
+const btnBoardWriteClose = document.getElementById("btnBoardWriteClose");
+const btnBoardWriteCancel = document.getElementById("btnBoardWriteCancel");
+const boardWriteForm = document.getElementById("boardWriteForm");
+const btnBoardWriteSubmit = document.getElementById("btnBoardWriteSubmit");
+
+const boardDetailModal = document.getElementById("boardDetailModal");
+const btnBoardDetailClose = document.getElementById("btnBoardDetailClose");
+const btnBoardDetailOk = document.getElementById("btnBoardDetailOk");
+const btnBoardDelete = document.getElementById("btnBoardDelete");
+
+let currentBoardId = null;
+
+async function fetchBoards() {
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient.from("boards").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      if (data) MOCK_BOARDS = data;
+    } catch (err) {
+      console.warn("게시판 DB 로드 실패, 빈 배열로 시작", err.message);
+    }
+  }
+  renderBoards();
+}
+
+function renderBoards() {
+  if (!boardNoticeList || !boardInfoList) return;
+
+  const notices = MOCK_BOARDS.filter(b => b.category === "notice").slice(0, 5);
+  const infos = MOCK_BOARDS.filter(b => b.category === "info").slice(0, 5);
+
+  const renderItem = (b, badgeColor, isBold) => `
+    <li data-id="${b.id}" class="board-item" style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80%; cursor:pointer; ${isBold ? 'font-weight:700; color:' + badgeColor + ';' : ''}">${b.title}</span>
+        <span style="font-size:0.75rem; color:#94a3b8;">${(b.created_at || "").substring(5, 10)}</span>
+    </li>
+  `;
+
+  boardNoticeList.innerHTML = notices.length > 0 ? notices.map(b => renderItem(b, "#ef4444", true)).join("") : `<li style="padding: 10px 0; color:#94a3b8; font-size:0.8rem; text-align:center;">등록된 공지사항이 없습니다.</li>`;
+  boardInfoList.innerHTML = infos.length > 0 ? infos.map(b => renderItem(b, "#3b82f6", false)).join("") : `<li style="padding: 10px 0; color:#94a3b8; font-size:0.8rem; text-align:center;">등록된 정보마당 글이 없습니다.</li>`;
+
+  // 리스트 클릭 시 상세 모달 오픈
+  document.querySelectorAll(".board-item").forEach(li => {
+    li.addEventListener("click", () => {
+      openBoardDetail(li.getAttribute("data-id"));
+    });
+  });
+}
+
+function openBoardDetail(id) {
+  const b = MOCK_BOARDS.find(x => x.id === id);
+  if(!b) return;
+  currentBoardId = id;
+  
+  const badge = document.getElementById("boardDetailCategoryBadge");
+  if(badge) {
+    badge.textContent = b.category === 'notice' ? '공지사항' : '정보마당';
+    badge.style.background = b.category === 'notice' ? '#ef4444' : '#3b82f6';
+  }
+  if(document.getElementById("boardDetailDate")) document.getElementById("boardDetailDate").textContent = (b.created_at || "").substring(0, 10);
+  if(document.getElementById("boardDetailTitle")) document.getElementById("boardDetailTitle").textContent = b.title;
+  if(document.getElementById("boardDetailAuthor")) document.getElementById("boardDetailAuthor").textContent = b.author_name || "관리자";
+  if(document.getElementById("boardDetailContent")) document.getElementById("boardDetailContent").textContent = b.content;
+
+  // 레벨 4 이상만 삭제 권한
+  if(btnBoardDelete) {
+    if(state.currentUser && state.currentUser.level >= 4) {
+      btnBoardDelete.style.display = "flex";
+    } else {
+      btnBoardDelete.style.display = "none";
+    }
+  }
+
+  if(boardDetailModal) {
+    boardDetailModal.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+// 상세 모달 닫기
+[btnBoardDetailClose, btnBoardDetailOk].forEach(btn => {
+  if(btn) btn.addEventListener("click", () => {
+    if(boardDetailModal) boardDetailModal.classList.remove("active");
+    document.body.style.overflow = "";
+    currentBoardId = null;
+  });
+});
+
+// 쓰기 모달 닫기
+[btnBoardWriteClose, btnBoardWriteCancel].forEach(btn => {
+  if(btn) btn.addEventListener("click", () => {
+    if(boardWriteModal) boardWriteModal.classList.remove("active");
+    document.body.style.overflow = "";
+    if(boardWriteForm) boardWriteForm.reset();
+  });
+});
+
+// 새 글 쓰기 버튼 클릭
+[btnWriteNotice, btnWriteInfo].forEach(btn => {
+  if(btn) btn.addEventListener("click", (e) => {
+    const isNotice = e.currentTarget.id === 'btnWriteNotice';
+    const catSelect = document.getElementById("boardWriteCategory");
+    if(catSelect) catSelect.value = isNotice ? 'notice' : 'info';
+    if(boardWriteModal) {
+      boardWriteModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+  });
+});
+
+// 글 등록 Submit
+if(btnBoardWriteSubmit) {
+  btnBoardWriteSubmit.addEventListener("click", async () => {
+    if(!state.currentUser || state.currentUser.level < 4) {
+      alert("글쓰기 권한이 없습니다."); return;
+    }
+    const cat = document.getElementById("boardWriteCategory").value;
+    const title = document.getElementById("boardWriteTitle").value.trim();
+    const content = document.getElementById("boardWriteContent").value.trim();
+    if(!title || !content) {
+      alert("제목과 내용을 모두 입력해주세요."); return;
+    }
+
+    btnBoardWriteSubmit.disabled = true;
+    const newBoard = {
+      id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+      category: cat,
+      title: title,
+      content: content,
+      author_name: state.currentUser.name,
+      author_email: state.currentUser.email,
+      created_at: new Date().toISOString()
+    };
+
+    if(supabaseClient) {
+      try {
+        await supabaseClient.from("boards").insert([newBoard]);
+      } catch(e) { console.warn("Supabase Board Insert Failed", e); }
+    }
+    MOCK_BOARDS.unshift(newBoard);
+    
+    if(boardWriteModal) boardWriteModal.classList.remove("active");
+    document.body.style.overflow = "";
+    if(boardWriteForm) boardWriteForm.reset();
+    
+    if(typeof Swal !== 'undefined') {
+      Swal.fire({ title: "BUIKBU 확인내용", text: "게시글이 성공적으로 등록되었습니다.", icon: "success", confirmButtonText: "확인" });
+    } else {
+      alert("게시글이 등록되었습니다.");
+    }
+    renderBoards();
+    btnBoardWriteSubmit.disabled = false;
+  });
+}
+
+// 게시글 삭제
+if(btnBoardDelete) {
+  btnBoardDelete.addEventListener("click", async () => {
+    if(!confirm("이 게시글을 완전히 삭제하시겠습니까?")) return;
+    
+    if(supabaseClient && currentBoardId) {
+      try {
+        await supabaseClient.from("boards").delete().eq("id", currentBoardId);
+      } catch(e) { console.warn("Delete Failed", e); }
+    }
+    MOCK_BOARDS = MOCK_BOARDS.filter(b => b.id !== currentBoardId);
+    
+    if(boardDetailModal) boardDetailModal.classList.remove("active");
+    document.body.style.overflow = "";
+    renderBoards();
+  });
+}
+
+// 초기화 시 게시판 불러오기 호출
+setTimeout(() => {
+    fetchBoards();
+}, 500);
