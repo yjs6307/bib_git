@@ -1882,7 +1882,7 @@ function renderBoards() {
   const infos = MOCK_BOARDS.filter(b => b.category === "info").slice(0, 3);
 
   const renderItem = (b, badgeColor, isBold) => `
-    <li data-id="${b.id}" class="board-item" style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+    <li data-id="${b.id}" class="board-item" style="padding: 5px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
         <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80%; cursor:pointer; ${isBold ? 'font-weight:700; color:' + badgeColor + ';' : ''}">${b.title}</span>
         <span style="font-size:0.75rem; color:#94a3b8;">${(b.created_at || "").substring(5, 10)}</span>
     </li>
