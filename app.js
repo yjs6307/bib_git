@@ -1892,7 +1892,7 @@ function renderBoards() {
     </li>
   `;
 
-  boardNoticeList.innerHTML = notices.length > 0 ? notices.map(b => renderItem(b, "#ef4444", true)).join("") : `<li style="padding: 10px 0; color:#94a3b8; font-size:0.8rem; text-align:center;">등록된 공지사항이 없습니다.</li>`;
+  boardNoticeList.innerHTML = notices.length > 0 ? notices.map(b => renderItem(b, "#0f172a", true)).join("") : `<li style="padding: 10px 0; color:#94a3b8; font-size:0.8rem; text-align:center;">등록된 공지사항이 없습니다.</li>`;
   boardInfoList.innerHTML = infos.length > 0 ? infos.map(b => renderItem(b, "#3b82f6", false)).join("") : `<li style="padding: 10px 0; color:#94a3b8; font-size:0.8rem; text-align:center;">등록된 정보마당 글이 없습니다.</li>`;
 
   // 리스트 클릭 시 상세 모달 오픈
@@ -2008,10 +2008,16 @@ if(btnBoardWriteSubmit) {
       created_at: new Date().toISOString()
     };
 
-    if(supabaseClient) {
+    if (supabaseClient) {
       try {
-        await supabaseClient.from("boards").insert([newBoard]);
-      } catch(e) { console.warn("Supabase Board Insert Failed", e); }
+        const { error } = await supabaseClient.from("boards").insert([newBoard]);
+        if (error) {
+          console.error("게시글 DB 저장 실패:", error);
+          alert("서버(DB) 저장에 실패했습니다. 현재 기기에서만 임시로 보이며 다른 기기(모바일)에서는 보이지 않습니다.\n\n원인: " + error.message);
+        }
+      } catch (e) {
+        console.warn("Supabase Board Insert Exception", e);
+      }
     }
     MOCK_BOARDS.unshift(newBoard);
     
