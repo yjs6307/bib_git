@@ -586,9 +586,9 @@ function calculateProfit() {
 // -----------------------------------------------------------------------------
 function getStatusBadgeClass(status) {
   switch (status) {
-    case "매입준비중": return "badge-status-ready";
-    case "계약": return "badge-status-contract";
-    case "인테리어중": return "badge-status-interior";
+    case "위탁매매준비중": return "badge-status-ready";
+    case "매매계약완료": return "badge-status-contract";
+    case "수리중": return "badge-status-interior";
     case "매매완료": return "badge-status-completed";
     case "매매진행중":
     default: return "badge-status-progress";
