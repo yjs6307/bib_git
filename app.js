@@ -1911,7 +1911,7 @@ function openBoardDetail(id) {
   const badge = document.getElementById("boardDetailCategoryBadge");
   if(badge) {
     badge.textContent = b.category === 'notice' ? '공지사항' : '정보마당';
-    badge.style.background = b.category === 'notice' ? '#ef4444' : '#3b82f6';
+    badge.style.background = b.category === 'notice' ? '#1e293b' : '#3b82f6';
   }
   if(document.getElementById("boardDetailDate")) document.getElementById("boardDetailDate").textContent = (b.created_at || "").substring(0, 10);
   if(document.getElementById("boardDetailTitle")) document.getElementById("boardDetailTitle").textContent = b.title;
