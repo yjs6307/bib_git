@@ -307,10 +307,10 @@ async function fetchProperties() {
         state.properties = [];
       }
     } catch (err) {
-      state.properties = MOCK_PROPERTIES;
+      state.properties = [];
     }
   } else {
-    state.properties = MOCK_PROPERTIES;
+    state.properties = [];
   }
   render();
 }
