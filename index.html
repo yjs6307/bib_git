@@ -229,7 +229,9 @@
                 </div>
 
                 <!-- 진행 상태 파이프라인 UI 컨테이너 -->
-                <div id="modalPipelineWrap" style="margin: 16px 0 20px 0; padding: 16px 0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;"></div>
+                <div id="modalPipelineWrap"
+                    style="margin: 16px 0 20px 0; padding: 16px 0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+                </div>
 
                 <div class="spec-grid">
                     <div class="spec-box">
@@ -237,7 +239,7 @@
                         <div id="modalPropertyNumber" class="spec-value" style="color:#0f172a; font-weight:800;">-</div>
                     </div>
                     <div class="spec-box">
-                        <div class="spec-label">면적(㎡)</div>
+                        <div class="spec-label">전용면적(㎡)</div>
                         <div id="modalAreaSize" class="spec-value">-</div>
                     </div>
                     <div class="spec-box">
@@ -595,9 +597,9 @@
                         <div class="form-group">
                             <label class="form-label" for="inputTradeStatus">현재 진행 상태</label>
                             <select id="inputTradeStatus" class="form-control" required>
-                                <option value="위탁매매준비중">위탁매매준비중</option>
+                                <option value="위탁매매준비중" selected>위탁매매준비중</option>
                                 <option value="수리중">수리중</option>
-                                <option value="매매진행중" selected>매매진행중</option>
+                                <option value="매매진행중">매매진행중</option>
                                 <option value="매매계약완료">매매계약완료</option>
                                 <option value="매매완료">매매완료</option>
                             </select>
