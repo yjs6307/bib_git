@@ -391,12 +391,12 @@ function updateNavUI() {
     }
   }
 
-  // 게시판 쓰기 버튼 권한 (레벨 4이상) 제어
+  // 게시판 쓰기 버튼 권한 제어 (공지사항: 8이상, 정보마당: 로그인회원)
   const btnWriteNotice = document.getElementById("btnWriteNotice");
   const btnWriteInfo = document.getElementById("btnWriteInfo");
-  if(user && user.level >= 4) {
-    if(btnWriteNotice) btnWriteNotice.style.display = "flex";
+  if(user) {
     if(btnWriteInfo) btnWriteInfo.style.display = "flex";
+    if(btnWriteNotice) btnWriteNotice.style.display = (user.level >= 8) ? "flex" : "none";
   } else {
     if(btnWriteNotice) btnWriteNotice.style.display = "none";
     if(btnWriteInfo) btnWriteInfo.style.display = "none";
@@ -1975,10 +1975,16 @@ function openBoardDetail(id) {
 // 글 등록 Submit
 if(btnBoardWriteSubmit) {
   btnBoardWriteSubmit.addEventListener("click", async () => {
-    if(!state.currentUser || state.currentUser.level < 4) {
-      alert("글쓰기 권한이 없습니다."); return;
+    if(!state.currentUser) {
+      alert("로그인이 필요합니다."); return;
     }
     const cat = document.getElementById("boardWriteCategory").value;
+    
+    // 권한 검증: 공지사항은 레벨 8 이상만
+    if(cat === 'notice' && state.currentUser.level < 8) {
+      alert("공지사항은 레벨 8 이상 관리자만 작성할 수 있습니다."); return;
+    }
+
     const title = document.getElementById("boardWriteTitle").value.trim();
     const link = document.getElementById("boardWriteLink") ? document.getElementById("boardWriteLink").value.trim() : "";
     const content = document.getElementById("boardWriteContent").value.trim();
