@@ -160,6 +160,7 @@ const modalPrice = document.getElementById("modalPrice");
 const modalTitle = document.getElementById("modalTitle");
 const modalLocation = document.getElementById("modalLocation");
 const modalRegistrationDate = document.getElementById("modalRegistrationDate");
+const modalStatusPipeline = document.getElementById("modalStatusPipeline");
 const modalPropertyNumber = document.getElementById("modalPropertyNumber");
 const modalAreaSize = document.getElementById("modalAreaSize");
 const modalFloorInfo = document.getElementById("modalFloorInfo");
@@ -819,6 +820,40 @@ function openDetailModal(property) {
   modalPropertyNumberBadge.textContent = `No. ${propNo}`;
   modalPropertyNumber.textContent = propNo;
   modalRegistrationDate.textContent = regDate;
+
+  // 파이프라인 (진행 상태 그래픽) 렌더링
+  const STATUS_STEPS = ["위탁매매준비중", "수리중", "매매진행중", "매매계약완료", "매매완료"];
+  const currentStatus = property.trade_status || "매매진행중";
+  let currentIndex = STATUS_STEPS.indexOf(currentStatus);
+  if (currentIndex === -1) currentIndex = 2; // 기본값 매매진행중
+
+  if (modalStatusPipeline) {
+    modalStatusPipeline.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: space-between; position: relative;">
+        <!-- 가로 배경 선 -->
+        <div style="position: absolute; top: 12px; left: 10px; right: 10px; height: 3px; background: #e2e8f0; z-index: 1;"></div>
+        <!-- 채워진 가로 선 -->
+        <div style="position: absolute; top: 12px; left: 10px; height: 3px; background: #10b981; z-index: 2; width: calc(${currentIndex > 0 ? (currentIndex / (STATUS_STEPS.length - 1)) * 100 : 0}% - 20px);"></div>
+        
+        ${STATUS_STEPS.map((step, idx) => {
+          const isCompleted = idx <= currentIndex;
+          const isCurrent = idx === currentIndex;
+          const bgColor = isCompleted ? '#10b981' : '#fff';
+          const borderColor = isCompleted ? '#10b981' : '#cbd5e1';
+          return \`
+            <div style="position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; background: \${bgColor}; border: 3px solid \${borderColor}; display: flex; align-items: center; justify-content: center; box-shadow: \${isCurrent ? '0 0 0 5px rgba(16, 185, 129, 0.2)' : 'none'};">
+                \${isCompleted ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+              </div>
+              <span style="font-size: 0.75rem; font-weight: \${isCurrent ? '700' : '500'}; color: \${isCurrent ? '#0f172a' : (isCompleted ? '#475569' : '#94a3b8')}; white-space: nowrap; letter-spacing: -0.5px;">
+                \${step}
+              </span>
+            </div>
+          \`;
+        }).join('')}
+      </div>
+    `;
+  }
 
   modalPrice.innerHTML = `
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
