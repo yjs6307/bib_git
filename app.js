@@ -160,7 +160,6 @@ const modalPrice = document.getElementById("modalPrice");
 const modalTitle = document.getElementById("modalTitle");
 const modalLocation = document.getElementById("modalLocation");
 const modalRegistrationDate = document.getElementById("modalRegistrationDate");
-const modalStatusPipeline = document.getElementById("modalStatusPipeline");
 const modalPropertyNumber = document.getElementById("modalPropertyNumber");
 const modalAreaSize = document.getElementById("modalAreaSize");
 const modalFloorInfo = document.getElementById("modalFloorInfo");
@@ -821,40 +820,6 @@ function openDetailModal(property) {
   modalPropertyNumber.textContent = propNo;
   modalRegistrationDate.textContent = regDate;
 
-  // 파이프라인 (진행 상태 그래픽) 렌더링
-  const STATUS_STEPS = ["위탁매매준비중", "수리중", "매매진행중", "매매계약완료", "매매완료"];
-  const currentStatus = property.trade_status || "매매진행중";
-  let currentIndex = STATUS_STEPS.indexOf(currentStatus);
-  if (currentIndex === -1) currentIndex = 2; // 기본값 매매진행중
-
-  if (modalStatusPipeline) {
-    modalStatusPipeline.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: space-between; position: relative;">
-        <!-- 가로 배경 선 -->
-        <div style="position: absolute; top: 12px; left: 10px; right: 10px; height: 3px; background: #e2e8f0; z-index: 1;"></div>
-        <!-- 채워진 가로 선 -->
-        <div style="position: absolute; top: 12px; left: 10px; height: 3px; background: #10b981; z-index: 2; width: calc(${currentIndex > 0 ? (currentIndex / (STATUS_STEPS.length - 1)) * 100 : 0}% - 20px);"></div>
-        
-        ${STATUS_STEPS.map((step, idx) => {
-          const isCompleted = idx <= currentIndex;
-          const isCurrent = idx === currentIndex;
-          const bgColor = isCompleted ? '#10b981' : '#fff';
-          const borderColor = isCompleted ? '#10b981' : '#cbd5e1';
-          return \`
-            <div style="position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-              <div style="width: 24px; height: 24px; border-radius: 50%; background: \${bgColor}; border: 3px solid \${borderColor}; display: flex; align-items: center; justify-content: center; box-shadow: \${isCurrent ? '0 0 0 5px rgba(16, 185, 129, 0.2)' : 'none'};">
-                \${isCompleted ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
-              </div>
-              <span style="font-size: 0.75rem; font-weight: \${isCurrent ? '700' : '500'}; color: \${isCurrent ? '#0f172a' : (isCompleted ? '#475569' : '#94a3b8')}; white-space: nowrap; letter-spacing: -0.5px;">
-                \${step}
-              </span>
-            </div>
-          \`;
-        }).join('')}
-      </div>
-    `;
-  }
-
   modalPrice.innerHTML = `
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
       <span style="font-size:0.85rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:4px 8px; border-radius:6px; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">계약가</span>
@@ -863,6 +828,46 @@ function openDetailModal(property) {
   `;
   modalTitle.textContent = property.title;
   modalLocation.textContent = property.location;
+
+  // --- 진행상태 파이프라인 렌더링 ---
+  const pipelineWrap = document.getElementById("modalPipelineWrap");
+  if (pipelineWrap) {
+    const steps = ["위탁매매준비중", "수리중", "매매진행중", "매매계약완료", "매매완료"];
+    const currentStatus = property.trade_status || "매매진행중";
+    let currentIndex = steps.indexOf(currentStatus);
+    if(currentIndex === -1) currentIndex = 2; // 매치 안되면 매매진행중(기본)
+
+    let html = `<div style="display:flex; justify-content:space-between; align-items:center; position:relative; width:100%;">`;
+    // 배경 회색 선
+    html += `<div style="position:absolute; top:12px; left:10%; right:10%; height:3px; background:#e2e8f0; z-index:0;"></div>`;
+    
+    // 파란색 진행 선
+    const progressPercentage = currentIndex > 0 ? (currentIndex / (steps.length - 1)) * 80 + 10 : 10;
+    html += `<div style="position:absolute; top:12px; left:10%; width:calc(${progressPercentage}% - 10%); height:3px; background:#3b82f6; z-index:0; transition:width 0.4s ease;"></div>`;
+
+    steps.forEach((step, index) => {
+      const isPastOrCurrent = index <= currentIndex;
+      const isCurrent = index === currentIndex;
+      const circleColor = isPastOrCurrent ? "#3b82f6" : "#f8fafc";
+      const borderColor = isPastOrCurrent ? "#3b82f6" : "#cbd5e1";
+      const iconHtml = isPastOrCurrent ? `<i data-lucide="check" style="width:14px; height:14px; color:#fff;"></i>` : ``;
+      const textColor = isCurrent ? "#0f172a" : (isPastOrCurrent ? "#475569" : "#94a3b8");
+      const fontWeight = isCurrent ? "800" : "600";
+      
+      html += `
+        <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:6px; flex:1;">
+          <div style="width:26px; height:26px; border-radius:50%; background:${circleColor}; border:2px solid ${borderColor}; display:flex; align-items:center; justify-content:center; outline:3px solid #fff;">
+            ${iconHtml}
+          </div>
+          <span style="font-size:0.7rem; color:${textColor}; font-weight:${fontWeight}; text-align:center; word-break:keep-all; letter-spacing:-0.5px;">${step}</span>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    pipelineWrap.innerHTML = html;
+    if (window.lucide) lucide.createIcons();
+  }
+  // --------------------------------
   modalAreaSize.textContent = property.area_size;
   modalFloorInfo.textContent = property.floor_info || "정보 없음";
   modalBuildYear.textContent = property.build_year || "정보 없음";
