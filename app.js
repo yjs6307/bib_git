@@ -1878,8 +1878,8 @@ async function fetchBoards() {
 function renderBoards() {
   if (!boardNoticeList || !boardInfoList) return;
 
-  const notices = MOCK_BOARDS.filter(b => b.category === "notice").slice(0, 5);
-  const infos = MOCK_BOARDS.filter(b => b.category === "info").slice(0, 5);
+  const notices = MOCK_BOARDS.filter(b => b.category === "notice").slice(0, 3);
+  const infos = MOCK_BOARDS.filter(b => b.category === "info").slice(0, 3);
 
   const renderItem = (b, badgeColor, isBold) => `
     <li data-id="${b.id}" class="board-item" style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
