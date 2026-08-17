@@ -1892,7 +1892,7 @@ function renderBoards() {
     </li>
   `;
 
-  boardNoticeList.innerHTML = notices.length > 0 ? notices.map(b => renderItem(b, "#0f172a", true)).join("") : `<li style="padding: 10px 0; color:#94a3b8; font-size:0.8rem; text-align:center;">등록된 공지사항이 없습니다.</li>`;
+  boardNoticeList.innerHTML = notices.length > 0 ? notices.map(b => renderItem(b, "#0f172a", false)).join("") : `<li style="padding: 10px 0; color:#94a3b8; font-size:0.8rem; text-align:center;">등록된 공지사항이 없습니다.</li>`;
   boardInfoList.innerHTML = infos.length > 0 ? infos.map(b => renderItem(b, "#3b82f6", false)).join("") : `<li style="padding: 10px 0; color:#94a3b8; font-size:0.8rem; text-align:center;">등록된 정보마당 글이 없습니다.</li>`;
 
   // 리스트 클릭 시 상세 모달 오픈
