@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.boards (
     category VARCHAR(50) NOT NULL,          -- 'notice' (공지사항), 'info' (정보마당)
     title VARCHAR(255) NOT NULL,            -- 게시글 제목
     content TEXT NOT NULL,                  -- 게시글 내용
+    link_url VARCHAR(500),                  -- 외부 관련 링크 (선택)
     author_name VARCHAR(100),               -- 작성자 이름
     author_email VARCHAR(100),              -- 작성자 이메일
     created_at TIMESTAMPTZ DEFAULT now()    -- 작성 일시
@@ -19,6 +20,7 @@ COMMENT ON COLUMN public.boards.id IS '게시글 고유 식별자(UUID)';
 COMMENT ON COLUMN public.boards.category IS '게시글 분류 (notice/info)';
 COMMENT ON COLUMN public.boards.title IS '게시글 제목';
 COMMENT ON COLUMN public.boards.content IS '게시글 상세 내용';
+COMMENT ON COLUMN public.boards.link_url IS '관련 외부 링크';
 COMMENT ON COLUMN public.boards.author_name IS '작성자 이름';
 COMMENT ON COLUMN public.boards.author_email IS '작성자 이메일';
 COMMENT ON COLUMN public.boards.created_at IS '작성일시';

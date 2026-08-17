@@ -1914,6 +1914,18 @@ function openBoardDetail(id) {
   if(document.getElementById("boardDetailAuthor")) document.getElementById("boardDetailAuthor").textContent = b.author_name || "관리자";
   if(document.getElementById("boardDetailContent")) document.getElementById("boardDetailContent").textContent = b.content;
 
+  const linkContainer = document.getElementById("boardDetailLinkContainer");
+  const linkAnchor = document.getElementById("boardDetailLink");
+  if(linkContainer && linkAnchor) {
+    if(b.link_url) {
+      linkAnchor.href = b.link_url;
+      linkContainer.style.display = "block";
+    } else {
+      linkAnchor.href = "#";
+      linkContainer.style.display = "none";
+    }
+  }
+
   // 레벨 4 이상만 삭제 권한
   if(btnBoardDelete) {
     if(state.currentUser && state.currentUser.level >= 4) {
@@ -1968,6 +1980,7 @@ if(btnBoardWriteSubmit) {
     }
     const cat = document.getElementById("boardWriteCategory").value;
     const title = document.getElementById("boardWriteTitle").value.trim();
+    const link = document.getElementById("boardWriteLink") ? document.getElementById("boardWriteLink").value.trim() : "";
     const content = document.getElementById("boardWriteContent").value.trim();
     if(!title || !content) {
       alert("제목과 내용을 모두 입력해주세요."); return;
@@ -1979,6 +1992,7 @@ if(btnBoardWriteSubmit) {
       category: cat,
       title: title,
       content: content,
+      link_url: link,
       author_name: state.currentUser.name,
       author_email: state.currentUser.email,
       created_at: new Date().toISOString()
