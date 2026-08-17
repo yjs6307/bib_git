@@ -2053,6 +2053,43 @@ if(btnBoardDelete) {
   });
 }
 
+// 게시판 전체보기(더보기) 로직
+const btnMoreInfo = document.getElementById("btnMoreInfo");
+const btnMoreNotice = document.getElementById("btnMoreNotice");
+const boardListModal = document.getElementById("boardListModal");
+const boardListModalTitle = document.getElementById("boardListModalTitle");
+const boardListModalContent = document.getElementById("boardListModalContent");
+const btnBoardListClose = document.getElementById("btnBoardListClose");
+
+function openBoardList(category, titleText) {
+  if (!boardListModal || !boardListModalContent) return;
+  boardListModalTitle.textContent = titleText;
+  
+  const list = MOCK_BOARDS.filter(b => b.category === category);
+  
+  boardListModalContent.innerHTML = list.length > 0 ? list.map(b => `
+    <li data-id="${b.id}" class="board-item-modal" style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:75%; ${category === 'notice' ? 'color:#0f172a;' : ''}">${b.title}</span>
+        <span style="font-size:0.75rem; color:#94a3b8;">${(b.created_at || "").substring(0, 10)}</span>
+    </li>
+  `).join("") : `<li style="padding: 15px 0; text-align:center; color:#94a3b8;">등록된 글이 없습니다.</li>`;
+  
+  boardListModal.classList.add("active");
+  document.body.style.overflow = "hidden";
+  
+  // 팝업 리스트 클릭 시 상세 모달 오픈
+  boardListModalContent.querySelectorAll(".board-item-modal").forEach(li => {
+    li.addEventListener("click", () => {
+       boardListModal.classList.remove("active");
+       openBoardDetail(li.getAttribute("data-id"));
+    });
+  });
+}
+
+if (btnMoreInfo) btnMoreInfo.addEventListener("click", (e) => { e.preventDefault(); openBoardList("info", "정보마당 전체글 보기"); });
+if (btnMoreNotice) btnMoreNotice.addEventListener("click", (e) => { e.preventDefault(); openBoardList("notice", "공지사항 전체글 보기"); });
+if (btnBoardListClose) btnBoardListClose.addEventListener("click", () => { boardListModal.classList.remove("active"); document.body.style.overflow = ""; });
+
 // 초기화 시 게시판 불러오기 호출
 setTimeout(() => {
     fetchBoards();
