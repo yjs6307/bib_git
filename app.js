@@ -868,7 +868,8 @@ function openDetailModal(property) {
     if (window.lucide) lucide.createIcons();
   }
   // --------------------------------
-  modalAreaSize.textContent = property.area_size;
+  const areaVal = property.area_size || '';
+  modalAreaSize.textContent = areaVal ? (areaVal.includes('㎡') ? areaVal : areaVal + '㎡') : '-';
   modalFloorInfo.textContent = property.floor_info || "정보 없음";
   modalBuildYear.textContent = property.build_year || "정보 없음";
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
