@@ -360,27 +360,6 @@ function updateNavUI() {
         updateNavUI();
         renderBoards(); // 로그아웃 시 권한 버튼 재렌더링
       });
-    } else {
-      navActions.innerHTML = `
-        <button type="button" class="btn-primary" id="btnOpenLoginModal">로그인 / 회원가입</button>
-      `;
-      document.getElementById("btnOpenLoginModal")?.addEventListener("click", () => {
-        document.getElementById("loginModal").classList.add("active");
-      });
-    }
-  }
-
-  // 게시판 쓰기 버튼 권한 (레벨 4이상) 제어
-  const btnWriteNotice = document.getElementById("btnWriteNotice");
-  const btnWriteInfo = document.getElementById("btnWriteInfo");
-  if(user && user.level >= 4) {
-    if(btnWriteNotice) btnWriteNotice.style.display = "flex";
-    if(btnWriteInfo) btnWriteInfo.style.display = "flex";
-  } else {
-    if(btnWriteNotice) btnWriteNotice.style.display = "none";
-    if(btnWriteInfo) btnWriteInfo.style.display = "none";
-  }
-      });
 
       document.getElementById("btnOpenUserAdmin")?.addEventListener("click", () => {
         renderUserAdminTable();
@@ -410,6 +389,17 @@ function updateNavUI() {
       document.getElementById("btnOpenSignupModal")?.addEventListener("click", () => signupModal.classList.add("active"));
       document.getElementById("btnOpenAdminModal")?.addEventListener("click", handleRegisterClick);
     }
+  }
+
+  // 게시판 쓰기 버튼 권한 (레벨 4이상) 제어
+  const btnWriteNotice = document.getElementById("btnWriteNotice");
+  const btnWriteInfo = document.getElementById("btnWriteInfo");
+  if(user && user.level >= 4) {
+    if(btnWriteNotice) btnWriteNotice.style.display = "flex";
+    if(btnWriteInfo) btnWriteInfo.style.display = "flex";
+  } else {
+    if(btnWriteNotice) btnWriteNotice.style.display = "none";
+    if(btnWriteInfo) btnWriteInfo.style.display = "none";
   }
 
   // 2. 모바일 3선 슬라이드 메뉴 드로어 렌더링
