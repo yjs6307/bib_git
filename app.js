@@ -505,16 +505,23 @@ function updateNavUI() {
       `;
 
       document.getElementById("m_btnOpenLoginModal")?.addEventListener("click", () => {
+        if(loginModal) {
+          loginModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
         closeMobileDrawer();
-        loginModal.classList.add("active");
       });
       document.getElementById("m_btnOpenSignupModal")?.addEventListener("click", () => {
+        if(signupModal) {
+          signupModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
         closeMobileDrawer();
-        signupModal.classList.add("active");
       });
       document.getElementById("m_btnOpenAdminModal")?.addEventListener("click", () => {
-        closeMobileDrawer();
+        // 매물 등록 버튼 클릭 시 권한 체크 및 모달 팝업
         handleRegisterClick();
+        closeMobileDrawer();
       });
     }
   }
