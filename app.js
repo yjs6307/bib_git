@@ -1900,8 +1900,10 @@ const boardDetailModal = document.getElementById("boardDetailModal");
 const btnBoardDetailClose = document.getElementById("btnBoardDetailClose");
 const btnBoardDetailOk = document.getElementById("btnBoardDetailOk");
 const btnBoardDelete = document.getElementById("btnBoardDelete");
+const btnBoardEdit = document.getElementById("btnBoardEdit");
 
 let currentBoardId = null;
+let editingBoardId = null;
 
 async function fetchBoards() {
   if (supabaseClient) {
@@ -1971,12 +1973,14 @@ function openBoardDetail(id) {
     }
   }
 
-  // 레벨 4 이상만 삭제 권한
-  if(btnBoardDelete) {
-    if(state.currentUser && state.currentUser.level >= 4) {
+  // 레벨 4 이상 관리자이거나 작성자 본인일 때 삭제/수정 권한 부여
+  if(btnBoardDelete && btnBoardEdit) {
+    if(state.currentUser && (state.currentUser.level >= 4 || state.currentUser.email === b.author_email)) {
       btnBoardDelete.style.display = "flex";
+      btnBoardEdit.style.display = "flex";
     } else {
       btnBoardDelete.style.display = "none";
+      btnBoardEdit.style.display = "none";
     }
   }
 
@@ -2001,21 +2005,57 @@ function openBoardDetail(id) {
     if(boardWriteModal) boardWriteModal.classList.remove("active");
     document.body.style.overflow = "";
     if(boardWriteForm) boardWriteForm.reset();
+    editingBoardId = null;
   });
 });
 
 // 새 글 쓰기 버튼 클릭
 [btnWriteNotice, btnWriteInfo].forEach(btn => {
   if(btn) btn.addEventListener("click", (e) => {
+    editingBoardId = null;
     const isNotice = e.currentTarget.id === 'btnWriteNotice';
     const catSelect = document.getElementById("boardWriteCategory");
     if(catSelect) catSelect.value = isNotice ? 'notice' : 'info';
+    
+    // 모달 타이틀 변경
+    const modalTitle = document.querySelector("#boardWriteModal .modal-header h2");
+    if(modalTitle) modalTitle.textContent = "새 게시글 작성";
+    
+    if(boardWriteForm) boardWriteForm.reset();
     if(boardWriteModal) {
       boardWriteModal.classList.add("active");
       document.body.style.overflow = "hidden";
     }
   });
 });
+
+// 수정 버튼 클릭
+if (btnBoardEdit) {
+  btnBoardEdit.addEventListener("click", () => {
+    if(!currentBoardId) return;
+    const b = MOCK_BOARDS.find(x => x.id === currentBoardId);
+    if(!b) return;
+
+    editingBoardId = currentBoardId;
+    
+    // 기존 데이터 폼에 채우기
+    document.getElementById("boardWriteCategory").value = b.category;
+    document.getElementById("boardWriteTitle").value = b.title;
+    if (document.getElementById("boardWriteLink")) document.getElementById("boardWriteLink").value = b.link_url || "";
+    document.getElementById("boardWriteContent").value = b.content;
+
+    // 모달 타이틀 변경
+    const modalTitle = document.querySelector("#boardWriteModal .modal-header h2");
+    if(modalTitle) modalTitle.textContent = "게시글 수정";
+
+    // 기존 상세 모달 닫고 쓰기 모달 띄우기
+    if(boardDetailModal) boardDetailModal.classList.remove("active");
+    if(boardWriteModal) {
+      boardWriteModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+  });
+}
 
 // 글 등록 Submit
 if(btnBoardWriteSubmit) {
@@ -2038,38 +2078,63 @@ if(btnBoardWriteSubmit) {
     }
 
     btnBoardWriteSubmit.disabled = true;
-    const newBoard = {
-      id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
-      category: cat,
-      title: title,
-      content: content,
-      link_url: link,
-      author_name: state.currentUser.name,
-      author_email: state.currentUser.email,
-      created_at: new Date().toISOString()
-    };
-
-    if (supabaseClient) {
-      try {
-        const { error } = await supabaseClient.from("boards").insert([newBoard]);
-        if (error) {
-          console.error("게시글 DB 저장 실패:", error);
-          alert("서버(DB) 저장에 실패했습니다. 현재 기기에서만 임시로 보이며 다른 기기(모바일)에서는 보이지 않습니다.\n\n원인: " + error.message);
+    if (editingBoardId) {
+      // 기존 글 수정
+      const targetBoard = MOCK_BOARDS.find(b => b.id === editingBoardId);
+      if(targetBoard) {
+        targetBoard.category = cat;
+        targetBoard.title = title;
+        targetBoard.content = content;
+        targetBoard.link_url = link;
+        
+        if (supabaseClient) {
+          try {
+            const { error } = await supabaseClient.from("boards")
+              .update({ category: cat, title: title, content: content, link_url: link })
+              .eq("id", editingBoardId);
+            if(error) throw error;
+          } catch(e) {
+             console.warn("Supabase Board Update Exception", e);
+             alert("서버 수정에 실패했습니다. (임시 반영)");
+          }
         }
-      } catch (e) {
-        console.warn("Supabase Board Insert Exception", e);
       }
+    } else {
+      // 새 글 작성
+      const newBoard = {
+        id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+        category: cat,
+        title: title,
+        content: content,
+        link_url: link,
+        author_name: state.currentUser.name,
+        author_email: state.currentUser.email,
+        created_at: new Date().toISOString()
+      };
+
+      if (supabaseClient) {
+        try {
+          const { error } = await supabaseClient.from("boards").insert([newBoard]);
+          if (error) {
+            console.error("게시글 DB 저장 실패:", error);
+            alert("서버(DB) 저장에 실패했습니다. 현재 기기에서만 임시로 보이며 다른 기기(모바일)에서는 보이지 않습니다.\n\n원인: " + error.message);
+          }
+        } catch (e) {
+          console.warn("Supabase Board Insert Exception", e);
+        }
+      }
+      MOCK_BOARDS.unshift(newBoard);
     }
-    MOCK_BOARDS.unshift(newBoard);
     
     if(boardWriteModal) boardWriteModal.classList.remove("active");
     document.body.style.overflow = "";
     if(boardWriteForm) boardWriteForm.reset();
+    editingBoardId = null;
     
     if(typeof Swal !== 'undefined') {
-      Swal.fire({ title: "BUIKBU 확인내용", text: "게시글이 성공적으로 등록되었습니다.", icon: "success", confirmButtonText: "확인" });
+      Swal.fire({ title: "BUIKBU 확인내용", text: "게시글이 성공적으로 저장되었습니다.", icon: "success", confirmButtonText: "확인" });
     } else {
-      alert("게시글이 등록되었습니다.");
+      alert("게시글이 저장되었습니다.");
     }
     renderBoards();
     btnBoardWriteSubmit.disabled = false;
