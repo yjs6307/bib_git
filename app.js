@@ -25,7 +25,7 @@ if (window.supabase) {
   const originalRemove = DOMTokenList.prototype.remove;
 
   DOMTokenList.prototype.add = function(...args) {
-    if (args.includes('active') && this.value && (this.value.includes('modal-overlay') || this.value.includes('mobile-drawer'))) {
+    if (args.includes('active') && this.value && (this.value.includes('modal-overlay') || this.value.includes('mobile-drawer-overlay'))) {
       if (!history.state || !history.state.modalOpen) {
         history.pushState({ modalOpen: true }, "", location.href);
       }
@@ -34,8 +34,8 @@ if (window.supabase) {
   };
 
   DOMTokenList.prototype.remove = function(...args) {
-    if (args.includes('active') && this.value && (this.value.includes('modal-overlay') || this.value.includes('mobile-drawer'))) {
-      const activeModals = document.querySelectorAll('.modal-overlay.active, .mobile-drawer.active');
+    if (args.includes('active') && this.value && (this.value.includes('modal-overlay') || this.value.includes('mobile-drawer-overlay'))) {
+      const activeModals = document.querySelectorAll('.modal-overlay.active, .mobile-drawer-overlay.active');
       // 현재 닫히려는 모달이 마지막(유일한) 모달일 때만 가짜 히스토리를 뺀다
       if (activeModals.length <= 1) { 
          if (history.state && history.state.modalOpen) {
@@ -47,7 +47,7 @@ if (window.supabase) {
   };
 
   window.addEventListener('popstate', (e) => {
-    const activeModals = document.querySelectorAll(".modal-overlay.active, .mobile-drawer.active");
+    const activeModals = document.querySelectorAll(".modal-overlay.active, .mobile-drawer-overlay.active");
     if (activeModals.length > 0) {
       const topModal = activeModals[activeModals.length - 1];
       originalRemove.call(topModal.classList, 'active');
