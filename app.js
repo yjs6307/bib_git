@@ -480,15 +480,17 @@ function updateNavUI() {
       });
 
       document.getElementById("m_btnOpenUserAdmin")?.addEventListener("click", () => {
-        closeMobileDrawer();
         renderUserAdminTable();
-        userAdminModal.classList.add("active");
-        document.body.style.overflow = "hidden";
+        if(userAdminModal) {
+          userAdminModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+        closeMobileDrawer();
       });
 
       document.getElementById("m_btnOpenAdminModal")?.addEventListener("click", () => {
-        closeMobileDrawer();
         handleRegisterClick();
+        closeMobileDrawer();
       });
 
     } else {
