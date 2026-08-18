@@ -1827,7 +1827,12 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         } else {
           const newProperty = {
-            id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+            id: (typeof crypto !== "undefined" && crypto.randomUUID) 
+                ? crypto.randomUUID() 
+                : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                  }),
             property_number: propertyNumber,
             registration_date: registrationDate,
             title: document.getElementById("inputTitle").value,
@@ -2193,7 +2198,12 @@ if(btnBoardWriteSubmit) {
     } else {
       // 새 글 작성
       const newBoard = {
-        id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+        id: (typeof crypto !== "undefined" && crypto.randomUUID) 
+            ? crypto.randomUUID() 
+            : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+              }),
         category: cat,
         title: title,
         content: content,
