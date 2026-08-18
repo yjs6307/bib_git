@@ -17,6 +17,47 @@ if (window.supabase) {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
+// -----------------------------------------------------------------------------
+// [모바일 UX 개선] 기기 뒤로가기 버튼으로 모달만 닫기 (History API 가로채기)
+// -----------------------------------------------------------------------------
+(() => {
+  const originalAdd = DOMTokenList.prototype.add;
+  const originalRemove = DOMTokenList.prototype.remove;
+
+  DOMTokenList.prototype.add = function(...args) {
+    if (args.includes('active') && this.value && (this.value.includes('modal-overlay') || this.value.includes('mobile-drawer'))) {
+      if (!history.state || !history.state.modalOpen) {
+        history.pushState({ modalOpen: true }, "", location.href);
+      }
+    }
+    return originalAdd.apply(this, args);
+  };
+
+  DOMTokenList.prototype.remove = function(...args) {
+    if (args.includes('active') && this.value && (this.value.includes('modal-overlay') || this.value.includes('mobile-drawer'))) {
+      const activeModals = document.querySelectorAll('.modal-overlay.active, .mobile-drawer.active');
+      // 현재 닫히려는 모달이 마지막(유일한) 모달일 때만 가짜 히스토리를 뺀다
+      if (activeModals.length <= 1) { 
+         if (history.state && history.state.modalOpen) {
+            history.back(); 
+         }
+      }
+    }
+    return originalRemove.apply(this, args);
+  };
+
+  window.addEventListener('popstate', (e) => {
+    const activeModals = document.querySelectorAll(".modal-overlay.active, .mobile-drawer.active");
+    if (activeModals.length > 0) {
+      const topModal = activeModals[activeModals.length - 1];
+      originalRemove.call(topModal.classList, 'active');
+      if (activeModals.length === 1) {
+        document.body.style.overflow = "";
+      }
+    }
+  });
+})();
+
 // 10단계 회원 등급명 매핑
 const LEVEL_NAMES = {
   1: "Level 1 (준회원 / 승인대기)",
