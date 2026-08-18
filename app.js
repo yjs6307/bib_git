@@ -1973,6 +1973,20 @@ function openBoardDetail(id) {
     }
   }
 
+  const fileContainer = document.getElementById("boardDetailFileContainer");
+  const fileAnchor = document.getElementById("boardDetailFileLink");
+  const fileNameSpan = document.getElementById("boardDetailFileName");
+  if (fileContainer && fileAnchor && fileNameSpan) {
+    if (b.attached_file_url) {
+      fileAnchor.href = b.attached_file_url;
+      fileNameSpan.textContent = b.attached_file_name || "첨부파일";
+      fileContainer.style.display = "block";
+    } else {
+      fileAnchor.href = "#";
+      fileContainer.style.display = "none";
+    }
+  }
+
   // 레벨 4 이상 관리자이거나 작성자 본인일 때 삭제/수정 권한 부여
   if(btnBoardDelete && btnBoardEdit) {
     if(state.currentUser && (state.currentUser.level >= 4 || state.currentUser.email === b.author_email)) {
@@ -2022,6 +2036,9 @@ function openBoardDetail(id) {
     if(modalTitle) modalTitle.textContent = "새 게시글 작성";
     
     if(boardWriteForm) boardWriteForm.reset();
+    const fileStatus = document.getElementById("boardWriteFileStatus");
+    if(fileStatus) fileStatus.style.display = "none";
+    
     if(boardWriteModal) {
       boardWriteModal.classList.add("active");
       document.body.style.overflow = "hidden";
@@ -2031,7 +2048,10 @@ function openBoardDetail(id) {
 
 // 수정 버튼 클릭
 if (btnBoardEdit) {
-  btnBoardEdit.addEventListener("click", () => {
+  btnBoardEdit.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if(!currentBoardId) return;
     const b = MOCK_BOARDS.find(x => x.id === currentBoardId);
     if(!b) return;
@@ -2043,17 +2063,28 @@ if (btnBoardEdit) {
     document.getElementById("boardWriteTitle").value = b.title;
     if (document.getElementById("boardWriteLink")) document.getElementById("boardWriteLink").value = b.link_url || "";
     document.getElementById("boardWriteContent").value = b.content;
+    
+    // 기존 파일 표시
+    const fileStatus = document.getElementById("boardWriteFileStatus");
+    if(fileStatus) {
+      if(b.attached_file_name) {
+        fileStatus.textContent = `기존 첨부파일: ${b.attached_file_name} (새 파일 업로드 시 교체됨)`;
+        fileStatus.style.display = "block";
+      } else {
+        fileStatus.style.display = "none";
+      }
+    }
 
     // 모달 타이틀 변경
     const modalTitle = document.querySelector("#boardWriteModal .modal-header h2");
     if(modalTitle) modalTitle.textContent = "게시글 수정";
 
-    // 기존 상세 모달 닫고 쓰기 모달 띄우기
-    if(boardDetailModal) boardDetailModal.classList.remove("active");
+    // 기존 상세 모달을 닫기 전에 새 쓰기 모달을 띄워야 스마트폰 뒤로가기 꼬임을 방지함
     if(boardWriteModal) {
       boardWriteModal.classList.add("active");
       document.body.style.overflow = "hidden";
     }
+    if(boardDetailModal) boardDetailModal.classList.remove("active");
   });
 }
 
@@ -2078,6 +2109,41 @@ if(btnBoardWriteSubmit) {
     }
 
     btnBoardWriteSubmit.disabled = true;
+    
+    // 파일 업로드 처리
+    let attachedFileUrl = "";
+    let attachedFileName = "";
+    const fileInput = document.getElementById("boardWriteFile");
+    
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        alert("파일 크기는 5MB 이하여야 합니다.");
+        btnBoardWriteSubmit.disabled = false;
+        return;
+      }
+      
+      if (supabaseClient) {
+        try {
+          const fileExt = file.name.split('.').pop();
+          const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const fileName = `${Date.now()}_${safeName}`;
+          
+          const { data, error } = await supabaseClient.storage.from('board_files').upload(fileName, file);
+          if (error) {
+            console.error("파일 업로드 실패:", error);
+            alert("파일 업로드에 실패했습니다. Storage 버킷 설정이 올바른지 확인해주세요.");
+          } else {
+            const { data: publicData } = supabaseClient.storage.from('board_files').getPublicUrl(fileName);
+            attachedFileUrl = publicData.publicUrl;
+            attachedFileName = file.name;
+          }
+        } catch(e) {
+          console.error("파일 업로드 예외 발생:", e);
+        }
+      }
+    }
+    
     if (editingBoardId) {
       // 기존 글 수정
       const targetBoard = MOCK_BOARDS.find(b => b.id === editingBoardId);
@@ -2086,11 +2152,21 @@ if(btnBoardWriteSubmit) {
         targetBoard.title = title;
         targetBoard.content = content;
         targetBoard.link_url = link;
+        if(attachedFileUrl) {
+          targetBoard.attached_file_url = attachedFileUrl;
+          targetBoard.attached_file_name = attachedFileName;
+        }
         
         if (supabaseClient) {
           try {
+            const updatePayload = { category: cat, title: title, content: content, link_url: link };
+            if (attachedFileUrl) {
+              updatePayload.attached_file_url = attachedFileUrl;
+              updatePayload.attached_file_name = attachedFileName;
+            }
+            
             const { error } = await supabaseClient.from("boards")
-              .update({ category: cat, title: title, content: content, link_url: link })
+              .update(updatePayload)
               .eq("id", editingBoardId);
             if(error) throw error;
           } catch(e) {
@@ -2111,6 +2187,10 @@ if(btnBoardWriteSubmit) {
         author_email: state.currentUser.email,
         created_at: new Date().toISOString()
       };
+      if (attachedFileUrl) {
+        newBoard.attached_file_url = attachedFileUrl;
+        newBoard.attached_file_name = attachedFileName;
+      }
 
       if (supabaseClient) {
         try {
