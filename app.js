@@ -2126,8 +2126,8 @@ if(btnBoardWriteSubmit) {
       if (supabaseClient) {
         try {
           const fileExt = file.name.split('.').pop();
-          const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-          const fileName = `${Date.now()}_${safeName}`;
+          // 한글, 특수문자로 인한 브라우저 400 인코딩 에러를 방지하기 위해 파일명을 완전한 랜덤 영숫자로 변경합니다.
+          const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
           
           const { data, error } = await supabaseClient.storage.from('board_files').upload(fileName, file);
           if (error) {
@@ -2136,7 +2136,7 @@ if(btnBoardWriteSubmit) {
           } else {
             const { data: publicData } = supabaseClient.storage.from('board_files').getPublicUrl(fileName);
             attachedFileUrl = publicData.publicUrl;
-            attachedFileName = file.name;
+            attachedFileName = file.name; // 화면에 보여줄 원본 이름은 DB에 저장
           }
         } catch(e) {
           console.error("파일 업로드 예외 발생:", e);
