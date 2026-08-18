@@ -1638,7 +1638,12 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
 
       const newMember = {
-        id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+        id: (typeof crypto !== "undefined" && crypto.randomUUID) 
+            ? crypto.randomUUID() 
+            : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+              }),
         email: document.getElementById("signupEmail").value.trim(),
         password: document.getElementById("signupPassword").value.trim(),
         name: document.getElementById("signupName").value.trim(),
