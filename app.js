@@ -1179,12 +1179,11 @@ function updateGallery() {
 
   const track = document.getElementById("modalGalleryTrack");
   if (track) {
-    const currentPropId = state.selectedProperty.id || 'default';
-    if (track.getAttribute("data-property-id") !== currentPropId) {
-      track.innerHTML = images.map(img => `<img src="${img}" class="gallery-main-img" />`).join("");
-      track.setAttribute("data-property-id", currentPropId);
-    }
-    track.style.transform = `translateX(-${state.currentImageIndex * 100}%)`;
+    // 가로로 무한정 길게 늘어뜨려 모바일 그래픽 메모리가 터지는(블랙아웃) 현상을 방지하기 위해 
+    // translateX 방식을 버리고 1장만 교체하여 렌더링하는 안전한 방식으로 변경합니다.
+    track.style.transform = "none";
+    track.style.display = "block";
+    track.innerHTML = `<img src="${images[state.currentImageIndex]}" class="gallery-main-img" style="animation: fadeIn 0.3s ease-in-out;" />`;
   }
 
   galleryCounter.textContent = `${state.currentImageIndex + 1} / ${images.length}`;
