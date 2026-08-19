@@ -1183,8 +1183,18 @@ function updateGallery() {
     // translateX 방식을 버리고 1장만 교체하여 렌더링하는 안전한 방식으로 변경합니다.
     track.style.transform = "none";
     track.style.display = "block";
-    track.innerHTML = `<img src="${images[state.currentImageIndex]}" class="gallery-main-img" style="animation: fadeIn 0.3s ease-in-out;" />`;
-  }
+    track.innerHTML = `<img id="currentGalleryImg" src="${images[state.currentImageIndex]}" class="gallery-main-img" style="animation: fadeIn 0.3s ease-in-out; cursor: pointer;" />`;
+    const imgEl = document.getElementById("currentGalleryImg");
+    if(imgEl) {
+      imgEl.addEventListener("click", () => {
+        const viewer = document.getElementById("imageViewerModal");
+        const viewerImg = document.getElementById("imageViewerImg");
+        if(viewer && viewerImg) {
+          viewerImg.src = imgEl.src;
+          viewer.classList.add("active");
+        }
+      });
+    }
 
   galleryCounter.textContent = `${state.currentImageIndex + 1} / ${images.length}`;
 
@@ -1627,9 +1637,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  const imageViewerModal = document.getElementById("imageViewerModal");
+  const btnImageViewerClose = document.getElementById("btnImageViewerClose");
+  if(btnImageViewerClose && imageViewerModal) {
+    btnImageViewerClose.addEventListener("click", () => {
+      imageViewerModal.classList.remove("active");
+    });
+  }
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer].forEach(modal => {
+      [detailModal, adminModal, signupModal, loginModal, userAdminModal, smsModal, mobileMenuDrawer, imageViewerModal].forEach(modal => {
         if (modal) modal.classList.remove("active");
       });
       document.body.style.overflow = "";
