@@ -1172,6 +1172,25 @@ function closeDetailModal() {
   document.body.style.overflow = "";
 }
 
+let viewerImages = [];
+let viewerCurrentIndex = 0;
+
+function updateViewer() {
+  const viewerImg = document.getElementById("imageViewerImg");
+  const counter = document.getElementById("imageViewerCounter");
+  const btnPrev = document.getElementById("btnViewerPrev");
+  const btnNext = document.getElementById("btnViewerNext");
+  
+  if (viewerImg && viewerImages.length > 0) {
+    viewerImg.src = viewerImages[viewerCurrentIndex];
+  }
+  if (counter) {
+    counter.textContent = `${viewerCurrentIndex + 1} / ${viewerImages.length}`;
+  }
+  if (btnPrev) btnPrev.style.display = viewerImages.length > 1 ? "block" : "none";
+  if (btnNext) btnNext.style.display = viewerImages.length > 1 ? "block" : "none";
+}
+
 function updateGallery() {
   const images = (state.selectedProperty.images && state.selectedProperty.images.length > 0)
     ? state.selectedProperty.images
@@ -1187,12 +1206,12 @@ function updateGallery() {
     const imgEl = document.getElementById("currentGalleryImg");
     if(imgEl) {
       imgEl.addEventListener("click", () => {
+        viewerImages = images;
+        viewerCurrentIndex = state.currentImageIndex;
+        updateViewer();
         const viewer = document.getElementById("imageViewerModal");
-        const viewerImg = document.getElementById("imageViewerImg");
-        if(viewer && viewerImg) {
-          viewerImg.src = imgEl.src;
-          viewer.classList.add("active");
-        }
+        if(viewer) viewer.classList.add("active");
+        document.body.style.overflow = "hidden";
       });
     }
   }
@@ -1640,9 +1659,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const imageViewerModal = document.getElementById("imageViewerModal");
   const btnImageViewerClose = document.getElementById("btnImageViewerClose");
+  const btnViewerPrev = document.getElementById("btnViewerPrev");
+  const btnViewerNext = document.getElementById("btnViewerNext");
+  
   if(btnImageViewerClose && imageViewerModal) {
     btnImageViewerClose.addEventListener("click", () => {
       imageViewerModal.classList.remove("active");
+    });
+    imageViewerModal.addEventListener("click", (e) => {
+      if (e.target === imageViewerModal) {
+        imageViewerModal.classList.remove("active");
+      }
+    });
+  }
+  
+  if(btnViewerPrev) {
+    btnViewerPrev.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if(viewerImages.length > 0) {
+        viewerCurrentIndex = (viewerCurrentIndex - 1 + viewerImages.length) % viewerImages.length;
+        updateViewer();
+      }
+    });
+  }
+  
+  if(btnViewerNext) {
+    btnViewerNext.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if(viewerImages.length > 0) {
+        viewerCurrentIndex = (viewerCurrentIndex + 1) % viewerImages.length;
+        updateViewer();
+      }
     });
   }
 
