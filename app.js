@@ -1082,9 +1082,11 @@ function openDetailModal(property) {
       toggleVillaSpec();
       calculateProfit();
 
+      if (adminModal) {
+        adminModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
       closeDetailModal();
-      adminModal.classList.add("active");
-      document.body.style.overflow = "hidden";
     };
   }
 
