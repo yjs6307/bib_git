@@ -1195,6 +1195,7 @@ function updateGallery() {
         }
       });
     }
+  }
 
   galleryCounter.textContent = `${state.currentImageIndex + 1} / ${images.length}`;
 
