@@ -2327,7 +2327,7 @@ function openBoardList(category, titleText) {
   const list = MOCK_BOARDS.filter(b => b.category === category);
   
   boardListModalContent.innerHTML = list.length > 0 ? list.map(b => `
-    <li data-id="${b.id}" class="board-item-modal" style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+    <li data-id="${b.id}" class="board-item-modal" onclick="document.getElementById('boardListModal').classList.remove('active'); openBoardDetail('${b.id}'); return false;" style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
         <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:75%; ${category === 'notice' ? 'color:#0f172a;' : ''}">${b.title}</span>
         <span style="font-size:0.75rem; color:#94a3b8;">${(b.created_at || "").substring(0, 10)}</span>
     </li>
@@ -2335,14 +2335,6 @@ function openBoardList(category, titleText) {
   
   boardListModal.classList.add("active");
   document.body.style.overflow = "hidden";
-  
-  // 팝업 리스트 클릭 시 상세 모달 오픈
-  boardListModalContent.querySelectorAll(".board-item-modal").forEach(li => {
-    li.addEventListener("click", () => {
-       boardListModal.classList.remove("active");
-       openBoardDetail(li.getAttribute("data-id"));
-    });
-  });
 }
 
 if (btnMoreInfo) btnMoreInfo.addEventListener("click", (e) => { e.preventDefault(); openBoardList("info", "정보마당 전체글 보기"); });
