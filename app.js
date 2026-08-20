@@ -2092,15 +2092,18 @@ function openBoardDetail(id) {
 [btnWriteNotice, btnWriteInfo].forEach(btn => {
   if(btn) btn.addEventListener("click", (e) => {
     editingBoardId = null;
-    const isNotice = e.currentTarget.id === 'btnWriteNotice';
-    const catSelect = document.getElementById("boardWriteCategory");
-    if(catSelect) catSelect.value = isNotice ? 'notice' : 'info';
     
     // 모달 타이틀 변경
     const modalTitle = document.querySelector("#boardWriteModal .modal-header h2");
     if(modalTitle) modalTitle.textContent = "새 게시글 작성";
     
-    if(boardWriteForm) boardWriteForm.reset();
+    if(boardWriteForm) boardWriteForm.reset(); // 폼을 먼저 완전히 비웁니다
+    
+    // 폼 리셋 이후에 사용자가 누른 게시판에 맞게 카테고리를 세팅합니다
+    const isNotice = e.currentTarget.id === 'btnWriteNotice';
+    const catSelect = document.getElementById("boardWriteCategory");
+    if(catSelect) catSelect.value = isNotice ? 'notice' : 'info';
+    
     const fileStatus = document.getElementById("boardWriteFileStatus");
     if(fileStatus) fileStatus.style.display = "none";
     
