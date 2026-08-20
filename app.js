@@ -855,6 +855,16 @@ function renderComments(comments) {
 }
 
 function openDetailModal(property) {
+  if (!state.currentUser) {
+    alert("매물 상세 정보는 회원만 열람할 수 있습니다. 먼저 로그인해 주세요.");
+    const loginModal = document.getElementById("loginModal");
+    if (loginModal) {
+      loginModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+    return;
+  }
+
   state.selectedProperty = property;
   state.currentImageIndex = 0;
 
@@ -2321,6 +2331,16 @@ const boardListModalContent = document.getElementById("boardListModalContent");
 const btnBoardListClose = document.getElementById("btnBoardListClose");
 
 function openBoardList(category, titleText) {
+  if (!state.currentUser) {
+    alert("더보기(전체 글 목록)는 회원만 이용하실 수 있습니다. 먼저 로그인해 주세요.");
+    const loginModal = document.getElementById("loginModal");
+    if (loginModal) {
+      loginModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+    return;
+  }
+
   if (!boardListModal || !boardListModalContent) return;
   boardListModalTitle.textContent = titleText;
   
