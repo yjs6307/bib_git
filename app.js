@@ -2012,7 +2012,7 @@ function renderBoards() {
 }
 
 function openBoardDetail(id) {
-  const b = MOCK_BOARDS.find(x => x.id === id);
+  const b = MOCK_BOARDS.find(x => String(x.id) === String(id));
   if(!b) return;
   currentBoardId = id;
   
