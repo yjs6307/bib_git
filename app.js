@@ -2337,19 +2337,29 @@ function openBoardList(category, titleText) {
   document.body.style.overflow = "hidden";
 }
 
+// 전역에서 어디서든 호출 가능하도록 명시적 바인딩
+window.openBoardDetail = openBoardDetail;
+
 // 이벤트 위임을 사용하여 동적으로 생성된 더보기 리스트 항목의 클릭 이벤트 처리
 if (boardListModalContent) {
   boardListModalContent.addEventListener("click", (e) => {
-    const li = e.target.closest(".board-item-modal");
+    let target = e.target;
+    if (target.nodeType === 3) target = target.parentNode; // 텍스트 노드 방어
+    
+    const li = target.closest ? target.closest(".board-item-modal") : null;
     if (!li) return;
     
+    const boardId = li.getAttribute("data-id");
+    if (!boardId) return;
+
     if (boardListModal) {
       boardListModal.classList.remove("active");
     }
-    const boardId = li.getAttribute("data-id");
-    if (boardId) {
+    
+    // 모달 두 개가 동시에 닫히고 열릴 때 발생하는 모바일 브라우저 렌더링 버그(먹통 현상) 방지
+    setTimeout(() => {
       openBoardDetail(boardId);
-    }
+    }, 50);
   });
 }
 
