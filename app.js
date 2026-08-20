@@ -2327,14 +2327,30 @@ function openBoardList(category, titleText) {
   const list = MOCK_BOARDS.filter(b => b.category === category);
   
   boardListModalContent.innerHTML = list.length > 0 ? list.map(b => `
-    <li data-id="${b.id}" class="board-item-modal" onclick="document.getElementById('boardListModal').classList.remove('active'); openBoardDetail('${b.id}'); return false;" style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:75%; ${category === 'notice' ? 'color:#0f172a;' : ''}">${b.title}</span>
-        <span style="font-size:0.75rem; color:#94a3b8;">${(b.created_at || "").substring(0, 10)}</span>
+    <li data-id="${b.id}" class="board-item-modal" style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:75%; ${category === 'notice' ? 'color:#0f172a;' : ''}; pointer-events:none;">${b.title}</span>
+        <span style="font-size:0.75rem; color:#94a3b8; pointer-events:none;">${(b.created_at || "").substring(0, 10)}</span>
     </li>
   `).join("") : `<li style="padding: 15px 0; text-align:center; color:#94a3b8;">등록된 글이 없습니다.</li>`;
   
   boardListModal.classList.add("active");
   document.body.style.overflow = "hidden";
+}
+
+// 이벤트 위임을 사용하여 동적으로 생성된 더보기 리스트 항목의 클릭 이벤트 처리
+if (boardListModalContent) {
+  boardListModalContent.addEventListener("click", (e) => {
+    const li = e.target.closest(".board-item-modal");
+    if (!li) return;
+    
+    if (boardListModal) {
+      boardListModal.classList.remove("active");
+    }
+    const boardId = li.getAttribute("data-id");
+    if (boardId) {
+      openBoardDetail(boardId);
+    }
+  });
 }
 
 if (btnMoreInfo) btnMoreInfo.addEventListener("click", (e) => { e.preventDefault(); openBoardList("info", "정보마당 전체글 보기"); });
