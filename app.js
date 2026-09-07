@@ -725,9 +725,10 @@ function render() {
           <div class="card-content">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div class="card-price" style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
-                <span style="font-size:0.75rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px; border:1px solid #e2e8f0;">계약가</span>
+                <span style="font-size:0.75rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px; border:1px solid #e2e8f0;">${property.property_type === "건물" ? "매매가" : "계약가"}</span>
                 <span style="font-size:1.05rem; font-weight:700; color:#1e293b;">${formatKoreanCurrency(property.price)}</span>
               </div>
+              ${property.property_type === "건물" ? "" : `
               <div style="font-size:0.75rem; color:#64748b; text-align:right; font-weight:600; line-height:1.4; background:#f1f5f9; padding:4px 8px; border-radius:6px;">
                 <div>방 ${property.rooms || 0} · 화장실 ${property.bathrooms || 0}</div>
                 <div>전용면적 ${
@@ -736,6 +737,7 @@ function render() {
                     : (property.area_size || '-')
                 }</div>
               </div>
+              `}
             </div>
             <h3 class="card-title">${property.title}</h3>
             <div class="card-location" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
