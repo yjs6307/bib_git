@@ -18,6 +18,14 @@ if (window.supabase) {
 }
 
 // -----------------------------------------------------------------------------
+// 1.5 초기 렌더링 깜빡임(Flash) 방지
+// 공유 링크(?id=xxx)로 접속 시, 데이터를 불러오기 전까지 화면 전체를 임시로 숨깁니다.
+// -----------------------------------------------------------------------------
+if (new URLSearchParams(window.location.search).has('id')) {
+  document.documentElement.style.visibility = 'hidden';
+}
+
+// -----------------------------------------------------------------------------
 // [모바일 UX 개선] 기기 뒤로가기 버튼으로 모달만 닫기 (History API 가로채기)
 // -----------------------------------------------------------------------------
 (() => {
@@ -317,6 +325,9 @@ async function initApp() {
       openDetailModal(property);
     }
   }
+  
+  // URL에 id가 있든 없든(또는 오류가 났든) 렌더링 준비가 끝났으므로 항상 화면 다시 표시
+  document.documentElement.style.visibility = '';
 }
 
 async function fetchUsers() {

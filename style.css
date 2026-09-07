@@ -1187,7 +1187,7 @@ input, textarea, select {
 body.shared-mode header.navbar,
 body.shared-mode section.hero-section,
 body.shared-mode section.filter-section,
-body.shared-mode main.main-container,
+body.shared-mode .main-container,
 body.shared-mode footer,
 body.shared-mode .mobile-drawer-overlay {
     display: none !important;
