@@ -910,9 +910,10 @@ function openDetailModal(property) {
   modalPropertyNumber.textContent = propNo;
   modalRegistrationDate.textContent = regDate;
 
+  const priceLabel = property.property_type === "건물" ? "매매가" : "계약가";
   modalPrice.innerHTML = `
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:0.85rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:4px 8px; border-radius:6px; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">계약가</span>
+      <span style="font-size:0.85rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:4px 8px; border-radius:6px; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">${priceLabel}</span>
       <span style="font-size:1.3rem; font-weight:800; color:#0f172a; line-height:1;">${formatKoreanCurrency(property.price)}</span>
     </div>
   `;
@@ -921,6 +922,12 @@ function openDetailModal(property) {
 
   // --- 진행상태 파이프라인 렌더링 ---
   const pipelineWrap = document.getElementById("modalPipelineWrap");
+  const modalAreaSizeBox = document.getElementById("modalAreaSizeBox");
+  const modalFloorInfoBox = document.getElementById("modalFloorInfoBox");
+  const modalBuildYearBox = document.getElementById("modalBuildYearBox");
+  const modalInvestmentWrap = document.getElementById("modalInvestmentWrap");
+  const modalParticipantsWrap = document.getElementById("modalParticipantsWrap");
+  
   if (pipelineWrap) {
     const steps = ["위탁매매준비중", "수리중", "매매진행중", "매매계약완료", "매매완료"];
     const currentStatus = property.trade_status || "매매진행중";
@@ -975,6 +982,12 @@ function openDetailModal(property) {
   if (modalBuildingSpecBox) {
     if (property.property_type === "건물") {
       modalBuildingSpecBox.style.display = "flex";
+      if (pipelineWrap) pipelineWrap.style.display = "none";
+      if (modalAreaSizeBox) modalAreaSizeBox.style.display = "none";
+      if (modalFloorInfoBox) modalFloorInfoBox.style.display = "none";
+      if (modalBuildYearBox) modalBuildYearBox.style.display = "none";
+      if (modalInvestmentWrap) modalInvestmentWrap.style.display = "none";
+      if (modalParticipantsWrap) modalParticipantsWrap.style.display = "none";
       document.getElementById("modalLandArea").textContent = property.land_area || "-";
       document.getElementById("modalBuildingArea").textContent = property.building_area || "-";
       document.getElementById("modalTotalFloorArea").textContent = property.total_floor_area || "-";
@@ -1017,6 +1030,12 @@ function openDetailModal(property) {
       }
     } else {
       modalBuildingSpecBox.style.display = "none";
+      if (pipelineWrap) pipelineWrap.style.display = "block";
+      if (modalAreaSizeBox) modalAreaSizeBox.style.display = "block";
+      if (modalFloorInfoBox) modalFloorInfoBox.style.display = "block";
+      if (modalBuildYearBox) modalBuildYearBox.style.display = "block";
+      if (modalInvestmentWrap) modalInvestmentWrap.style.display = "block";
+      if (modalParticipantsWrap) modalParticipantsWrap.style.display = "block";
     }
   }
 
