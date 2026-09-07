@@ -603,6 +603,8 @@ function toggleVillaSpec() {
   
   const standardFieldsGroup = document.getElementById("standardFieldsGroup");
   const buildingFinancialsGroup = document.getElementById("buildingFinancialsGroup");
+  const investmentProfitGroup = document.getElementById("investmentProfitGroup");
+  const participantsGroup = document.getElementById("participantsGroup");
   const stdInputs = ["inputFloorInfo", "inputArea", "inputPrice"];
 
   if (inputType) {
@@ -613,6 +615,8 @@ function toggleVillaSpec() {
       
       if (standardFieldsGroup) standardFieldsGroup.style.display = "none";
       if (buildingFinancialsGroup) buildingFinancialsGroup.style.display = "block";
+      if (investmentProfitGroup) investmentProfitGroup.style.display = "none";
+      if (participantsGroup) participantsGroup.style.display = "none";
       
       stdInputs.forEach(id => {
         const el = document.getElementById(id);
@@ -625,6 +629,8 @@ function toggleVillaSpec() {
       
       if (standardFieldsGroup) standardFieldsGroup.style.display = "block";
       if (buildingFinancialsGroup) buildingFinancialsGroup.style.display = "none";
+      if (investmentProfitGroup) investmentProfitGroup.style.display = "block";
+      if (participantsGroup) participantsGroup.style.display = "block";
       
       stdInputs.forEach(id => {
         const el = document.getElementById(id);
