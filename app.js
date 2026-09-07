@@ -1389,7 +1389,7 @@ function updateViewer() {
   if (btnNext) btnNext.style.display = viewerImages.length > 1 ? "block" : "none";
 }
 
-function updateGallery() {
+function updateGallery(direction = 'fade') {
   const images = (state.selectedProperty.images && state.selectedProperty.images.length > 0)
     ? state.selectedProperty.images
     : ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"];
@@ -1400,7 +1400,10 @@ function updateGallery() {
     // translateX 방식을 버리고 1장만 교체하여 렌더링하는 안전한 방식으로 변경합니다.
     track.style.transform = "none";
     track.style.display = "block";
-    track.innerHTML = `<img id="currentGalleryImg" src="${images[state.currentImageIndex]}" class="gallery-main-img" style="animation: fadeIn 0.3s ease-in-out; cursor: pointer;" />`;
+    let anim = "fadeIn 0.3s ease-in-out";
+    if (direction === 'next') anim = "slideInRight 0.3s ease-out";
+    if (direction === 'prev') anim = "slideInLeft 0.3s ease-out";
+    track.innerHTML = `<img id="currentGalleryImg" src="${images[state.currentImageIndex]}" class="gallery-main-img" style="animation: ${anim}; cursor: pointer;" />`;
     const imgEl = document.getElementById("currentGalleryImg");
     if(imgEl) {
       imgEl.addEventListener("click", () => {
@@ -1754,7 +1757,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const images = state.selectedProperty?.images || [];
       if (images.length > 1) {
         state.currentImageIndex = (state.currentImageIndex - 1 + images.length) % images.length;
-        updateGallery();
+        updateGallery('prev');
       }
     });
   }
@@ -1764,7 +1767,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const images = state.selectedProperty?.images || [];
       if (images.length > 1) {
         state.currentImageIndex = (state.currentImageIndex + 1) % images.length;
-        updateGallery();
+        updateGallery('next');
       }
     });
   }
