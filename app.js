@@ -982,6 +982,8 @@ function openDetailModal(property) {
       document.getElementById("modalBuildingStructure").textContent = property.building_structure || "-";
       document.getElementById("modalBuildingCompletionYear").textContent = property.completion_year || "-";
       document.getElementById("modalBuildingType").textContent = property.building_type || "-";
+      document.getElementById("modalBuildingScaleUnderground").textContent = property.building_scale_underground || "-";
+      document.getElementById("modalBuildingScaleGround").textContent = property.building_scale_ground || "-";
       document.getElementById("modalBuildingSalePrice").textContent = property.building_sale_price || "-";
       document.getElementById("modalBuildingDeposit").textContent = property.building_deposit || "-";
       document.getElementById("modalBuildingMonthlyRent").textContent = property.building_monthly_rent || "-";
@@ -1135,6 +1137,8 @@ function openDetailModal(property) {
       if (document.getElementById("inputBuildingStructure")) document.getElementById("inputBuildingStructure").value = property.building_structure || "";
       if (document.getElementById("inputCompletionYear")) document.getElementById("inputCompletionYear").value = property.completion_year || "";
       if (document.getElementById("inputBuildingType")) document.getElementById("inputBuildingType").value = property.building_type || "";
+      if (document.getElementById("inputBuildingScaleUnderground")) document.getElementById("inputBuildingScaleUnderground").value = property.building_scale_underground || "";
+      if (document.getElementById("inputBuildingScaleGround")) document.getElementById("inputBuildingScaleGround").value = property.building_scale_ground || "";
       if (document.getElementById("inputBuildingSalePrice")) document.getElementById("inputBuildingSalePrice").value = property.building_sale_price || "";
       if (document.getElementById("inputBuildingDeposit")) document.getElementById("inputBuildingDeposit").value = property.building_deposit || "";
       if (document.getElementById("inputBuildingMonthlyRent")) document.getElementById("inputBuildingMonthlyRent").value = property.building_monthly_rent || "";
@@ -1981,6 +1985,8 @@ document.addEventListener("DOMContentLoaded", () => {
           building_structure: document.getElementById("inputBuildingStructure") ? document.getElementById("inputBuildingStructure").value.trim() : "",
           completion_year: document.getElementById("inputCompletionYear") ? document.getElementById("inputCompletionYear").value.trim() : "",
           building_type: document.getElementById("inputBuildingType") ? document.getElementById("inputBuildingType").value.trim() : "",
+          building_scale_underground: document.getElementById("inputBuildingScaleUnderground") ? document.getElementById("inputBuildingScaleUnderground").value.trim() : "",
+          building_scale_ground: document.getElementById("inputBuildingScaleGround") ? document.getElementById("inputBuildingScaleGround").value.trim() : "",
           building_sale_price: document.getElementById("inputBuildingSalePrice") ? document.getElementById("inputBuildingSalePrice").value.trim() : "",
           building_deposit: document.getElementById("inputBuildingDeposit") ? document.getElementById("inputBuildingDeposit").value.trim() : "",
           building_monthly_rent: document.getElementById("inputBuildingMonthlyRent") ? document.getElementById("inputBuildingMonthlyRent").value.trim() : "",
