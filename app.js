@@ -905,7 +905,7 @@ function renderComments(comments) {
 }
 
 function openDetailModal(property) {
-  if (!state.currentUser) {
+  if (!state.currentUser && property.property_type !== "건물") {
     alert("매물 상세 정보는 회원만 열람할 수 있습니다. 먼저 로그인해 주세요.");
     const loginModal = document.getElementById("loginModal");
     if (loginModal) {
