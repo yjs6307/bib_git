@@ -317,6 +317,14 @@
                         <div class="spec-box"><div class="spec-label">준공년도</div><div id="modalBuildingCompletionYear" class="spec-value">-</div></div>
                         <div class="spec-box"><div class="spec-label">건물유형</div><div id="modalBuildingType" class="spec-value">-</div></div>
                     </div>
+                    <div class="spec-grid" style="margin-top: 12px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
+                        <div class="spec-box"><div class="spec-label">매매가(만원)</div><div id="modalBuildingSalePrice" class="spec-value" style="font-weight: 700; color: #0f172a;">-</div></div>
+                        <div class="spec-box"><div class="spec-label">보증금(만원)</div><div id="modalBuildingDeposit" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">월세금액(만원)</div><div id="modalBuildingMonthlyRent" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">융자금액(만원)</div><div id="modalBuildingLoan" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">투자현금(만원)</div><div id="modalBuildingInvestCash" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">입주금(만원)</div><div id="modalBuildingMoveInCash" class="spec-value">-</div></div>
+                    </div>
                     
                     <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 8px;">
                         <h4 style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">현 임차현황</h4>
@@ -338,6 +346,11 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 8px;">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">특이사항</h4>
+                        <div id="modalBuildingSpecialNotes" style="font-size: 0.85rem; color: #475569; white-space: pre-wrap; line-height: 1.5;">-</div>
                     </div>
                 </div>
 
@@ -849,35 +862,77 @@
                             required />
                     </div>
 
-                    <!-- 소재지/위치 아래 층수 및 면적(㎡) 공급/전용 입력란 -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="inputFloorInfo">층수 / 총층수</label>
-                            <input type="text" id="inputFloorInfo" class="form-control" placeholder="예: 3층 / 5층"
-                                required />
+                    <!-- 기존 일반 필드 그룹 (건물 선택 시 숨김 처리됨) -->
+                    <div id="standardFieldsGroup">
+                        <!-- 소재지/위치 아래 층수 및 면적(㎡) 공급/전용 입력란 -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputFloorInfo">층수 / 총층수</label>
+                                <input type="text" id="inputFloorInfo" class="form-control" placeholder="예: 3층 / 5층"
+                                    required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inputArea">전용면적(㎡) </label>
+                                <input type="text" id="inputArea" class="form-control" placeholder="예: 전용 59㎡" required />
+                            </div>
                         </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputPrice">계약가격(만원)</label>
+                                <input type="text" id="inputPrice" class="form-control" placeholder="예: 38000" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inputExpectedSellingPrice">예상매매가(만원)</label>
+                                <input type="number" id="inputExpectedSellingPrice" class="form-control"
+                                    placeholder="예: 40000" min="0" step="100" />
+                            </div>
+                        </div>
+
                         <div class="form-group">
-                            <label class="form-label" for="inputArea">전용면적(㎡) </label>
-                            <input type="text" id="inputArea" class="form-control" placeholder="예: 전용 59㎡" required />
+                            <label class="form-label" for="inputBuildYear">준공년도</label>
+                            <input type="text" id="inputBuildYear" class="form-control" placeholder="예: 2015년" />
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="inputPrice">계약가격(만원)</label>
-                            <input type="text" id="inputPrice" class="form-control" placeholder="예: 38000" required />
+                    <!-- 건물 전용 재무 및 특이사항 그룹 -->
+                    <div id="buildingFinancialsGroup" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingSalePrice">매매가(만원)</label>
+                                <input type="text" id="inputBuildingSalePrice" class="form-control" placeholder="예: 150000" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingDeposit">보증금(만원)</label>
+                                <input type="text" id="inputBuildingDeposit" class="form-control" placeholder="예: 5000" />
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="inputExpectedSellingPrice">예상매매가(만원)</label>
-                            <input type="number" id="inputExpectedSellingPrice" class="form-control"
-                                placeholder="예: 40000" min="0" step="100" />
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingMonthlyRent">월세금액(만원)</label>
+                                <input type="text" id="inputBuildingMonthlyRent" class="form-control" placeholder="예: 300" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingLoan">융자금액(만원)</label>
+                                <input type="text" id="inputBuildingLoan" class="form-control" placeholder="예: 50000" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingInvestCash">투자현금(만원)</label>
+                                <input type="text" id="inputBuildingInvestCash" class="form-control" placeholder="예: 95000" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingMoveInCash">입주금(만원)</label>
+                                <input type="text" id="inputBuildingMoveInCash" class="form-control" placeholder="예: 100000" />
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-label" for="inputBuildingSpecialNotes">특이사항</label>
+                            <textarea id="inputBuildingSpecialNotes" class="form-control" rows="3" placeholder="예: 1층 편의점 입점 확정, 엘리베이터 유 등..."></textarea>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="inputBuildYear">준공년도</label>
-                        <input type="text" id="inputBuildYear" class="form-control" placeholder="예: 2015년" />
-                    </div>
 
                     <!-- 부동산 투자 및 자동 수익 계산 영역 (단위: 만원) -->
                     <div

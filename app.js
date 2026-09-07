@@ -601,19 +601,35 @@ function toggleVillaSpec() {
   const villaExtraRow = document.getElementById("villaExtraRow");
   const buildingSpecRow = document.getElementById("buildingSpecRow");
   
+  const standardFieldsGroup = document.getElementById("standardFieldsGroup");
+  const buildingFinancialsGroup = document.getElementById("buildingFinancialsGroup");
+  const stdInputs = ["inputFloorInfo", "inputArea", "inputPrice"];
+
   if (inputType) {
-    if (inputType.value === "빌라") {
-      if (villaSpecRow) villaSpecRow.style.display = "flex";
-      if (villaExtraRow) villaExtraRow.style.display = "flex";
-      if (buildingSpecRow) buildingSpecRow.style.display = "none";
-    } else if (inputType.value === "건물") {
+    if (inputType.value === "건물") {
       if (villaSpecRow) villaSpecRow.style.display = "none";
       if (villaExtraRow) villaExtraRow.style.display = "none";
       if (buildingSpecRow) buildingSpecRow.style.display = "flex";
+      
+      if (standardFieldsGroup) standardFieldsGroup.style.display = "none";
+      if (buildingFinancialsGroup) buildingFinancialsGroup.style.display = "block";
+      
+      stdInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.required = false;
+      });
     } else {
-      if (villaSpecRow) villaSpecRow.style.display = "none";
-      if (villaExtraRow) villaExtraRow.style.display = "none";
+      if (villaSpecRow) villaSpecRow.style.display = inputType.value === "빌라" ? "flex" : "none";
+      if (villaExtraRow) villaExtraRow.style.display = inputType.value === "빌라" ? "flex" : "none";
       if (buildingSpecRow) buildingSpecRow.style.display = "none";
+      
+      if (standardFieldsGroup) standardFieldsGroup.style.display = "block";
+      if (buildingFinancialsGroup) buildingFinancialsGroup.style.display = "none";
+      
+      stdInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.required = true;
+      });
     }
   }
 }
@@ -960,6 +976,15 @@ function openDetailModal(property) {
       document.getElementById("modalBuildingStructure").textContent = property.building_structure || "-";
       document.getElementById("modalBuildingCompletionYear").textContent = property.completion_year || "-";
       document.getElementById("modalBuildingType").textContent = property.building_type || "-";
+      document.getElementById("modalBuildingSalePrice").textContent = property.building_sale_price || "-";
+      document.getElementById("modalBuildingDeposit").textContent = property.building_deposit || "-";
+      document.getElementById("modalBuildingMonthlyRent").textContent = property.building_monthly_rent || "-";
+      document.getElementById("modalBuildingLoan").textContent = property.building_loan || "-";
+      document.getElementById("modalBuildingInvestCash").textContent = property.building_invest_cash || "-";
+      document.getElementById("modalBuildingMoveInCash").textContent = property.building_move_in_cash || "-";
+      
+      const specialNotesEl = document.getElementById("modalBuildingSpecialNotes");
+      if (specialNotesEl) specialNotesEl.textContent = property.building_special_notes || "-";
       
       const tbody = document.getElementById("modalTenancyTableBody");
       if (tbody) {
@@ -1104,6 +1129,13 @@ function openDetailModal(property) {
       if (document.getElementById("inputBuildingStructure")) document.getElementById("inputBuildingStructure").value = property.building_structure || "";
       if (document.getElementById("inputCompletionYear")) document.getElementById("inputCompletionYear").value = property.completion_year || "";
       if (document.getElementById("inputBuildingType")) document.getElementById("inputBuildingType").value = property.building_type || "";
+      if (document.getElementById("inputBuildingSalePrice")) document.getElementById("inputBuildingSalePrice").value = property.building_sale_price || "";
+      if (document.getElementById("inputBuildingDeposit")) document.getElementById("inputBuildingDeposit").value = property.building_deposit || "";
+      if (document.getElementById("inputBuildingMonthlyRent")) document.getElementById("inputBuildingMonthlyRent").value = property.building_monthly_rent || "";
+      if (document.getElementById("inputBuildingLoan")) document.getElementById("inputBuildingLoan").value = property.building_loan || "";
+      if (document.getElementById("inputBuildingInvestCash")) document.getElementById("inputBuildingInvestCash").value = property.building_invest_cash || "";
+      if (document.getElementById("inputBuildingMoveInCash")) document.getElementById("inputBuildingMoveInCash").value = property.building_move_in_cash || "";
+      if (document.getElementById("inputBuildingSpecialNotes")) document.getElementById("inputBuildingSpecialNotes").value = property.building_special_notes || "";
       
       const tenancyTableBody = document.getElementById("tenancyTableBody");
       if (tenancyTableBody) {
@@ -1919,7 +1951,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const checkedConditions = Array.from(document.querySelectorAll('input[name="conditions"]:checked')).map(cb => cb.value);
         const checkedOptions = Array.from(document.querySelectorAll('input[name="options"]:checked')).map(cb => cb.value);
 
-        const contractPrice = parseFloat(document.getElementById("inputPrice").value) || 0;
+        let rawPrice = document.getElementById("inputPrice").value;
+        const propType = document.getElementById("inputType").value;
+        if (propType === "건물") {
+          rawPrice = document.getElementById("inputBuildingSalePrice") ? document.getElementById("inputBuildingSalePrice").value.trim() : "0";
+        }
+        
+        const contractPrice = parseFloat(rawPrice) || 0;
         const purchasePrice = parseFloat(document.getElementById("inputPurchasePrice").value) || 0;
         const costDetails = document.getElementById("inputCostDetails") ? document.getElementById("inputCostDetails").value.trim() : "";
         const expectedCost = parseFloat(document.getElementById("inputExpectedCost").value) || 0;
@@ -1936,7 +1974,14 @@ document.addEventListener("DOMContentLoaded", () => {
           heating_system: document.getElementById("inputHeatingSystem") ? document.getElementById("inputHeatingSystem").value.trim() : "",
           building_structure: document.getElementById("inputBuildingStructure") ? document.getElementById("inputBuildingStructure").value.trim() : "",
           completion_year: document.getElementById("inputCompletionYear") ? document.getElementById("inputCompletionYear").value.trim() : "",
-          building_type: document.getElementById("inputBuildingType") ? document.getElementById("inputBuildingType").value.trim() : ""
+          building_type: document.getElementById("inputBuildingType") ? document.getElementById("inputBuildingType").value.trim() : "",
+          building_sale_price: document.getElementById("inputBuildingSalePrice") ? document.getElementById("inputBuildingSalePrice").value.trim() : "",
+          building_deposit: document.getElementById("inputBuildingDeposit") ? document.getElementById("inputBuildingDeposit").value.trim() : "",
+          building_monthly_rent: document.getElementById("inputBuildingMonthlyRent") ? document.getElementById("inputBuildingMonthlyRent").value.trim() : "",
+          building_loan: document.getElementById("inputBuildingLoan") ? document.getElementById("inputBuildingLoan").value.trim() : "",
+          building_invest_cash: document.getElementById("inputBuildingInvestCash") ? document.getElementById("inputBuildingInvestCash").value.trim() : "",
+          building_move_in_cash: document.getElementById("inputBuildingMoveInCash") ? document.getElementById("inputBuildingMoveInCash").value.trim() : "",
+          building_special_notes: document.getElementById("inputBuildingSpecialNotes") ? document.getElementById("inputBuildingSpecialNotes").value.trim() : ""
         };
 
         const tenancy_status = [];
@@ -1963,7 +2008,7 @@ document.addEventListener("DOMContentLoaded", () => {
             bathrooms: parseInt(document.getElementById("inputBathrooms").value, 10) || 0,
             location: document.getElementById("inputLocation").value,
             floor_info: document.getElementById("inputFloorInfo").value,
-            price: document.getElementById("inputPrice").value,
+            price: rawPrice,
             area_size: document.getElementById("inputArea").value,
             build_year: document.getElementById("inputBuildYear").value,
             purchase_price: purchasePrice,
@@ -2026,7 +2071,7 @@ document.addEventListener("DOMContentLoaded", () => {
             bathrooms: parseInt(document.getElementById("inputBathrooms").value, 10) || 0,
             location: document.getElementById("inputLocation").value,
             floor_info: document.getElementById("inputFloorInfo").value,
-            price: document.getElementById("inputPrice").value,
+            price: rawPrice,
             area_size: document.getElementById("inputArea").value,
             build_year: document.getElementById("inputBuildYear").value,
             purchase_price: purchasePrice,
