@@ -304,6 +304,43 @@
                     </div>
                 </div>
 
+                <!-- 건물 전용 사양 표시 영역 -->
+                <div id="modalBuildingSpecBox"
+                    style="margin-top: 16px; padding: 16px; background-color: #f1f5f9; border-radius: 0px; border: 1px solid #e2e8f0; display: none; flex-direction: column; gap: 12px;">
+                    <h4 style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">건물 상세 정보</h4>
+                    <div class="spec-grid" style="margin-top:0;">
+                        <div class="spec-box"><div class="spec-label">대지</div><div id="modalLandArea" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">건평</div><div id="modalBuildingArea" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">연면적</div><div id="modalTotalFloorArea" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">난방방식</div><div id="modalHeatingSystem" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">건축구조</div><div id="modalBuildingStructure" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">준공년도</div><div id="modalBuildingCompletionYear" class="spec-value">-</div></div>
+                        <div class="spec-box"><div class="spec-label">건물유형</div><div id="modalBuildingType" class="spec-value">-</div></div>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 8px;">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">현 임차현황</h4>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center; border: 1px solid #e2e8f0;">
+                                <thead style="background: #e2e8f0;">
+                                    <tr>
+                                        <th style="padding: 6px; border: 1px solid #cbd5e1;">층별</th>
+                                        <th style="padding: 6px; border: 1px solid #cbd5e1;">호수</th>
+                                        <th style="padding: 6px; border: 1px solid #cbd5e1;">방수</th>
+                                        <th style="padding: 6px; border: 1px solid #cbd5e1;">화장실수</th>
+                                        <th style="padding: 6px; border: 1px solid #cbd5e1;">보증금</th>
+                                        <th style="padding: 6px; border: 1px solid #cbd5e1;">월세</th>
+                                        <th style="padding: 6px; border: 1px solid #cbd5e1;">관리비</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modalTenancyTableBody">
+                                    <!-- 동적 추가 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 투자 & 수익 자동 계산표 박스 (단위: 만원) -->
                 <div id="modalInvestmentWrap"
                     style="margin-top: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0px; padding: 16px;">
@@ -625,6 +662,7 @@
                             <select id="inputType" class="form-control" required>
                                 <option value="빌라" selected>빌라</option>
                                 <option value="상가">상가</option>
+                                <option value="건물">건물</option>
                                 <option value="기타">기타</option>
                             </select>
                         </div>
@@ -734,6 +772,73 @@
                                     style="display: flex; align-items: center; gap: 4px; font-size: 0.875rem; cursor: pointer;"><input
                                         type="checkbox" name="options" value="번호키" style="accent-color: #0f172a;">
                                     번호키</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 건물 선택 시 나타나는 동적 전용 항목 -->
+                    <div id="buildingSpecRow" style="display: none; flex-direction: column; gap: 16px; padding: 16px; background-color: #f8fafc; border-radius: 0px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                        <h4 style="margin: 0; font-size: 1rem; color: #0f172a; font-weight: 700;">건물 상세 정보</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputLandArea">대지</label>
+                                <input type="text" id="inputLandArea" class="form-control" placeholder="예: 100평 또는 330m2" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingArea">건평</label>
+                                <input type="text" id="inputBuildingArea" class="form-control" placeholder="예: 60평" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputTotalFloorArea">연면적</label>
+                                <input type="text" id="inputTotalFloorArea" class="form-control" placeholder="예: 200평" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inputHeatingSystem">난방방식</label>
+                                <input type="text" id="inputHeatingSystem" class="form-control" placeholder="예: 개별난방/도시가스" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingStructure">건축구조</label>
+                                <input type="text" id="inputBuildingStructure" class="form-control" placeholder="예: 철근콘크리트구조" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inputCompletionYear">준공년도</label>
+                                <input type="text" id="inputCompletionYear" class="form-control" placeholder="예: 2015년" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="inputBuildingType">건물유형</label>
+                                <input type="text" id="inputBuildingType" class="form-control" placeholder="예: 상가주택, 원룸건물 등" />
+                            </div>
+                        </div>
+                        
+                        <div style="border-top: 1px solid #cbd5e1; padding-top: 16px; margin-top: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <label class="form-label" style="margin: 0;">현 임차현황</label>
+                                <button type="button" id="btnAddTenancy" style="background: #0f172a; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">+ 항목 추가</button>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: center; border: 1px solid #e2e8f0;">
+                                    <thead style="background: #f1f5f9;">
+                                        <tr>
+                                            <th style="padding: 8px; border: 1px solid #e2e8f0;">층별</th>
+                                            <th style="padding: 8px; border: 1px solid #e2e8f0;">호수</th>
+                                            <th style="padding: 8px; border: 1px solid #e2e8f0;">방수</th>
+                                            <th style="padding: 8px; border: 1px solid #e2e8f0;">화장실수</th>
+                                            <th style="padding: 8px; border: 1px solid #e2e8f0;">보증금</th>
+                                            <th style="padding: 8px; border: 1px solid #e2e8f0;">월세</th>
+                                            <th style="padding: 8px; border: 1px solid #e2e8f0;">관리비</th>
+                                            <th style="padding: 8px; border: 1px solid #e2e8f0;">삭제</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tenancyTableBody">
+                                        <!-- 동적 추가 -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

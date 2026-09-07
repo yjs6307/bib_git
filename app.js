@@ -552,7 +552,11 @@ function handleRegisterClick() {
   selectedFiles = [];
   const adminModalTitle = document.getElementById("adminModalTitle");
   if (adminModalTitle) adminModalTitle.textContent = "신규 매물 등록 (관리자)";
-  if (propertyForm) propertyForm.reset();
+  if (propertyForm) {
+    propertyForm.reset();
+    const tenancyTableBody = document.getElementById("tenancyTableBody");
+    if (tenancyTableBody) tenancyTableBody.innerHTML = "";
+  }
   
   // 7자리 매물번호 자동 생성 세팅 (수정 불가 읽기 전용)
   const inputPropNum = document.getElementById("inputPropertyNumber");
@@ -595,13 +599,21 @@ function toggleVillaSpec() {
   const inputType = document.getElementById("inputType");
   const villaSpecRow = document.getElementById("villaSpecRow");
   const villaExtraRow = document.getElementById("villaExtraRow");
-  if (inputType && villaSpecRow) {
+  const buildingSpecRow = document.getElementById("buildingSpecRow");
+  
+  if (inputType) {
     if (inputType.value === "빌라") {
-      villaSpecRow.style.display = "flex";
+      if (villaSpecRow) villaSpecRow.style.display = "flex";
       if (villaExtraRow) villaExtraRow.style.display = "flex";
-    } else {
-      villaSpecRow.style.display = "none";
+      if (buildingSpecRow) buildingSpecRow.style.display = "none";
+    } else if (inputType.value === "건물") {
+      if (villaSpecRow) villaSpecRow.style.display = "none";
       if (villaExtraRow) villaExtraRow.style.display = "none";
+      if (buildingSpecRow) buildingSpecRow.style.display = "flex";
+    } else {
+      if (villaSpecRow) villaSpecRow.style.display = "none";
+      if (villaExtraRow) villaExtraRow.style.display = "none";
+      if (buildingSpecRow) buildingSpecRow.style.display = "none";
     }
   }
 }
@@ -930,12 +942,49 @@ function openDetailModal(property) {
   modalBuildYear.textContent = property.build_year || "정보 없음";
   modalDescription.textContent = property.description || "상세 설명이 없습니다.";
 
-  // 빌라 전용 사양 표시
   if (property.property_type === "빌라") {
     modalVillaSpecBox.style.display = "block";
     modalVillaRooms.textContent = `방 ${property.rooms || 0}개 / 화장실 ${property.bathrooms || 0}개`;
   } else {
     modalVillaSpecBox.style.display = "none";
+  }
+
+  const modalBuildingSpecBox = document.getElementById("modalBuildingSpecBox");
+  if (modalBuildingSpecBox) {
+    if (property.property_type === "건물") {
+      modalBuildingSpecBox.style.display = "flex";
+      document.getElementById("modalLandArea").textContent = property.land_area || "-";
+      document.getElementById("modalBuildingArea").textContent = property.building_area || "-";
+      document.getElementById("modalTotalFloorArea").textContent = property.total_floor_area || "-";
+      document.getElementById("modalHeatingSystem").textContent = property.heating_system || "-";
+      document.getElementById("modalBuildingStructure").textContent = property.building_structure || "-";
+      document.getElementById("modalBuildingCompletionYear").textContent = property.completion_year || "-";
+      document.getElementById("modalBuildingType").textContent = property.building_type || "-";
+      
+      const tbody = document.getElementById("modalTenancyTableBody");
+      if (tbody) {
+        tbody.innerHTML = "";
+        if (property.tenancy_status && Array.isArray(property.tenancy_status) && property.tenancy_status.length > 0) {
+          property.tenancy_status.forEach(t => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td style="padding: 6px; border: 1px solid #cbd5e1;">${t.floor || '-'}</td>
+              <td style="padding: 6px; border: 1px solid #cbd5e1;">${t.room || '-'}</td>
+              <td style="padding: 6px; border: 1px solid #cbd5e1;">${t.rooms !== undefined && t.rooms !== '' ? t.rooms : '-'}</td>
+              <td style="padding: 6px; border: 1px solid #cbd5e1;">${t.baths !== undefined && t.baths !== '' ? t.baths : '-'}</td>
+              <td style="padding: 6px; border: 1px solid #cbd5e1;">${t.deposit || '-'}</td>
+              <td style="padding: 6px; border: 1px solid #cbd5e1;">${t.rent || '-'}</td>
+              <td style="padding: 6px; border: 1px solid #cbd5e1;">${t.fee || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="7" style="padding: 12px; color: #94a3b8; text-align: center;">등록된 임차현황이 없습니다.</td></tr>`;
+        }
+      }
+    } else {
+      modalBuildingSpecBox.style.display = "none";
+    }
   }
 
   // 매물 조건 및 옵션 렌더링
@@ -1048,6 +1097,37 @@ function openDetailModal(property) {
       document.getElementById("inputPrice").value = property.price || "";
       document.getElementById("inputBuildYear").value = property.build_year || "";
 
+      if (document.getElementById("inputLandArea")) document.getElementById("inputLandArea").value = property.land_area || "";
+      if (document.getElementById("inputBuildingArea")) document.getElementById("inputBuildingArea").value = property.building_area || "";
+      if (document.getElementById("inputTotalFloorArea")) document.getElementById("inputTotalFloorArea").value = property.total_floor_area || "";
+      if (document.getElementById("inputHeatingSystem")) document.getElementById("inputHeatingSystem").value = property.heating_system || "";
+      if (document.getElementById("inputBuildingStructure")) document.getElementById("inputBuildingStructure").value = property.building_structure || "";
+      if (document.getElementById("inputCompletionYear")) document.getElementById("inputCompletionYear").value = property.completion_year || "";
+      if (document.getElementById("inputBuildingType")) document.getElementById("inputBuildingType").value = property.building_type || "";
+      
+      const tenancyTableBody = document.getElementById("tenancyTableBody");
+      if (tenancyTableBody) {
+        tenancyTableBody.innerHTML = "";
+        if (property.tenancy_status && Array.isArray(property.tenancy_status)) {
+          property.tenancy_status.forEach(t => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" value="${t.floor || ''}" class="t-floor" /></td>
+              <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" value="${t.room || ''}" class="t-room" /></td>
+              <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="number" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" value="${t.rooms || ''}" class="t-rooms" min="0" /></td>
+              <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="number" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" value="${t.baths || ''}" class="t-baths" min="0" /></td>
+              <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" value="${t.deposit || ''}" class="t-deposit" /></td>
+              <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" value="${t.rent || ''}" class="t-rent" /></td>
+              <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" value="${t.fee || ''}" class="t-fee" /></td>
+              <td style="padding: 4px; border: 1px solid #e2e8f0;"><button type="button" class="btn-del-tenancy" style="background: #fee2e2; color: #ef4444; border: none; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">X</button></td>
+            `;
+            tenancyTableBody.appendChild(row);
+            row.querySelector(".btn-del-tenancy").addEventListener("click", () => {
+              row.remove();
+            });
+          });
+        }
+      }
       // 조건 및 옵션 체크 복원
       const editConditions = property.conditions || [];
       const editOptions = property.options || [];
@@ -1498,6 +1578,30 @@ function fileToBase64(file) {
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
 
+  const btnAddTenancy = document.getElementById("btnAddTenancy");
+  const tenancyTableBody = document.getElementById("tenancyTableBody");
+  
+  if (btnAddTenancy && tenancyTableBody) {
+    btnAddTenancy.addEventListener("click", () => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" placeholder="1층" class="t-floor" /></td>
+        <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" placeholder="101호" class="t-room" /></td>
+        <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="number" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" placeholder="1" class="t-rooms" min="0" /></td>
+        <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="number" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" placeholder="1" class="t-baths" min="0" /></td>
+        <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" placeholder="1000" class="t-deposit" /></td>
+        <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" placeholder="50" class="t-rent" /></td>
+        <td style="padding: 4px; border: 1px solid #e2e8f0;"><input type="text" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" placeholder="5" class="t-fee" /></td>
+        <td style="padding: 4px; border: 1px solid #e2e8f0;"><button type="button" class="btn-del-tenancy" style="background: #fee2e2; color: #ef4444; border: none; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">X</button></td>
+      `;
+      tenancyTableBody.appendChild(row);
+      
+      row.querySelector(".btn-del-tenancy").addEventListener("click", () => {
+        row.remove();
+      });
+    });
+  }
+
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       state.searchQuery = e.target.value;
@@ -1825,6 +1929,29 @@ document.addEventListener("DOMContentLoaded", () => {
         const propertyNumber = document.getElementById("inputPropertyNumber").value.trim() || generatePropertyNumber();
         const registrationDate = document.getElementById("inputRegistrationDate").value || new Date().toISOString().split('T')[0];
 
+        const buildingFields = {
+          land_area: document.getElementById("inputLandArea") ? document.getElementById("inputLandArea").value.trim() : "",
+          building_area: document.getElementById("inputBuildingArea") ? document.getElementById("inputBuildingArea").value.trim() : "",
+          total_floor_area: document.getElementById("inputTotalFloorArea") ? document.getElementById("inputTotalFloorArea").value.trim() : "",
+          heating_system: document.getElementById("inputHeatingSystem") ? document.getElementById("inputHeatingSystem").value.trim() : "",
+          building_structure: document.getElementById("inputBuildingStructure") ? document.getElementById("inputBuildingStructure").value.trim() : "",
+          completion_year: document.getElementById("inputCompletionYear") ? document.getElementById("inputCompletionYear").value.trim() : "",
+          building_type: document.getElementById("inputBuildingType") ? document.getElementById("inputBuildingType").value.trim() : ""
+        };
+
+        const tenancy_status = [];
+        document.querySelectorAll("#tenancyTableBody tr").forEach(row => {
+          tenancy_status.push({
+            floor: row.querySelector(".t-floor")?.value || "",
+            room: row.querySelector(".t-room")?.value || "",
+            rooms: parseInt(row.querySelector(".t-rooms")?.value || 0, 10),
+            baths: parseInt(row.querySelector(".t-baths")?.value || 0, 10),
+            deposit: row.querySelector(".t-deposit")?.value || "",
+            rent: row.querySelector(".t-rent")?.value || "",
+            fee: row.querySelector(".t-fee")?.value || ""
+          });
+        });
+
         if (isEditMode && editingPropertyId) {
           const updatePayload = {
             property_number: propertyNumber,
@@ -1849,7 +1976,9 @@ document.addEventListener("DOMContentLoaded", () => {
             description: document.getElementById("inputDescription").value,
             images: finalImageUrls,
             conditions: checkedConditions,
-            options: checkedOptions
+            options: checkedOptions,
+            ...buildingFields,
+            tenancy_status: tenancy_status
           };
 
           // 메모리 상의 state 배열 즉시 동기화 보장
@@ -1911,7 +2040,9 @@ document.addEventListener("DOMContentLoaded", () => {
             images: finalImageUrls,
             conditions: checkedConditions,
             options: checkedOptions,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            ...buildingFields,
+            tenancy_status: tenancy_status
           };
 
           state.properties.unshift(newProperty);
