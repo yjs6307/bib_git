@@ -677,6 +677,9 @@ function getStatusBadgeClass(status) {
 
 function render() {
   const filtered = state.properties.filter(item => {
+    if (item.property_type === "건물") {
+      if (!state.currentUser || state.currentUser.level < 6) return false;
+    }
     const matchesCategory = state.selectedCategory === "전체" || item.property_type === state.selectedCategory;
     const query = state.searchQuery.toLowerCase();
     const propNum = (item.property_number || "").toLowerCase();
@@ -984,6 +987,8 @@ function openDetailModal(property) {
   if (modalBuildingSpecBox) {
     if (property.property_type === "건물") {
       modalBuildingSpecBox.style.display = "flex";
+      const btnShareProperty = document.getElementById("btnShareProperty");
+      if (btnShareProperty) btnShareProperty.style.display = "flex";
       if (pipelineWrap) pipelineWrap.style.display = "none";
       if (modalAreaSizeBox) modalAreaSizeBox.style.display = "none";
       if (modalFloorInfoBox) modalFloorInfoBox.style.display = "none";
@@ -1032,6 +1037,8 @@ function openDetailModal(property) {
       }
     } else {
       modalBuildingSpecBox.style.display = "none";
+      const btnShareProperty = document.getElementById("btnShareProperty");
+      if (btnShareProperty) btnShareProperty.style.display = "none";
       if (pipelineWrap) pipelineWrap.style.display = "block";
       if (modalAreaSizeBox) modalAreaSizeBox.style.display = "block";
       if (modalFloorInfoBox) modalFloorInfoBox.style.display = "block";
@@ -1111,6 +1118,29 @@ function openDetailModal(property) {
       modalYoutubeWrap.style.display = "none";
       modalYoutubeWrap.innerHTML = "";
     }
+  }
+
+  const btnShareProperty = document.getElementById("btnShareProperty");
+  if (btnShareProperty) {
+    btnShareProperty.onclick = async () => {
+      if (navigator.share) {
+        try {
+          const shareTitle = `[매물공유] ${property.title}`;
+          const shareText = `건물매물: ${property.title}\n위치: ${property.location}\n매매가: ${formatKoreanCurrency(property.price)}`;
+          const shareUrl = window.location.href; // Or a specific deep link if applicable
+          
+          await navigator.share({
+            title: shareTitle,
+            text: shareText,
+            url: shareUrl
+          });
+        } catch (error) {
+          console.error("공유 실패:", error);
+        }
+      } else {
+        alert("현재 브라우저에서는 공유 기능을 지원하지 않습니다. 링크를 직접 복사해주세요.");
+      }
+    };
   }
 
   const btnEditProperty = document.getElementById("btnEditProperty");
