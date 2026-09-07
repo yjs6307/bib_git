@@ -303,6 +303,17 @@ async function initApp() {
   await fetchProperties();
   updateNavUI();
   setupCalculationEvents();
+
+  // 공유된 링크를 타고 들어왔을 때 해당 매물 상세창 바로 열기
+  const urlParams = new URLSearchParams(window.location.search);
+  const propertyId = urlParams.get('id');
+  if (propertyId) {
+    // 문자열 타입 매칭을 위해 toString() 비교 (숫자/문자열 혼재 방지)
+    const property = state.properties.find(p => p.id && p.id.toString() === propertyId);
+    if (property) {
+      openDetailModal(property);
+    }
+  }
 }
 
 async function fetchUsers() {
@@ -1123,12 +1134,12 @@ function openDetailModal(property) {
   const btnShareProperty = document.getElementById("btnShareProperty");
   if (btnShareProperty) {
     btnShareProperty.onclick = async () => {
+      const shareTitle = `[매물공유] ${property.title}`;
+      const shareText = `건물매물: ${property.title}\n위치: ${property.location}\n매매가: ${formatKoreanCurrency(property.price)}`;
+      const shareUrl = `${window.location.origin}${window.location.pathname}?id=${property.id}`;
+      
       if (navigator.share) {
         try {
-          const shareTitle = `[매물공유] ${property.title}`;
-          const shareText = `건물매물: ${property.title}\n위치: ${property.location}\n매매가: ${formatKoreanCurrency(property.price)}`;
-          const shareUrl = window.location.href; // Or a specific deep link if applicable
-          
           await navigator.share({
             title: shareTitle,
             text: shareText,
@@ -1136,9 +1147,16 @@ function openDetailModal(property) {
           });
         } catch (error) {
           console.error("공유 실패:", error);
+          // Fallback to clipboard if share gets cancelled or fails for other reasons, but don't show an error if user just dismissed
         }
       } else {
-        alert("현재 브라우저에서는 공유 기능을 지원하지 않습니다. 링크를 직접 복사해주세요.");
+        // Fallback to clipboard
+        try {
+          await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+          alert("공유 링크가 클립보드에 복사되었습니다. 원하는 곳에 붙여넣기 해주세요.");
+        } catch (err) {
+          alert("공유 기능을 사용할 수 없습니다. 링크를 직접 복사해주세요.");
+        }
       }
     };
   }
