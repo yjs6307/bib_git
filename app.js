@@ -409,6 +409,7 @@ function updateNavUI() {
         alert("로그아웃 되었습니다.");
         updateNavUI();
         renderBoards(); // 로그아웃 시 권한 버튼 재렌더링
+        render(); // 권한 변경에 따른 매물 리스트 재렌더링 (건물 등)
       });
 
       document.getElementById("btnOpenUserAdmin")?.addEventListener("click", () => {
@@ -483,6 +484,7 @@ function updateNavUI() {
         state.currentUser = null;
         alert("로그아웃 되었습니다.");
         updateNavUI();
+        render(); // 권한 변경에 따른 매물 리스트 재렌더링 (건물 등)
       });
 
       document.getElementById("m_btnOpenUserAdmin")?.addEventListener("click", () => {
@@ -2013,6 +2015,7 @@ document.addEventListener("DOMContentLoaded", () => {
       loginForm.reset();
       loginModal.classList.remove("active");
       updateNavUI();
+      render(); // 권한 변경에 따른 매물 리스트 재렌더링 (건물 등)
     });
   }
 
