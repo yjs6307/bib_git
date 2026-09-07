@@ -311,6 +311,9 @@ async function initApp() {
     // 문자열 타입 매칭을 위해 toString() 비교 (숫자/문자열 혼재 방지)
     const property = state.properties.find(p => p.id && p.id.toString() === propertyId);
     if (property) {
+      if (property.property_type === "건물") {
+        document.body.classList.add("shared-mode");
+      }
       openDetailModal(property);
     }
   }

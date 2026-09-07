@@ -1182,3 +1182,33 @@ input, textarea, select {
     grid-template-columns: 1fr;
   }
 }
+
+/* 공유 모드 (단독 페이지 뷰) 스타일 */
+body.shared-mode header.navbar,
+body.shared-mode section.hero-section,
+body.shared-mode section.filter-section,
+body.shared-mode main.main-container,
+body.shared-mode footer,
+body.shared-mode .mobile-drawer-overlay {
+    display: none !important;
+}
+
+body.shared-mode .modal-overlay#detailModal {
+    background-color: var(--bg-main) !important;
+    position: relative !important;
+    padding: 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+}
+
+body.shared-mode .modal-content {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    min-height: 100vh;
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+body.shared-mode #btnCloseDetailModal {
+    display: none !important;
+}
