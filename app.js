@@ -1373,13 +1373,22 @@ function closeDetailModal() {
 let viewerImages = [];
 let viewerCurrentIndex = 0;
 
-function updateViewer() {
+function updateViewer(direction = 'fade') {
   const viewerImg = document.getElementById("imageViewerImg");
   const counter = document.getElementById("imageViewerCounter");
   const btnPrev = document.getElementById("btnViewerPrev");
   const btnNext = document.getElementById("btnViewerNext");
   
   if (viewerImg && viewerImages.length > 0) {
+    // Reset animation to trigger it again
+    viewerImg.style.animation = 'none';
+    void viewerImg.offsetWidth; // trigger reflow
+    
+    let anim = "fadeIn 0.3s ease-in-out";
+    if (direction === 'next') anim = "slideInRight 0.3s ease-out";
+    if (direction === 'prev') anim = "slideInLeft 0.3s ease-out";
+    
+    viewerImg.style.animation = anim;
     viewerImg.src = viewerImages[viewerCurrentIndex];
   }
   if (counter) {
@@ -1903,7 +1912,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.stopPropagation();
       if(viewerImages.length > 0) {
         viewerCurrentIndex = (viewerCurrentIndex - 1 + viewerImages.length) % viewerImages.length;
-        updateViewer();
+        updateViewer('prev');
       }
     });
   }
@@ -1913,7 +1922,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.stopPropagation();
       if(viewerImages.length > 0) {
         viewerCurrentIndex = (viewerCurrentIndex + 1) % viewerImages.length;
-        updateViewer();
+        updateViewer('next');
       }
     });
   }
