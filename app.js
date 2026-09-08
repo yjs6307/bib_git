@@ -1045,7 +1045,48 @@ function openDetailModal(property) {
       if (tbody) {
         tbody.innerHTML = "";
         if (property.tenancy_status && Array.isArray(property.tenancy_status) && property.tenancy_status.length > 0) {
+          
+          let sumDeposit = 0;
+          let sumRent = 0;
+          let sumFee = 0;
+
+          const parseMoney = (val) => {
+            if (!val) return 0;
+            const s = String(val).replace(/,/g, '').replace(/ /g, '');
+            if (/^\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+            let total = 0;
+            let found = false;
+            const regex = /([0-9.]+)(억|천|만)?/g;
+            let match;
+            while ((match = regex.exec(s)) !== null) {
+              found = true;
+              let num = parseFloat(match[1]);
+              if (match[2] === '억') total += num * 10000;
+              else if (match[2] === '천') total += num * 1000;
+              else if (match[2] === '만') total += num * 1;
+              else total += num;
+            }
+            if (found) return total;
+            const num = parseFloat(s);
+            return isNaN(num) ? 0 : num;
+          };
+
+          const formatMoney = (val) => {
+            if (val === 0) return '0';
+            if (val >= 10000) {
+              const eok = Math.floor(val / 10000);
+              const rest = val % 10000;
+              if (rest > 0) return `${eok}억 ${rest.toLocaleString()}`;
+              return `${eok}억`;
+            }
+            return val.toLocaleString();
+          };
+
           property.tenancy_status.forEach(t => {
+            sumDeposit += parseMoney(t.deposit);
+            sumRent += parseMoney(t.rent);
+            sumFee += parseMoney(t.fee);
+
             const tr = document.createElement("tr");
             tr.innerHTML = `
               <td style="padding: 6px; border: 1px solid #cbd5e1;">${t.floor || '-'}</td>
@@ -1058,6 +1099,18 @@ function openDetailModal(property) {
             `;
             tbody.appendChild(tr);
           });
+          
+          const trTotal = document.createElement("tr");
+          trTotal.style.backgroundColor = "#f1f5f9";
+          trTotal.style.fontWeight = "700";
+          trTotal.innerHTML = `
+            <td colspan="4" style="padding: 8px 6px; border: 1px solid #cbd5e1; text-align: center; color: #0f172a;">합계</td>
+            <td style="padding: 8px 6px; border: 1px solid #cbd5e1; color: #0f172a;">${formatMoney(sumDeposit)}</td>
+            <td style="padding: 8px 6px; border: 1px solid #cbd5e1; color: #0f172a;">${formatMoney(sumRent)}</td>
+            <td style="padding: 8px 6px; border: 1px solid #cbd5e1; color: #0f172a;">${formatMoney(sumFee)}</td>
+          `;
+          tbody.appendChild(trTotal);
+
         } else {
           tbody.innerHTML = `<tr><td colspan="7" style="padding: 12px; color: #94a3b8; text-align: center;">등록된 임차현황이 없습니다.</td></tr>`;
         }
