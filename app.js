@@ -1153,6 +1153,30 @@ function openDetailModal(property) {
       const shareTitle = `[매물공유] ${property.title}`;
       const shareText = `건물매물: ${property.title}\n위치: ${property.location}\n매매가: ${formatKoreanCurrency(property.price)}`;
       const shareUrl = `${window.location.origin}${window.location.pathname}?id=${property.id}`;
+      const fallbackText = `${shareText}\n${shareUrl}`;
+
+      const fallbackCopy = async () => {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(fallbackText);
+            alert("공유 링크가 클립보드에 복사되었습니다. 원하는 곳에 붙여넣기 해주세요.");
+          } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = fallbackText;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            textArea.remove();
+            alert("공유 링크가 클립보드에 복사되었습니다. 원하는 곳에 붙여넣기 해주세요.");
+          }
+        } catch (err) {
+          alert("공유 기능을 지원하지 않는 브라우저입니다. 직접 링크를 복사해주세요.");
+        }
+      };
       
       if (navigator.share) {
         try {
@@ -1163,16 +1187,12 @@ function openDetailModal(property) {
           });
         } catch (error) {
           console.error("공유 실패:", error);
-          // Fallback to clipboard if share gets cancelled or fails for other reasons, but don't show an error if user just dismissed
+          if (error.name !== 'AbortError') {
+            await fallbackCopy();
+          }
         }
       } else {
-        // Fallback to clipboard
-        try {
-          await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-          alert("공유 링크가 클립보드에 복사되었습니다. 원하는 곳에 붙여넣기 해주세요.");
-        } catch (err) {
-          alert("공유 기능을 사용할 수 없습니다. 링크를 직접 복사해주세요.");
-        }
+        await fallbackCopy();
       }
     };
   }
